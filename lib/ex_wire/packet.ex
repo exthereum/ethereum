@@ -30,7 +30,7 @@ defmodule ExWire.Packet do
     0x14 => Packet.BlockHeaders, # New model syncing (PV62)
     0x15 => Packet.GetBlockBodies, # New model syncing (PV62)
     0x16 => Packet.BlockBodies, # New model syncing (PV62)
-    # 0x17 => Packet.NewBlock,
+    0x17 => Packet.NewBlock,
     ### Fast synchronization (PV63)
     # 0x1d => Packet.GetNodeData,
     # 0x1e => Packet.NodeData,
