@@ -22,15 +22,18 @@ defmodule ExWire do
       db = MerklePatriciaTree.Test.random_ets_db()
 
       [
-        worker(ExWire.PeerSupervisor, [ExWire.Config.bootnodes]),
+        worker(ExWire.Discovery, [ExWire.Config.bootnodes]),
+        worker(ExWire.PeerSupervisor, [:ok]),
         worker(ExWire.Sync, [db])
       ]
     else
       []
     end
 
+    discovery = if ExWire.Config.sync, do: ExWire.Discovery, else: nil
+
     children = [
-      worker(network_adapter, [{ExWire.Network, []}, port]),
+      worker(network_adapter, [{ExWire.Network, [discovery]}, port], name: ExWire.Network, restart: :permanent),
     ] ++ sync_children
 
     opts = [strategy: :one_for_one, name: name]

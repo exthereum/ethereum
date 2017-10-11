@@ -5,12 +5,14 @@ defmodule ExWire.Adapter.UDP do
   """
   use GenServer
 
+  require Logger
+
   @doc """
   When starting a UDP server, we'll store a network to use for all
   message handling.
   """
   def start_link({network, network_args}, port) do
-    GenServer.start_link(__MODULE__, %{network: network, network_args: network_args, port: port})
+    GenServer.start_link(__MODULE__, %{network: network, network_args: network_args, port: port}, name: __MODULE__)
   end
 
   @doc """
@@ -18,6 +20,7 @@ defmodule ExWire.Adapter.UDP do
   """
   def init(state=%{port: port}) do
     {:ok, socket} = :gen_udp.open(port, [:binary])
+    Logger.debug("[RLPx] Listening on port #{port}")
 
     {:ok, Map.put(state, :socket, socket)}
   end
@@ -50,7 +53,10 @@ defmodule ExWire.Adapter.UDP do
   all outbound messages we'll ever send.
   """
   def handle_cast({:send, %{to: %{ip: ip, udp_port: udp_port}, data: data}}, state = %{socket: socket}) when not is_nil(udp_port) do
-    :gen_udp.send(socket, ip |> List.to_tuple(), udp_port, data)
+    # TODO: How should we handle invalid ping or message requests?
+    if Enum.count(ip) == 4 and udp_port > 0 do
+      :gen_udp.send(socket, ip |> List.to_tuple(), udp_port, data)
+    end
 
     {:noreply, state}
   end

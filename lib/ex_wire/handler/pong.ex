@@ -18,14 +18,14 @@ defmodule ExWire.Handler.Pong do
       ...>   hash: <<5>>,
       ...>   data: [[<<1,2,3,4>>, <<>>, <<5>>], <<2>>, 3] |> ExRLP.encode(),
       ...>   timestamp: 123,
-      ...> })
+      ...> }, nil)
       :no_response
   """
-  @spec handle(Handler.Params.t) :: Handler.handler_response
-  def handle(params) do
+  @spec handle(Handler.Params.t, identifier() | nil) :: Handler.handler_response
+  def handle(params, discovery) do
     _pong = Pong.decode(params.data)
 
-    # TODO: Add to K-Bucket
+    if discovery, do: ExWire.Discovery.pong(discovery, params.node_id)
 
     :no_response
   end

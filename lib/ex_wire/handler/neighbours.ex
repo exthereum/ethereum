@@ -29,15 +29,14 @@ defmodule ExWire.Handler.Neighbours do
       ...>   hash: <<5>>,
       ...>   data: message |> ExWire.Message.Neighbours.encode(),
       ...>   timestamp: 123,
-      ...> })
+      ...> }, nil)
       :no_response
   """
-  @spec handle(Handler.Params.t) :: Handler.handler_response
-  def handle(params) do
+  @spec handle(Handler.Params.t, identifier() | nil) :: Handler.handler_response
+  def handle(params, discovery) do
     neighbours = Neighbours.decode(params.data)
 
-    # TODO: Add to buckets
-    Logger.warn("Got neighbours: #{inspect neighbours.nodes}")
+    if discovery, do: ExWire.Discovery.add_neighbours(discovery, neighbours)
 
     :no_response
   end

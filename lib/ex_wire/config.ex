@@ -8,6 +8,10 @@ defmodule ExWire.Config do
     key when is_binary(key) -> key
     :random -> ExthCrypto.ECIES.ECDH.new_ecdh_keypair() |> Tuple.to_list() |> List.last
   end )
+  @public_key ( case ExthCrypto.Signature.get_public_key(@private_key) do
+    {:ok, public_key} -> public_key
+  end )
+  @node_id @public_key |> ExthCrypto.Key.der_to_raw
   @protocol_version Application.get_env(:ex_wire, :protocol_version)
   @network_id Application.get_env(:ex_wire, :network_id)
   @p2p_version Application.get_env(:ex_wire, :p2p_version)
@@ -17,9 +21,15 @@ defmodule ExWire.Config do
   @chain Application.get_env(:ex_wire, :chain) |> Blockchain.Chain.load_chain
   @bootnodes ( case Application.get_env(:ex_wire, :bootnodes) do
     nodes when is_list(nodes) -> nodes
-    :from_chain -> @chain.nodes |> Enum.take(-1) # TODO: Take all
+    :from_chain -> @chain.nodes
   end )
   @commitment_count Application.get_env(:ex_wire, :commitment_count)
+  @local_ip Application.get_env(:ex_wire, :local_ip, [127, 0, 0, 1]) # TODO: How do we handle NAT?
+  @local_endpoint %ExWire.Struct.Endpoint{
+    ip: @local_ip,
+    udp_port: @port,
+    tcp_port: @port
+  }
 
   @doc """
   Returns a private key that is generated when a new session is created. It is
@@ -27,13 +37,12 @@ defmodule ExWire.Config do
   """
   @spec private_key() :: ExthCrypto.Key.private_key()
   def private_key, do: @private_key
-  def public_key do
-    {:ok, public_key} = ExthCrypto.Signature.get_public_key(private_key())
 
-    public_key
-  end
+  @spec public_key() :: ExthCrypto.Key.public_key()
+  def public_key, do: @public_key
+
   @spec node_id() :: ExWire.node_id
-  def node_id, do: public_key() |> ExthCrypto.Key.der_to_raw
+  def node_id, do: @node_id
 
   @spec listen_port() :: integer()
   def listen_port, do: @port
@@ -64,5 +73,8 @@ defmodule ExWire.Config do
 
   @spec commitment_count() :: integer()
   def commitment_count, do: @commitment_count
+
+  @spec local_endpoint() :: ExWire.Struct.Endpoint.t
+  def local_endpoint, do: @local_endpoint
 
 end

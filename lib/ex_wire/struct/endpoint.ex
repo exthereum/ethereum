@@ -15,7 +15,7 @@ defmodule ExWire.Struct.Endpoint do
   @type t :: %__MODULE__{
     ip: ip,
     udp_port: ip_port | nil,
-    tcp_port: ip_port | nil,
+    tcp_port: ip_port | nil
   }
 
   @doc """

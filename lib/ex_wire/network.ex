@@ -20,14 +20,14 @@ defmodule ExWire.Network do
       data: nil,
       server_pid: nil,
       remote_host: nil,
-      timestamp: nil,
+      timestamp: nil
     ]
 
     @type t :: %__MODULE__{
       data: binary(),
       server_pid: pid(),
       remote_host: ExWire.Struct.Endpoint.t,
-      timestamp: integer(),
+      timestamp: integer()
     }
   end
 
@@ -48,7 +48,7 @@ defmodule ExWire.Network do
       ...>   server_pid: self(),
       ...>   remote_host: nil,
       ...>   timestamp: 123,
-      ...> })
+      ...> }, nil)
       {:sent_message, ExWire.Message.Pong}
 
       iex> ping_data = [1, [<<1,2,3,4>>, <<>>, <<5>>], [<<5,6,7,8>>, <<6>>, <<>>], 4] |> ExRLP.encode
@@ -59,14 +59,14 @@ defmodule ExWire.Network do
       ...>   server_pid: self(),
       ...>   remote_host: nil,
       ...>   timestamp: 123,
-      ...> })
+      ...> }, nil)
       ** (ExWire.Crypto.HashMismatch) Invalid hash
   """
-  @spec receive(InboundMessage.t) :: handler_action
-  def receive(inbound_message=%InboundMessage{data: data, server_pid: _server_pid, remote_host: _remote_host, timestamp: _timestamp}) do
+  @spec receive(InboundMessage.t, identifier() | nil) :: handler_action
+  def receive(inbound_message=%InboundMessage{data: data, server_pid: _server_pid, remote_host: _remote_host, timestamp: _timestamp}, discovery) do
     :ok = assert_integrity(data)
 
-    handle(inbound_message)
+    handle(inbound_message, discovery)
   end
 
   @doc """
@@ -98,7 +98,7 @@ defmodule ExWire.Network do
       ...>   server_pid: self(),
       ...>   remote_host: nil,
       ...>   timestamp: 5,
-      ...> })
+      ...> }, nil)
       {:sent_message, ExWire.Message.Pong}
 
       iex> ExWire.Network.handle(%ExWire.Network.InboundMessage{
@@ -106,22 +106,24 @@ defmodule ExWire.Network do
       ...>   server_pid: self(),
       ...>   remote_host: nil,
       ...>   timestamp: 5,
-      ...> })
+      ...> }, nil)
       :no_action
   """
-  @spec handle(InboundMessage.t) :: handler_action
+  @spec handle(InboundMessage.t, identifier() | nil) :: handler_action
   def handle(%InboundMessage{
     data: <<
-      hash :: size(256),
-      signature :: size(512),
+      hash :: binary-size(32),
+      signature :: binary-size(64),
       recovery_id:: integer-size(8),
-      type:: integer-size(8),
+      type:: binary-size(1),
       data :: bitstring
     >>,
     server_pid: server_pid,
     remote_host: remote_host,
-    timestamp: timestamp,
-  }) do
+    timestamp: timestamp
+  }, discovery) do
+    {:ok, node_id} = ExthCrypto.Signature.recover(Crypto.hash(type <> data), signature, recovery_id)
+
     params = %Handler.Params{
       remote_host: remote_host,
       signature: signature,
@@ -129,12 +131,13 @@ defmodule ExWire.Network do
       hash: hash,
       data: data,
       timestamp: timestamp,
+      node_id: node_id |> ExthCrypto.Key.der_to_raw
     }
 
-    case Handler.dispatch(type, params) do
+    case Handler.dispatch(type |> :binary.decode_unsigned, params, discovery) do
       :not_implemented -> :no_action
       :no_response -> :no_action
-      response_message ->
+      {:respond, response_message} ->
         # TODO: This is a simple way to determine who to send the message to,
         #       but we may want to revise.
         to = response_message.__struct__.to(response_message) || remote_host
@@ -169,7 +172,7 @@ defmodule ExWire.Network do
         }
       }
   """
-  @spec send(ExWire.Message.t, pid(), ExWire.Struct.Endpoint.t) :: handler_action
+  @spec send(ExWire.Message.t, identifier(), ExWire.Struct.Endpoint.t) :: handler_action
   def send(message, server_pid, to) do
     GenServer.cast(
       server_pid,
