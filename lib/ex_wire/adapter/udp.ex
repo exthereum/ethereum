@@ -4,6 +4,7 @@ defmodule ExWire.Adapter.UDP do
   peer to peer messages according to RLPx.
   """
   use GenServer
+  use Bitwise
 
   require Logger
 
@@ -19,8 +20,8 @@ defmodule ExWire.Adapter.UDP do
   Initialize by opening up a `gen_udp` server on a given port.
   """
   def init(state=%{port: port}) do
-    {:ok, socket} = :gen_udp.open(port, [:binary])
-    Logger.debug("[RLPx] Listening on port #{port}")
+    {:ok, socket} = :gen_udp.open(port, [{:ip, {0, 0, 0, 0}}, {:active, true}, :binary])
+    Logger.debug("[UDP] Listening on port #{port}")
 
     {:ok, Map.put(state, :socket, socket)}
   end
@@ -54,11 +55,22 @@ defmodule ExWire.Adapter.UDP do
   """
   def handle_cast({:send, %{to: %{ip: ip, udp_port: udp_port}, data: data}}, state = %{socket: socket}) when not is_nil(udp_port) do
     # TODO: How should we handle invalid ping or message requests?
-    if Enum.count(ip) == 4 and udp_port > 0 do
-      :gen_udp.send(socket, ip |> List.to_tuple(), udp_port, data)
-    end
+    :gen_udp.send(socket, ip |> ip_to_tuple, udp_port, data)
 
     {:noreply, state}
   end
 
+  def ip_to_tuple([p_0, p_1, p_2, p_3]), do: {p_0, p_1, p_2, p_3}
+  def ip_to_tuple([p_0, p_1, p_2, p_3, p_4, p_5, p_6, p_7, p_8, p_9, p_10, p_11, p_12, p_13, p_14, p_15]) do
+    {
+      p_0 <<< 8 + p_1,
+      p_2 <<< 8 + p_3,
+      p_4 <<< 8 + p_5,
+      p_6 <<< 8 + p_7,
+      p_8 <<< 8 + p_9,
+      p_10 <<< 8 + p_11,
+      p_12 <<< 8 + p_13,
+      p_14 <<< 8 + p_15,
+    }
+  end
 end

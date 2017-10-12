@@ -33,7 +33,8 @@ defmodule ExWire.Mixfile do
       {:blockchain, "~> 0.1.7"},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
       {:exth_crypto, "~> 0.1.4"},
-      {:evm, "~> 0.1.11"}
+      {:evm, "~> 0.1.11"},
+      {:nat_upnp, github: "benoitc/nat_upnp"}
     ]
   end
 end

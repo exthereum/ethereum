@@ -10,6 +10,8 @@ defmodule ExWire.Discovery do
 
   alias ExWire.Struct.Neighbour
 
+  @min_neighbours 20
+
   @doc """
   Starts a Discovery server.
   """
@@ -22,19 +24,47 @@ defmodule ExWire.Discovery do
   and ask them for neighbours.
   """
   def init(nodes) do
+    # Configure how we describe ourselves
+    local_endpoint = if ExWire.Config.use_nat() do
+      # Use a NAT for inbound ports
+      {:ok, context} = :nat_upnp.discover()
+
+      # Remove existing mapping
+      :nat_upnp.delete_port_mapping(context, :udp, ExWire.Config.listen_port())
+
+      {_, _, ip_address_binary} = context
+      {:ok, ip_address} = :inet.parse_address(ip_address_binary)
+
+      :ok = :nat_upnp.add_port_mapping(context, :udp, ExWire.Config.listen_port(), ExWire.Config.listen_port(), 'discovery mapping', 0)
+
+      %ExWire.Struct.Endpoint{
+        ip: ExWire.Config.local_ip(),
+        udp_port: ExWire.Config.listen_port(),
+        tcp_port: ExWire.Config.listen_port()
+      }
+    else
+      # Use defaults
+      %ExWire.Struct.Endpoint{
+        ip: ExWire.Config.local_ip(),
+        udp_port: ExWire.Config.listen_port(),
+        tcp_port: ExWire.Config.listen_port()
+      }
+    end |> Exth.inspect("Local endpoint")
+
     :timer.sleep(1000)
 
     neighbours = for node <- nodes do
       {:ok, neighbour} = ExWire.Struct.Neighbour.from_uri(node)
 
-      ping_neighbour(neighbour)
+      ping_neighbour(neighbour, local_endpoint)
       find_neighbours(neighbour)
 
       neighbour
     end
 
     {:ok, %{
-      neighbours: neighbours
+      neighbours: neighbours,
+      local_endpoint: local_endpoint
     }}
   end
 
@@ -59,9 +89,7 @@ defmodule ExWire.Discovery do
     {:noreply, state}
   end
 
-  def handle_cast({:add_neighbours, add_neighbours}, state=%{neighbours: neighbours}) do
-    Logger.debug("[Discovery] Got neighbours #{inspect neighbours, limit: :infinity}")
-
+  def handle_cast({:add_neighbours, add_neighbours}, state=%{neighbours: neighbours, local_endpoint: local_endpoint}) do
     # If these are new nodes, we should ping them to see round-trip
     # time. If we like the neighbour, we can try and establish a
     # RLPx connection.
@@ -72,8 +100,20 @@ defmodule ExWire.Discovery do
       and not Enum.member?(known_nodes, neighbour.node)
     end)
 
+    Logger.debug("[Discovery] Received #{Enum.count(add_neighbours.nodes)} neighbour(s), #{Enum.count(new_neighbours)} new")
+
     # For each new neighbour, send a ping
-    for neighbour <- new_neighbours, do: ping_neighbour(neighbour)
+    for neighbour <- new_neighbours do
+      ping_neighbour(neighbour, local_endpoint)
+
+      if Enum.count(neighbours) < @min_neighbours do
+        spawn fn ->
+          :timer.sleep(2_000)
+
+          find_neighbours(neighbour)
+        end
+      end
+    end
 
     {:noreply, Map.put(state, :neighbours, neighbours ++ new_neighbours)}
   end
@@ -119,13 +159,13 @@ defmodule ExWire.Discovery do
     GenServer.call(pid, {:get_neighbours, target})
   end
 
-  defp ping_neighbour(neighbour) do
-    Logger.debug("[Discovery] Initiating ping to #{inspect neighbour, limit: :infinity}")
+  defp ping_neighbour(neighbour, local_endpoint) do
+    Logger.debug("[Discovery] Initiating ping to #{inspect neighbour, limit: :infinity}, #{inspect local_endpoint, limit: :infinity}")
 
     # Send a ping to each node
     ping = %ExWire.Message.Ping{
       version: 1,
-      from: ExWire.Config.local_endpoint(),
+      from: local_endpoint,
       to: neighbour.endpoint,
       timestamp: ExWire.Util.Timestamp.soon(),
     }
@@ -134,7 +174,7 @@ defmodule ExWire.Discovery do
   end
 
   defp find_neighbours(neighbour) do
-    Logger.debug("[Discovery] Initiating find neighbours to #{inspect neighbour, limit: :infinity}")
+    # Logger.debug("[Discovery] Initiating find neighbours to #{inspect neighbour, limit: :infinity}")
 
     # Ask node for neighbours
     find_neighbours = %ExWire.Message.FindNeighbours{
