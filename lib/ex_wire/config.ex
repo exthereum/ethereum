@@ -3,7 +3,7 @@ defmodule ExWire.Config do
   General configuration information for ExWire.
   """
 
-  @port Application.get_env(:ex_wire, :port, 30303 + :random.uniform(10_000))
+  @port Application.get_env(:ex_wire, :port, 30303 + :rand.uniform(10_000))
   @private_key ( case Application.get_env(:ex_wire, :private_key) do
     key when is_binary(key) -> key
     :random -> ExthCrypto.ECIES.ECDH.new_ecdh_keypair() |> Tuple.to_list() |> List.last
@@ -24,7 +24,7 @@ defmodule ExWire.Config do
     :from_chain -> @chain.nodes
   end )
   @commitment_count Application.get_env(:ex_wire, :commitment_count)
-  @local_ip ( case System.get_env("IP_ADDRESS") || Application.get_env(:ex_wire, :local_ip, [127, 0, 0, 1]) do
+  @local_ip ( case Application.get_env(:ex_wire, :local_ip, [127, 0, 0, 1]) do
     ip_address when is_binary(ip_address) ->
       {:ok, ip_address_parsed} = ip_address |> String.to_charlist |> :inet.parse_address
       ip_address_parsed |> Tuple.to_list

@@ -20,8 +20,9 @@ defmodule ExWire.Adapter.UDP do
   Initialize by opening up a `gen_udp` server on a given port.
   """
   def init(state=%{port: port}) do
-    {:ok, socket} = :gen_udp.open(port, [{:ip, {0, 0, 0, 0}}, {:active, true}, :binary])
-    Logger.debug("[UDP] Listening on port #{port}")
+    {:ok, socket} = :gen_udp.open(port, [{:ip, {0, 0, 0, 0}}, {:active, true}, {:reuseaddr, true}, :binary])
+    {:ok, port_num} = :inet.port(socket)
+    Logger.debug("[UDP] Listening on port #{port_num}")
 
     {:ok, Map.put(state, :socket, socket)}
   end
@@ -38,7 +39,7 @@ defmodule ExWire.Adapter.UDP do
       data: data,
       server_pid: self(),
       remote_host: %ExWire.Struct.Endpoint{
-        ip: ip,
+        ip: ip |> Tuple.to_list,
         udp_port: port,
       },
       timestamp: ExWire.Util.Timestamp.soon(),

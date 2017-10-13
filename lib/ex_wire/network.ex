@@ -175,6 +175,7 @@ defmodule ExWire.Network do
   @spec send(ExWire.Message.t, identifier(), ExWire.Struct.Endpoint.t) :: handler_action
   def send(message, server_pid, to) do
     Logger.debug("[Network] Sending #{to_string(message.__struct__)} message to #{to.ip |> Enum.join(".")}")
+
     GenServer.cast(
       server_pid,
       {
