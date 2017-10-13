@@ -10,13 +10,13 @@ defmodule ExWireTest do
   alias ExWire.Util.Timestamp
 
   @them %ExWire.Struct.Endpoint{
-    ip: [0, 0, 0, 1],
+    ip: {0, 0, 0, 1},
     udp_port: 30303,
     tcp_port: nil,
   }
 
   @us %ExWire.Struct.Endpoint{
-    ip: [0, 0, 0, 2],
+    ip: {0, 0, 0, 2},
     udp_port: 30303,
     tcp_port: nil,
   }

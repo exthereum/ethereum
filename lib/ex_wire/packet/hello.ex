@@ -48,6 +48,7 @@ defmodule ExWire.Packet.Hello do
 
       iex> %ExWire.Packet.Hello{p2p_version: 10, client_id: "Exthereum/Test", caps: [{"eth", 1}, {"par", 2}], listen_port: 5555, node_id: <<5>>}
       ...> |> ExWire.Packet.Hello.serialize
+      ...> |> Enum.take(5)
       [10, "Exthereum/Test", [["eth", 1], ["par", 2]], 5555, <<5>>]
   """
   @spec serialize(t) :: ExRLP.t

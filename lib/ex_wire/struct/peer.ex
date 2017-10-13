@@ -53,7 +53,7 @@ defmodule ExWire.Struct.Peer do
       ...>     ip: {13, 84, 180, 240},
       ...>     tcp_port: 30303,
       ...>   },
-      ...>   node: <<4, 108, 224, 89, 48, 199, 42, 188, 99, 44, 88, 226, 228, 50, 79, 124, 126, 164, 120, 206, 192, 237, 79, 162, 82, 137, 130, 207, 52, 72, 48, 148, 233, 203, 201, 33, 110, 122, 163, 73, 105, 18, 66, 87, 109, 85, 42, 42, 86, 170, 234, 228, 38, 197, 48, 61, 237, 103, 124, 228, 85, 186, 26, 205, 157>>
+      ...>   node: <<108, 224, 89, 48, 199, 42, 188, 99, 44, 88, 226, 228, 50, 79, 124, 126, 164, 120, 206, 192, 237, 79, 162, 82, 137, 130, 207, 52, 72, 48, 148, 233, 203, 201, 33, 110, 122, 163, 73, 105, 18, 66, 87, 109, 85, 42, 42, 86, 170, 234, 228, 38, 197, 48, 61, 237, 103, 124, 228, 85, 186, 26, 205, 157>>
       ...> }
       ...> |> ExWire.Struct.Peer.from_neighbour()
       %ExWire.Struct.Peer{
@@ -64,7 +64,7 @@ defmodule ExWire.Struct.Peer do
       }
   """
   def from_neighbour(neighbour) do
-    new(neighbour.endpoint.ip |> Enum.join("."), neighbour.endpoint.tcp_port, neighbour.node |> ExthCrypto.Math.bin_to_hex)
+    new(neighbour.endpoint.ip |> ExWire.Struct.Endpoint.ip_to_string, neighbour.endpoint.tcp_port, neighbour.node |> ExthCrypto.Math.bin_to_hex)
   end
 
   @doc """

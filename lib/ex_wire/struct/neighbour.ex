@@ -23,10 +23,11 @@ defmodule ExWire.Struct.Neighbour do
       iex> ExWire.Struct.Neighbour.from_uri("enode://6ce05930c72abc632c58e2e4324f7c7ea478cec0ed4fa2528982cf34483094e9cbc9216e7aa349691242576d552a2a56aaeae426c5303ded677ce455ba1acd9d@13.84.180.240:30303")
       {:ok, %ExWire.Struct.Neighbour{
         endpoint: %ExWire.Struct.Endpoint{
-          ip: [13, 84, 180, 240],
+          ip: {13, 84, 180, 240},
+          tcp_port: 30303,
           udp_port: 30303,
         },
-        node: <<4, 108, 224, 89, 48, 199, 42, 188, 99, 44, 88, 226, 228, 50, 79, 124, 126, 164, 120, 206, 192, 237, 79, 162, 82, 137, 130, 207, 52, 72, 48, 148, 233, 203, 201, 33, 110, 122, 163, 73, 105, 18, 66, 87, 109, 85, 42, 42, 86, 170, 234, 228, 38, 197, 48, 61, 237, 103, 124, 228, 85, 186, 26, 205, 157>>
+        node: <<108, 224, 89, 48, 199, 42, 188, 99, 44, 88, 226, 228, 50, 79, 124, 126, 164, 120, 206, 192, 237, 79, 162, 82, 137, 130, 207, 52, 72, 48, 148, 233, 203, 201, 33, 110, 122, 163, 73, 105, 18, 66, 87, 109, 85, 42, 42, 86, 170, 234, 228, 38, 197, 48, 61, 237, 103, 124, 228, 85, 186, 26, 205, 157>>
       }}
 
       iex> ExWire.Struct.Neighbour.from_uri("http://google:30303")
@@ -44,9 +45,7 @@ defmodule ExWire.Struct.Neighbour do
         host: remote_host,
         port: remote_peer_port
       } ->
-        remote_ip = with {:ok, remote_ip} <- :inet.ip(remote_host |> String.to_charlist) do
-          remote_ip |> Tuple.to_list
-        end
+        {:ok, remote_ip} = :inet.ip(remote_host |> String.to_charlist)
 
         {:ok, %ExWire.Struct.Neighbour{
           endpoint: %ExWire.Struct.Endpoint{
@@ -71,7 +70,7 @@ defmodule ExWire.Struct.Neighbour do
       iex> ExWire.Struct.Neighbour.decode([<<1,2,3,4>>, <<>>, <<5>>, <<7, 7>>])
       %ExWire.Struct.Neighbour{
         endpoint: %ExWire.Struct.Endpoint{
-          ip: [1,2,3,4],
+          ip: {1, 2, 3, 4},
           udp_port: nil,
           tcp_port: 5,
         },
@@ -95,7 +94,7 @@ defmodule ExWire.Struct.Neighbour do
       iex> ExWire.Struct.Neighbour.encode(
       ...>   %ExWire.Struct.Neighbour{
       ...>     endpoint: %ExWire.Struct.Endpoint{
-      ...>       ip: [1, 2, 3, 4],
+      ...>       ip: {1, 2, 3, 4},
       ...>       udp_port: nil,
       ...>       tcp_port: 5,
       ...>     },

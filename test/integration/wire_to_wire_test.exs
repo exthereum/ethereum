@@ -45,7 +45,7 @@ defmodule WireToWireTest do
         message = decode_message(inbound_message)
 
         assert message.__struct__ == ExWire.Message.Pong
-        assert message.to == %ExWire.Struct.Endpoint{ip: [127, 0, 0, 1], tcp_port: nil, udp_port: @us_port}
+        assert message.to == %ExWire.Struct.Endpoint{ip: {127, 0, 0, 1}, tcp_port: nil, udp_port: @us_port}
         assert message.timestamp >= timestamp
       after 2_000 ->
         raise "Expected pong, but did not receive before timeout."

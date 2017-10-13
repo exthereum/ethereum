@@ -30,7 +30,7 @@ defmodule ExWire.Message.Pong do
 
       iex> ExWire.Message.Pong.decode([[<<1,2,3,4>>, <<>>, <<0, 5>>], <<2>>, 3] |> ExRLP.encode)
       %ExWire.Message.Pong{
-        to: %ExWire.Struct.Endpoint{ip: [1, 2, 3, 4], tcp_port: 5, udp_port: nil},
+        to: %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, tcp_port: 5, udp_port: nil},
         hash: <<2>>,
         timestamp: 3,
       }
@@ -55,7 +55,7 @@ defmodule ExWire.Message.Pong do
   ## Examples
 
       iex> ExWire.Message.Pong.encode(%ExWire.Message.Pong{
-      ...>   to: %ExWire.Struct.Endpoint{ip: [1, 2, 3, 4], tcp_port: 5, udp_port: nil},
+      ...>   to: %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, tcp_port: 5, udp_port: nil},
       ...>   hash: <<2>>,
       ...>   timestamp: 3}
       ...> ) |> ExRLP.decode()
@@ -76,11 +76,11 @@ defmodule ExWire.Message.Pong do
   ## Examples
 
       iex> ExWire.Message.Pong.to(%ExWire.Message.Pong{
-      ...>   to: %ExWire.Struct.Endpoint{ip: [1, 2, 3, 4], tcp_port: 5, udp_port: nil},
+      ...>   to: %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, tcp_port: 5, udp_port: nil},
       ...>   hash: <<2>>,
       ...>   timestamp: 3}
       ...> )
-      %ExWire.Struct.Endpoint{ip: [1, 2, 3, 4], tcp_port: 5, udp_port: nil}
+      %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, tcp_port: 5, udp_port: nil}
   """
   @spec to(t) :: Endpoint.t | nil
   def to(message) do

@@ -31,14 +31,14 @@ defmodule ExWire.Message do
       iex> ExWire.Message.decode(0x01, <<210, 1, 199, 132, 1, 2, 3, 4, 128, 5, 199, 132, 5, 6, 7, 8, 6, 128, 4>>)
       %ExWire.Message.Ping{
         version: 1,
-        from: %ExWire.Struct.Endpoint{ip: [1, 2, 3, 4], tcp_port: 5, udp_port: nil},
-        to: %ExWire.Struct.Endpoint{ip: [5, 6, 7, 8], tcp_port: nil, udp_port: 6},
+        from: %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, tcp_port: 5, udp_port: nil},
+        to: %ExWire.Struct.Endpoint{ip: {5, 6, 7, 8}, tcp_port: nil, udp_port: 6},
         timestamp: 4
       }
 
       iex> ExWire.Message.decode(0x02, <<202, 199, 132, 5, 6, 7, 8, 6, 128, 2, 3>>)
       %ExWire.Message.Pong{
-      to: %ExWire.Struct.Endpoint{ip: [5, 6, 7, 8], tcp_port: nil, udp_port: 6}, hash: <<2>>, timestamp: 3
+      to: %ExWire.Struct.Endpoint{ip: {5, 6, 7, 8}, tcp_port: nil, udp_port: 6}, hash: <<2>>, timestamp: 3
       }
 
       iex> ExWire.Message.decode(0x99, <<>>)
@@ -61,14 +61,14 @@ defmodule ExWire.Message do
       iex> ExWire.Message.encode(
       ...>   %ExWire.Message.Ping{
       ...>     version: 1,
-      ...>     from: %ExWire.Struct.Endpoint{ip: [1, 2, 3, 4], tcp_port: 5, udp_port: nil},
-      ...>     to: %ExWire.Struct.Endpoint{ip: [5, 6, 7, 8], tcp_port: nil, udp_port: 6},
+      ...>     from: %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, tcp_port: 5, udp_port: nil},
+      ...>     to: %ExWire.Struct.Endpoint{ip: {5, 6, 7, 8}, tcp_port: nil, udp_port: 6},
       ...>     timestamp: 4
       ...>   }
       ...> )
       <<1, 214, 1, 201, 132, 1, 2, 3, 4, 128, 130, 0, 5, 201, 132, 5, 6, 7, 8, 130, 0, 6, 128, 4>>
 
-      iex> ExWire.Message.encode(%ExWire.Message.Pong{to: %ExWire.Struct.Endpoint{ip: [5, 6, 7, 8], tcp_port: nil, udp_port: 6}, hash: <<2>>, timestamp: 3})
+      iex> ExWire.Message.encode(%ExWire.Message.Pong{to: %ExWire.Struct.Endpoint{ip: {5, 6, 7, 8}, tcp_port: nil, udp_port: 6}, hash: <<2>>, timestamp: 3})
       <<2, 204, 201, 132, 5, 6, 7, 8, 130, 0, 6, 128, 2, 3>>
   """
   @spec encode(t) :: binary()

@@ -41,8 +41,7 @@ defmodule ExWire.Message.Neighbours do
       ...>   2
       ...> ] |> ExRLP.encode)
       %ExWire.Message.Neighbours{
-        nodes: [%ExWire.Struct.Neighbour{endpoint: %ExWire.Struct.Endpoint{ip: [1,
-                2, 3, 4], tcp_port: 5, udp_port: nil}, node: <<7, 7>>}],
+        nodes: [%ExWire.Struct.Neighbour{endpoint: %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, tcp_port: 5, udp_port: nil}, node: <<7, 7>>}],
         timestamp: 2,
       }
 
@@ -52,8 +51,8 @@ defmodule ExWire.Message.Neighbours do
       ...> ] |> ExRLP.encode)
       %ExWire.Message.Neighbours{
         nodes: [
-          %ExWire.Struct.Neighbour{endpoint: %ExWire.Struct.Endpoint{ip: [1, 2, 3, 4], tcp_port: 5, udp_port: nil}, node: <<7, 7>>},
-          %ExWire.Struct.Neighbour{endpoint: %ExWire.Struct.Endpoint{ip: [5, 6, 7, 8], tcp_port: nil, udp_port: 6}, node: <<8, 8>>}
+          %ExWire.Struct.Neighbour{endpoint: %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, tcp_port: 5, udp_port: nil}, node: <<7, 7>>},
+          %ExWire.Struct.Neighbour{endpoint: %ExWire.Struct.Endpoint{ip: {5, 6, 7, 8}, tcp_port: nil, udp_port: 6}, node: <<8, 8>>}
         ],
         timestamp: 2,
       }
@@ -81,8 +80,8 @@ defmodule ExWire.Message.Neighbours do
       [[], <<1>>]
 
       iex> ExWire.Message.Neighbours.encode(%ExWire.Message.Neighbours{nodes: [
-      ...>   %ExWire.Struct.Neighbour{endpoint: %ExWire.Struct.Endpoint{ip: [1, 2, 3, 4], tcp_port: 5, udp_port: nil}, node: <<7, 7>>},
-      ...>   %ExWire.Struct.Neighbour{endpoint: %ExWire.Struct.Endpoint{ip: [5, 6, 7, 8], tcp_port: nil, udp_port: 6}, node: <<8, 8>>}],
+      ...>   %ExWire.Struct.Neighbour{endpoint: %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, tcp_port: 5, udp_port: nil}, node: <<7, 7>>},
+      ...>   %ExWire.Struct.Neighbour{endpoint: %ExWire.Struct.Endpoint{ip: {5, 6, 7, 8}, tcp_port: nil, udp_port: 6}, node: <<8, 8>>}],
       ...>   timestamp: 1})
       ...> |> ExRLP.decode()
       [[[<<1,2,3,4>>, <<>>, <<0, 5>>, <<7, 7>>], [<<5,6,7,8>>, <<0, 6>>, <<>>, <<8, 8>>]], <<1>>]

@@ -13,7 +13,7 @@ defmodule ExWire.Handler.Ping do
   ## Examples
 
       iex> ExWire.Handler.Ping.handle(%ExWire.Handler.Params{
-      ...>   remote_host: %ExWire.Struct.Endpoint{ip: [1,2,3,4], udp_port: 55},
+      ...>   remote_host: %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, udp_port: 55},
       ...>   signature: 2,
       ...>   recovery_id: 3,
       ...>   hash: <<5>>,
@@ -24,7 +24,7 @@ defmodule ExWire.Handler.Ping do
         hash: <<5>>,
         timestamp: 123,
         to: %ExWire.Struct.Endpoint{
-          ip: [1, 2, 3, 4],
+          ip: {1, 2, 3, 4},
           tcp_port: 5,
           udp_port: nil
         }

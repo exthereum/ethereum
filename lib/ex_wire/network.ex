@@ -10,6 +10,7 @@ defmodule ExWire.Network do
   alias ExWire.Crypto
   alias ExWire.Handler
   alias ExWire.Protocol
+  alias ExWire.Struct.Endpoint
 
   defmodule InboundMessage do
     @moduledoc """
@@ -153,11 +154,11 @@ defmodule ExWire.Network do
   ## Examples
 
       iex> message = %ExWire.Message.Pong{
-      ...>   to: %ExWire.Struct.Endpoint{ip: [1, 2, 3, 4], tcp_port: 5, udp_port: nil},
+      ...>   to: %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, tcp_port: 5, udp_port: nil},
       ...>   hash: <<2>>,
       ...>   timestamp: 3,
       ...> }
-      iex> ExWire.Network.send(message, self(), %ExWire.Struct.Endpoint{ip: <<1, 2, 3, 4>>, udp_port: 5})
+      iex> ExWire.Network.send(message, self(), %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, udp_port: 5})
       {:sent_message, ExWire.Message.Pong}
       iex> receive do m -> m end
       {:"$gen_cast",
@@ -165,7 +166,7 @@ defmodule ExWire.Network do
           %{
             data: ExWire.Protocol.encode(message, ExWire.Config.private_key()),
             to: %ExWire.Struct.Endpoint{
-              ip: <<1, 2, 3, 4>>,
+              ip: {1, 2, 3, 4},
               tcp_port: nil,
               udp_port: 5}
           }
@@ -174,7 +175,7 @@ defmodule ExWire.Network do
   """
   @spec send(ExWire.Message.t, identifier(), ExWire.Struct.Endpoint.t) :: handler_action
   def send(message, server_pid, to) do
-    Logger.debug("[Network] Sending #{to_string(message.__struct__)} message to #{to.ip |> Enum.join(".")}")
+    Logger.debug("[Network] Sending #{to_string(message.__struct__)} message to #{to.ip |> Endpoint.ip_to_string}")
 
     GenServer.cast(
       server_pid,

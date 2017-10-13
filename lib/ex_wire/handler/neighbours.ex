@@ -18,12 +18,12 @@ defmodule ExWire.Handler.Neighbours do
 
       iex> message = %ExWire.Message.Neighbours{
       ...>   nodes: [
-      ...>     %ExWire.Struct.Neighbour{endpoint: %ExWire.Struct.Endpoint{ip: [1, 2, 3, 4], tcp_port: 5, udp_port: nil}, node: <<7, 7>>},
-      ...>     %ExWire.Struct.Neighbour{endpoint: %ExWire.Struct.Endpoint{ip: [5, 6, 7, 8], tcp_port: nil, udp_port: 6}, node: <<8, 8>>}],
+      ...>     %ExWire.Struct.Neighbour{endpoint: %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, tcp_port: 5, udp_port: nil}, node: <<7, 7>>},
+      ...>     %ExWire.Struct.Neighbour{endpoint: %ExWire.Struct.Endpoint{ip: {5, 6, 7, 8}, tcp_port: nil, udp_port: 6}, node: <<8, 8>>}],
       ...>   timestamp: 1
       ...> }
       iex> ExWire.Handler.Neighbours.handle(%ExWire.Handler.Params{
-      ...>   remote_host: %ExWire.Struct.Endpoint{ip: [1,2,3,4], udp_port: 55},
+      ...>   remote_host: %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, udp_port: 55},
       ...>   signature: 2,
       ...>   recovery_id: 3,
       ...>   hash: <<5>>,

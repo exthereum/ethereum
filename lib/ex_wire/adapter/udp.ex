@@ -56,22 +56,8 @@ defmodule ExWire.Adapter.UDP do
   """
   def handle_cast({:send, %{to: %{ip: ip, udp_port: udp_port}, data: data}}, state = %{socket: socket}) when not is_nil(udp_port) do
     # TODO: How should we handle invalid ping or message requests?
-    :gen_udp.send(socket, ip |> ip_to_tuple, udp_port, data)
+    :gen_udp.send(socket, ip, udp_port, data)
 
     {:noreply, state}
-  end
-
-  def ip_to_tuple([p_0, p_1, p_2, p_3]), do: {p_0, p_1, p_2, p_3}
-  def ip_to_tuple([p_0, p_1, p_2, p_3, p_4, p_5, p_6, p_7, p_8, p_9, p_10, p_11, p_12, p_13, p_14, p_15]) do
-    {
-      p_0 <<< 8 + p_1,
-      p_2 <<< 8 + p_3,
-      p_4 <<< 8 + p_5,
-      p_6 <<< 8 + p_7,
-      p_8 <<< 8 + p_9,
-      p_10 <<< 8 + p_11,
-      p_12 <<< 8 + p_13,
-      p_14 <<< 8 + p_15,
-    }
   end
 end

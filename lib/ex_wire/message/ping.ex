@@ -34,8 +34,8 @@ defmodule ExWire.Message.Ping do
       iex> ExWire.Message.Ping.decode([1, [<<1,2,3,4>>, <<>>, <<5>>], [<<5,6,7,8>>, <<6>>, <<>>], 4] |> ExRLP.encode)
       %ExWire.Message.Ping{
         version: 1,
-        from: %ExWire.Struct.Endpoint{ip: [1, 2, 3, 4], tcp_port: 5, udp_port: nil},
-        to: %ExWire.Struct.Endpoint{ip: [5, 6, 7, 8], tcp_port: nil, udp_port: 6},
+        from: %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, tcp_port: 5, udp_port: nil},
+        to: %ExWire.Struct.Endpoint{ip: {5, 6, 7, 8}, tcp_port: nil, udp_port: 6},
         timestamp: 4,
       }
 
@@ -61,8 +61,8 @@ defmodule ExWire.Message.Ping do
 
       iex> ExWire.Message.Ping.encode(%ExWire.Message.Ping{
       ...>   version: 1,
-      ...>   from: %ExWire.Struct.Endpoint{ip: [1, 2, 3, 4], tcp_port: 5, udp_port: nil},
-      ...>   to: %ExWire.Struct.Endpoint{ip: [5, 6, 7, 8], tcp_port: nil, udp_port: 6},
+      ...>   from: %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, tcp_port: 5, udp_port: nil},
+      ...>   to: %ExWire.Struct.Endpoint{ip: {5, 6, 7, 8}, tcp_port: nil, udp_port: 6},
       ...>   timestamp: 4}
       ...> ) |> ExRLP.decode()
       [<<1>>, [<<1, 2, 3, 4>>, "", <<0, 5>>], [<<5, 6, 7, 8>>, <<0, 6>>, ""], <<4>>]
@@ -84,11 +84,11 @@ defmodule ExWire.Message.Ping do
 
       iex> ExWire.Message.Ping.to(%ExWire.Message.Ping{
       ...>   version: 1,
-      ...>   from: %ExWire.Struct.Endpoint{ip: [1, 2, 3, 4], tcp_port: 5, udp_port: nil},
-      ...>   to: %ExWire.Struct.Endpoint{ip: [5, 6, 7, 8], tcp_port: nil, udp_port: 6},
+      ...>   from: %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, tcp_port: 5, udp_port: nil},
+      ...>   to: %ExWire.Struct.Endpoint{ip: {5, 6, 7, 8}, tcp_port: nil, udp_port: 6},
       ...>   timestamp: 4}
       ...> )
-      %ExWire.Struct.Endpoint{ip: [5, 6, 7, 8], tcp_port: nil, udp_port: 6}
+      %ExWire.Struct.Endpoint{ip: {5, 6, 7, 8}, tcp_port: nil, udp_port: 6}
   """
   @spec to(t) :: Endpoint.t | nil
   def to(message) do
