@@ -42,10 +42,11 @@ defmodule ExWire.Network do
   ## Examples
 
       iex> ping_data = [1, [<<1,2,3,4>>, <<>>, <<5>>], [<<5,6,7,8>>, <<6>>, <<>>], 4] |> ExRLP.encode
-      iex> payload = <<0::512>> <> <<0::8>> <> <<1::8>> <> ping_data
+      iex> payload = <<0x01::8>> <> ping_data
       iex> hash = ExWire.Crypto.hash(payload)
+      iex> {signature, _r, _s, recovery_bit} = ExthCrypto.Signature.sign_digest(hash, ExthCrypto.Test.private_key)
       iex> ExWire.Network.receive(%ExWire.Network.InboundMessage{
-      ...>   data: hash <> <<0::512>> <> <<0::8>> <> <<1::8>> <> ping_data,
+      ...>   data: hash <> signature <> <<recovery_bit::8>> <> payload,
       ...>   server_pid: self(),
       ...>   remote_host: nil,
       ...>   timestamp: 123,
@@ -53,10 +54,11 @@ defmodule ExWire.Network do
       {:sent_message, ExWire.Message.Pong}
 
       iex> ping_data = [1, [<<1,2,3,4>>, <<>>, <<5>>], [<<5,6,7,8>>, <<6>>, <<>>], 4] |> ExRLP.encode
-      iex> payload = <<0::512>> <> <<0::8>> <> <<1::8>> <> ping_data
+      iex> payload = <<0x01::8>> <> ping_data
       iex> hash = ExWire.Crypto.hash("hello")
+      iex> {signature, _r, _s, recovery_bit} = ExthCrypto.Signature.sign_digest(hash, ExthCrypto.Test.private_key)
       iex> ExWire.Network.receive(%ExWire.Network.InboundMessage{
-      ...>   data: hash <> payload,
+      ...>   data: hash <> signature <> <<recovery_bit::8>> <> payload,
       ...>   server_pid: self(),
       ...>   remote_host: nil,
       ...>   timestamp: 123,
@@ -94,16 +96,23 @@ defmodule ExWire.Network do
   ## Examples
 
       iex> ping_data = [1, [<<1,2,3,4>>, <<>>, <<5>>], [<<5,6,7,8>>, <<6>>, <<>>], 4] |> ExRLP.encode
+      iex> payload = <<0x01::8>> <> ping_data
+      iex> hash = ExWire.Crypto.hash(payload)
+      iex> {signature, _r, _s, recovery_bit} = ExthCrypto.Signature.sign_digest(hash, ExthCrypto.Test.private_key)
       iex> ExWire.Network.handle(%ExWire.Network.InboundMessage{
-      ...>   data: <<0::256>> <> <<0::512>> <> <<0::8>> <> <<1::8>> <> ping_data,
+      ...>   data: hash <> signature <> <<recovery_bit::8>> <> payload,
       ...>   server_pid: self(),
       ...>   remote_host: nil,
       ...>   timestamp: 5,
       ...> }, nil)
       {:sent_message, ExWire.Message.Pong}
 
+      iex> payload_data = [] |> ExRLP.encode
+      iex> payload = <<0xff::8>> <> payload_data
+      iex> hash = ExWire.Crypto.hash(payload)
+      iex> {signature, _r, _s, recovery_bit} = ExthCrypto.Signature.sign_digest(hash, ExthCrypto.Test.private_key)
       iex> ExWire.Network.handle(%ExWire.Network.InboundMessage{
-      ...>   data: <<0::256>> <> <<0::512>> <> <<0::8>> <> <<99::8>> <> <<>>,
+      ...>   data: hash <> signature <> <<recovery_bit::8>> <> payload,
       ...>   server_pid: self(),
       ...>   remote_host: nil,
       ...>   timestamp: 5,

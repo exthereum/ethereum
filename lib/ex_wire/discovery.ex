@@ -38,7 +38,7 @@ defmodule ExWire.Discovery do
       :ok = :nat_upnp.add_port_mapping(context, :udp, ExWire.Config.listen_port(), ExWire.Config.listen_port(), 'discovery mapping', 0)
 
       %ExWire.Struct.Endpoint{
-        ip: ip_address |> Tuple.to_list,
+        ip: ip_address,
         udp_port: ExWire.Config.listen_port(),
         tcp_port: ExWire.Config.listen_port()
       }

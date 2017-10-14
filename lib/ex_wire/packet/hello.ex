@@ -59,7 +59,7 @@ defmodule ExWire.Packet.Hello do
       (for {cap, ver} <- packet.caps, do: [cap, ver]),
       packet.listen_port,
       packet.node_id,
-      "#{ExWire.Config.local_ip() |> Enum.join(".")}:#{ExWire.Config.listen_port()}"
+      "#{ExWire.Config.local_ip() |> ExWire.Struct.Endpoint.ip_to_string}:#{ExWire.Config.listen_port()}"
     ]
   end
 

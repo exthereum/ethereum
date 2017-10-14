@@ -24,11 +24,11 @@ defmodule ExWire.Config do
     :from_chain -> @chain.nodes
   end )
   @commitment_count Application.get_env(:ex_wire, :commitment_count)
-  @local_ip ( case Application.get_env(:ex_wire, :local_ip, [127, 0, 0, 1]) do
+  @local_ip ( case Application.get_env(:ex_wire, :local_ip, {127, 0, 0, 1}) do
     ip_address when is_binary(ip_address) ->
       {:ok, ip_address_parsed} = ip_address |> String.to_charlist |> :inet.parse_address
-      ip_address_parsed |> Tuple.to_list
-    ip_address when is_list(ip_address) -> ip_address
+      ip_address_parsed
+    ip_address when is_tuple(ip_address) -> ip_address
   end )
 
   @use_nat Application.get_env(:ex_wire, :use_nat, false)
