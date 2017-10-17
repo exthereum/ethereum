@@ -51,7 +51,7 @@ defmodule ExWire.RemoteConnectionTest do
     }
 
     # First, start a new client
-    {:ok, client_pid} = ExWire.Adapter.UDP.start_link({__MODULE__, [self()]}, @local_peer_port)
+    {:ok, client_pid} = ExWire.Adapter.UDP.start_link({__MODULE__, [self()]}, @local_peer_port, __MODULE__.Test)
 
     # Now, we'll send a ping / pong to verify connectivity
     timestamp = ExWire.Util.Timestamp.soon()

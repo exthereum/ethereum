@@ -7,7 +7,7 @@ defmodule WireToWireTest do
   use ExUnit.Case, async: true
 
   @moduletag integration: true
-  @localhost [127, 0, 0, 1]
+  @localhost {127, 0, 0, 1}
   @us_port 8888
   @them_port 9999
 
@@ -27,7 +27,7 @@ defmodule WireToWireTest do
   end
 
   test "ping / pong", %{remote_host: remote_host} do
-    {:ok, client_pid} = ExWire.Adapter.UDP.start_link({__MODULE__, [self()]}, @us_port)
+    {:ok, client_pid} = ExWire.Adapter.UDP.start_link({__MODULE__, [self()]}, @us_port, __MODULE__.Test)
 
     timestamp = ExWire.Util.Timestamp.now()
 

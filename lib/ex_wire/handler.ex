@@ -26,6 +26,7 @@ defmodule ExWire.Handler do
       signature: nil,
       recovery_id: nil,
       hash: nil,
+      type: nil,
       data: nil,
       timestamp: nil,
       node_id: nil
@@ -36,6 +37,7 @@ defmodule ExWire.Handler do
       signature: Crpyto.signature,
       recovery_id: Crypto.recovery_id,
       hash: Crypto.hash,
+      type: integer(),
       data: binary(),
       timestamp: integer(),
       node_id: ExWire.node_id,

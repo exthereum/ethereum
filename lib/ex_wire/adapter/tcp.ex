@@ -216,7 +216,7 @@ defmodule ExWire.Adapter.TCP do
       |> Map.put(:closed, true)}
   end
 
-  def handle_info({:timeout, ref, :pinger}, state=%{socket: socket, peer: peer, active: true}) do
+  def handle_info({:timeout, _ref, :pinger}, state=%{socket: _socket, peer: peer, active: true}) do
     Logger.warn("[Network] [#{peer}] Sending peer ping.")
 
     send_status(self())
@@ -226,7 +226,7 @@ defmodule ExWire.Adapter.TCP do
     {:noreply, Map.put(state, :timer_ref, timer_ref)}
   end
 
-  def handle_info({:timeout, ref, :pinger}, state=%{socket: socket, peer: peer, active: false}) do
+  def handle_info({:timeout, _ref, :pinger}, state=%{socket: _socket, peer: peer, active: false}) do
     Logger.warn("[Network] [#{peer}] Not sending peer ping.")
 
     {:noreply, state}
