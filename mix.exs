@@ -3,7 +3,7 @@ defmodule ExWire.Mixfile do
 
   def project do
     [app: :ex_wire,
-     version: "0.1.1",
+     version: "0.1.2",
      elixir: "~> 1.6",
      description: "Elixir Client for Ethereum's RLPx, DevP2P and Eth Wire Protocol",
       package: [
