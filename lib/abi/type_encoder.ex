@@ -232,7 +232,7 @@ defmodule ABI.TypeEncoder do
 
   defp pad(bin, size_in_bytes, direction) do
     # TODO: Create `left_pad` repo, err, add to `ExthCrypto.Math`
-    total_size = size_in_bytes + ExthCrypto.Math.mod(32 - size_in_bytes, 32)
+    total_size = size_in_bytes + ExthCrypto.Math.mod( 32 - ExthCrypto.Math.mod(size_in_bytes, 32), 32 )
     padding_size_bits = ( total_size - byte_size(bin) ) * 8
     padding = <<0::size(padding_size_bits)>>
 
