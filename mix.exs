@@ -26,6 +26,7 @@ defmodule ABI.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:credo, "~>  0.9.1", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.14", only: :dev, runtime: false},
       {:poison, "~> 3.1", only: [:dev, :test]},
       {:exth_crypto, "~> 0.1.4"}
