@@ -32,7 +32,7 @@ defmodule ABI.Mixfile do
       {:ex_doc, "~> 0.14", only: :dev, runtime: false},
       {:dialyxir, "~> 1.0.0-rc.3", only: [:dev], runtime: false},
       {:poison, "~> 3.1", only: [:dev, :test]},
-      {:exth_crypto, "~> 0.1.5"}
+      {:exth_crypto, "~> 0.1.6"}
     ]
   end
 end
