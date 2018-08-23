@@ -16,11 +16,13 @@ defmodule ExWire.Adapter.TCP do
   alias ExWire.Handshake
   alias ExWire.Packet
 
+  @ping_interval 2_000
+
   @doc """
   Starts an outbound peer to peer connection.
   """
   def start_link(:outbound, peer, subscribers \\ []) do
-    GenServer.start_link(__MODULE__, %{is_outbound: true, peer: peer, active: false, subscribers: subscribers})
+    GenServer.start_link(__MODULE__, %{is_outbound: true, peer: peer, active: false, closed: false, subscribers: subscribers})
   end
 
   @doc """
@@ -29,6 +31,8 @@ defmodule ExWire.Adapter.TCP do
   We'll also prepare and send out an authentication message immediately after connecting.
   """
   def init(state=%{is_outbound: true, peer: peer}) do
+    timer_ref = :erlang.start_timer(@ping_interval, self(), :pinger)
+
     {:ok, socket} = :gen_tcp.connect(peer.host |> String.to_charlist, peer.port, [:binary])
 
     Logger.debug("[Network] [#{peer}] Established outbound connection with #{peer.host}, sending auth.")
@@ -50,7 +54,8 @@ defmodule ExWire.Adapter.TCP do
       socket: socket,
       auth_data: encoded_auth_msg,
       my_ephemeral_key_pair: my_ephemeral_key_pair,
-      my_nonce: my_nonce})}
+      my_nonce: my_nonce,
+      timer_ref: timer_ref})}
   end
 
   @doc """
@@ -206,7 +211,25 @@ defmodule ExWire.Adapter.TCP do
   def handle_info({:tcp_closed, _socket}, state=%{peer: peer}) do
     Logger.warn("[Network] [#{peer}] Peer closed connection.")
 
-    {:noreply, Map.put(state, :active, false)}
+    {:noreply, state
+      |> Map.put(:active, false)
+      |> Map.put(:closed, true)}
+  end
+
+  def handle_info({:timeout, _ref, :pinger}, state=%{socket: _socket, peer: peer, active: true}) do
+    Logger.warn("[Network] [#{peer}] Sending peer ping.")
+
+    send_status(self())
+
+    timer_ref = :erlang.start_timer(@ping_interval, self(), :pinger)
+
+    {:noreply, Map.put(state, :timer_ref, timer_ref)}
+  end
+
+  def handle_info({:timeout, _ref, :pinger}, state=%{socket: _socket, peer: peer, active: false}) do
+    Logger.warn("[Network] [#{peer}] Not sending peer ping.")
+
+    {:noreply, state}
   end
 
   @doc """
@@ -226,6 +249,12 @@ defmodule ExWire.Adapter.TCP do
   However, if we haven't yet sent a Hello message, we should queue the message and try again later. Most
   servers will disconnect if we send a non-Hello message as our first message.
   """
+  def handle_cast({:send, %{packet: {packet_mod, _packet_type, _packet_data}}}=_data, state = %{peer: peer, closed: true}) do
+    Logger.info("[Network] [#{peer}] Dropping packet #{Atom.to_string(packet_mod)} for #{peer.host} due to closed connection.")
+
+    {:noreply, state}
+  end
+
   def handle_cast({:send, %{packet: {packet_mod, _packet_type, _packet_data}}}=data, state = %{peer: peer, active: false}) when packet_mod != ExWire.Packet.Hello do
     Logger.info("[Network] [#{peer}] Queueing packet #{Atom.to_string(packet_mod)} to #{peer.host}")
 
@@ -275,6 +304,26 @@ defmodule ExWire.Adapter.TCP do
       listen_port: ExWire.Config.listen_port(),
       node_id: ExWire.Config.node_id()
     })
+  end
+
+  @doc """
+  Client function to send PING message.
+  """
+  def send_ping(pid) do
+    send_packet(pid, %Packet.Ping{})
+  end
+
+  @doc """
+  Client function to send STATUS message.
+  """
+  def send_status(pid) do
+    send_packet(pid, %Packet.Status{
+      protocol_version: ExWire.Config.protocol_version(),
+      network_id: ExWire.Config.network_id(),
+      total_difficulty: ExWire.Config.chain.genesis.difficulty,
+      best_hash: ExWire.Config.chain.genesis.parent_hash,
+      genesis_hash: <<>>
+    }) |> Exth.inspect("status")
   end
 
   @doc """

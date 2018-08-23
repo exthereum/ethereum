@@ -4,20 +4,25 @@ defmodule ExWire.Adapter.UDP do
   peer to peer messages according to RLPx.
   """
   use GenServer
+  use Bitwise
+
+  require Logger
 
   @doc """
   When starting a UDP server, we'll store a network to use for all
   message handling.
   """
-  def start_link({network, network_args}, port) do
-    GenServer.start_link(__MODULE__, %{network: network, network_args: network_args, port: port})
+  def start_link({network, network_args}, port, name \\ __MODULE__) do
+    GenServer.start_link(__MODULE__, %{network: network, network_args: network_args, port: port}, name: name)
   end
 
   @doc """
   Initialize by opening up a `gen_udp` server on a given port.
   """
   def init(state=%{port: port}) do
-    {:ok, socket} = :gen_udp.open(port, [:binary])
+    {:ok, socket} = :gen_udp.open(port, [{:ip, {0, 0, 0, 0}}, {:active, true}, {:reuseaddr, true}, :binary])
+    {:ok, port_num} = :inet.port(socket)
+    Logger.debug("[UDP] Listening on port #{port_num}")
 
     {:ok, Map.put(state, :socket, socket)}
   end
@@ -34,7 +39,7 @@ defmodule ExWire.Adapter.UDP do
       data: data,
       server_pid: self(),
       remote_host: %ExWire.Struct.Endpoint{
-        ip: ip,
+        ip: ip |> Tuple.to_list,
         udp_port: port,
       },
       timestamp: ExWire.Util.Timestamp.soon(),
@@ -50,9 +55,9 @@ defmodule ExWire.Adapter.UDP do
   all outbound messages we'll ever send.
   """
   def handle_cast({:send, %{to: %{ip: ip, udp_port: udp_port}, data: data}}, state = %{socket: socket}) when not is_nil(udp_port) do
-    :gen_udp.send(socket, ip |> List.to_tuple(), udp_port, data)
+    # TODO: How should we handle invalid ping or message requests?
+    :gen_udp.send(socket, ip, udp_port, data)
 
     {:noreply, state}
   end
-
 end

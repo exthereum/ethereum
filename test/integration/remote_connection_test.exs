@@ -21,7 +21,7 @@ defmodule ExWire.RemoteConnectionTest do
   @moduletag integration: true
   @moduletag network: true
 
-  @local_peer [127,0,0,1]
+  @local_peer {127, 0, 0, 1}
   @local_peer_port 35353
   @local_tcp_port 36363
 
@@ -43,9 +43,7 @@ defmodule ExWire.RemoteConnectionTest do
       port: remote_peer_port
     } = URI.parse(@remote_test_peer)
 
-    remote_ip = with {:ok, remote_ip} <- :inet.ip(remote_host |> String.to_charlist) do
-      remote_ip |> Tuple.to_list
-    end
+    {:ok, remote_ip} = :inet.ip(remote_host |> String.to_charlist)
 
     remote_peer = %ExWire.Struct.Endpoint{
       ip: remote_ip,
@@ -53,7 +51,7 @@ defmodule ExWire.RemoteConnectionTest do
     }
 
     # First, start a new client
-    {:ok, client_pid} = ExWire.Adapter.UDP.start_link({__MODULE__, [self()]}, @local_peer_port)
+    {:ok, client_pid} = ExWire.Adapter.UDP.start_link({__MODULE__, [self()]}, @local_peer_port, __MODULE__.Test)
 
     # Now, we'll send a ping / pong to verify connectivity
     timestamp = ExWire.Util.Timestamp.soon()

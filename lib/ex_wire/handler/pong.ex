@@ -12,20 +12,20 @@ defmodule ExWire.Handler.Pong do
   ## Examples
 
       iex> ExWire.Handler.Pong.handle(%ExWire.Handler.Params{
-      ...>   remote_host: %ExWire.Struct.Endpoint{ip: [1,2,3,4], udp_port: 55},
+      ...>   remote_host: %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, udp_port: 55},
       ...>   signature: 2,
       ...>   recovery_id: 3,
       ...>   hash: <<5>>,
       ...>   data: [[<<1,2,3,4>>, <<>>, <<5>>], <<2>>, 3] |> ExRLP.encode(),
       ...>   timestamp: 123,
-      ...> })
+      ...> }, nil)
       :no_response
   """
-  @spec handle(Handler.Params.t) :: Handler.handler_response
-  def handle(params) do
+  @spec handle(Handler.Params.t, identifier() | nil) :: Handler.handler_response
+  def handle(params, discovery) do
     _pong = Pong.decode(params.data)
 
-    # TODO: Add to K-Bucket
+    if discovery, do: ExWire.Discovery.pong(discovery, params.node_id)
 
     :no_response
   end

@@ -10,22 +10,20 @@ defmodule ExWire.PeerSupervisor do
 
   use Supervisor
 
+  require Logger
+
   @name __MODULE__
 
-  def start_link(bootnodes) do
-    Supervisor.start_link(__MODULE__, bootnodes, name: @name)
+  def start_link(:ok) do
+    Supervisor.start_link(__MODULE__, :ok, name: @name)
   end
 
-  def init(bootnodes) do
-    # TODO: Ask for peers, etc.
+  def init(:ok) do
+    children = [
+      worker(ExWire.Adapter.TCP, [], restart: :transient)
+    ]
 
-    children = for bootnode <- bootnodes do
-      {:ok, peer} = ExWire.Struct.Peer.from_uri(bootnode)
-
-      worker(ExWire.Adapter.TCP, [:outbound, peer, [{:server, ExWire.Sync}]])
-    end
-
-    Supervisor.init(children, strategy: :one_for_one)
+    Supervisor.init(children, strategy: :simple_one_for_one)
   end
 
   @doc """
@@ -40,6 +38,17 @@ defmodule ExWire.PeerSupervisor do
       # Children which are being restarted by not have a child_pid at this time.
       if is_pid(child), do: ExWire.Adapter.TCP.send_packet(child, packet)
     end
+  end
+
+  @doc """
+  Informs our peer supervisor a new neighbour that we should connect to.
+  """
+  def connect(neighbour) do
+    Logger.debug("[Peer Supervisor] Starting TCP connection to neighbour #{neighbour.endpoint.ip |> ExWire.Struct.Endpoint.ip_to_string}:#{neighbour.endpoint.tcp_port} (#{neighbour.node |> ExthCrypto.Math.bin_to_hex})")
+
+    peer = ExWire.Struct.Peer.from_neighbour(neighbour)
+
+    Supervisor.start_child(@name, [:outbound, peer, [{:server, ExWire.Sync}]])
   end
 
 end

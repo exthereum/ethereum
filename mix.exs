@@ -3,7 +3,7 @@ defmodule ExWire.Mixfile do
 
   def project do
     [app: :ex_wire,
-     version: "0.1.1",
+     version: "0.1.2",
      elixir: "~> 1.6",
      description: "Elixir Client for Ethereum's RLPx, DevP2P and Eth Wire Protocol",
       package: [
@@ -33,7 +33,8 @@ defmodule ExWire.Mixfile do
       {:blockchain, "~> 0.1.7"},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
       {:exth_crypto, "~> 0.1.4"},
-      {:evm, "~> 0.1.11"}
+      {:evm, "~> 0.1.11"},
+      {:nat_upnp, "~> 0.1.0"}
     ]
   end
 end

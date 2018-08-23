@@ -31,7 +31,7 @@ defmodule ExWire.Adapter.Test do
         server_pid: self(),
         remote_host: remote_host,
         timestamp: timestamp,
-      })
+      }, nil)
 
     {:noreply, state}
   end

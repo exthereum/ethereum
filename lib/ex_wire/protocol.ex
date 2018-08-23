@@ -15,8 +15,8 @@ defmodule ExWire.Protocol do
 
       iex> message = %ExWire.Message.Ping{
       ...>   version: 1,
-      ...>   from: %ExWire.Struct.Endpoint{ip: [1, 2, 3, 4], tcp_port: 5, udp_port: nil},
-      ...>   to: %ExWire.Struct.Endpoint{ip: [5, 6, 7, 8], tcp_port: nil, udp_port: 6},
+      ...>   from: %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, tcp_port: 5, udp_port: nil},
+      ...>   to: %ExWire.Struct.Endpoint{ip: {5, 6, 7, 8}, tcp_port: nil, udp_port: 6},
       ...>   timestamp: 4
       ...> }
       iex> ExWire.Protocol.encode(message, <<1::256>>)
@@ -44,8 +44,8 @@ defmodule ExWire.Protocol do
 
       iex> message = %ExWire.Message.Ping{
       ...>   version: 1,
-      ...>   from: %ExWire.Struct.Endpoint{ip: [1, 2, 3, 4], tcp_port: 5, udp_port: nil},
-      ...>   to: %ExWire.Struct.Endpoint{ip: [5, 6, 7, 8], tcp_port: nil, udp_port: 6},
+      ...>   from: %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, tcp_port: 5, udp_port: nil},
+      ...>   to: %ExWire.Struct.Endpoint{ip: {5, 6, 7, 8}, tcp_port: nil, udp_port: 6},
       ...>   timestamp: 4
       ...> }
       iex> signature = ExWire.Protocol.sign_message(message, ExthCrypto.Test.private_key())

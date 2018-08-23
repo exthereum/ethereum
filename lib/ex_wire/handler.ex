@@ -26,21 +26,25 @@ defmodule ExWire.Handler do
       signature: nil,
       recovery_id: nil,
       hash: nil,
+      type: nil,
       data: nil,
       timestamp: nil,
+      node_id: nil
     ]
 
     @type t :: %__MODULE__{
       remote_host: ExWire.Struct.Endpoint.t,
       signature: Crpyto.signature,
       recovery_id: Crypto.recovery_id,
-      hash: Cryto.hash,
+      hash: Crypto.hash,
+      type: integer(),
       data: binary(),
       timestamp: integer(),
+      node_id: ExWire.node_id,
     }
   end
 
-  @type handler_response :: :not_implented | :no_response | Message.t
+  @type handler_response :: :not_implented | :no_response | {:respond, Message.t}
   @callback handle(Params.t) :: handler_response
 
   @doc """
@@ -51,35 +55,35 @@ defmodule ExWire.Handler do
   ## Examples
 
       iex> ExWire.Handler.dispatch(0x01, %ExWire.Handler.Params{
-      ...>   remote_host: %ExWire.Struct.Endpoint{ip: [1,2,3,4], udp_port: 55},
+      ...>   remote_host: %ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, udp_port: 55},
       ...>   signature: 2,
       ...>   recovery_id: 3,
       ...>   hash: <<5>>,
       ...>   data: [1, [<<1,2,3,4>>, <<>>, <<5>>], [<<5,6,7,8>>, <<6>>, <<>>], 4] |> ExRLP.encode(),
       ...>   timestamp: 123,
-      ...> })
-      %ExWire.Message.Pong{
+      ...> }, nil)
+      {:respond, %ExWire.Message.Pong{
         hash: <<5>>,
         timestamp: 123,
         to: %ExWire.Struct.Endpoint{
-          ip: [1, 2, 3, 4],
+          ip: {1, 2, 3, 4},
           tcp_port: 5,
           udp_port: nil
         }
-      }
+      }}
 
-      iex> ExWire.Handler.dispatch(0x99, %ExWire.Handler.Params{})
+      iex> ExWire.Handler.dispatch(0x99, %ExWire.Handler.Params{}, nil)
       :not_implemented
 
       # TODO: Add a `no_response` test case
   """
-  @spec dispatch(integer(), Params.t) :: handler_response
-  def dispatch(type, params) do
+  @spec dispatch(integer(), Params.t, identifier() | nil) :: handler_response
+  def dispatch(type, params, discovery) do
     case @handlers[type] do
       nil ->
         Logger.warn("Message code `#{inspect type, base: :hex}` not implemented")
         :not_implemented
-      mod when is_atom(mod) -> apply(mod, :handle, [params])
+      mod when is_atom(mod) -> apply(mod, :handle, [params, discovery])
     end
   end
 

@@ -48,6 +48,7 @@ defmodule ExWire.Packet.Hello do
 
       iex> %ExWire.Packet.Hello{p2p_version: 10, client_id: "Exthereum/Test", caps: [{"eth", 1}, {"par", 2}], listen_port: 5555, node_id: <<5>>}
       ...> |> ExWire.Packet.Hello.serialize
+      ...> |> Enum.take(5)
       [10, "Exthereum/Test", [["eth", 1], ["par", 2]], 5555, <<5>>]
   """
   @spec serialize(t) :: ExRLP.t
@@ -57,7 +58,8 @@ defmodule ExWire.Packet.Hello do
       packet.client_id,
       (for {cap, ver} <- packet.caps, do: [cap, ver]),
       packet.listen_port,
-      packet.node_id
+      packet.node_id,
+      "#{ExWire.Config.local_ip() |> ExWire.Struct.Endpoint.ip_to_string}:#{ExWire.Config.listen_port()}"
     ]
   end
 
@@ -73,12 +75,13 @@ defmodule ExWire.Packet.Hello do
   @spec deserialize(ExRLP.t) :: t
   def deserialize(rlp) do
     [
-      p2p_version,
-      client_id,
-      caps,
-      listen_port,
-      node_id
-    ] = rlp
+      p2p_version |
+      [client_id |
+      [caps |
+      [listen_port |
+      [node_id |
+      _rest
+    ]]]]] = rlp
 
     %__MODULE__{
       p2p_version: p2p_version |> :binary.decode_unsigned,
