@@ -32,7 +32,7 @@ defmodule ExWire.Mixfile do
       {:ex_rlp, "~> 0.2.1"},
       {:blockchain, "~> 0.1.7"},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
-      {:exth_crypto, "~> 0.1.4"},
+      {:exth_crypto, "~> 0.1.6"},
       {:evm, "~> 0.1.11"},
       {:nat_upnp, "~> 0.1.0"}
     ]

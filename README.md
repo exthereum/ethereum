@@ -1,4 +1,4 @@
-# ExWire
+# ExWire [![CircleCI](https://circleci.com/gh/exthereum/ex_wire.svg?style=svg)](https://circleci.com/gh/exthereum/ex_wire)
 
 Elixir Client for RLPx, DevP2P and Eth Wire Protocol.
 
