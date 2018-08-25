@@ -2,8 +2,9 @@ defmodule ABI.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :abi,
-     version: "0.1.12",
+    [
+      app: :abi,
+      version: "0.1.12",
       elixir: "~> 1.4",
       description: "Ethereum's ABI Interface",
       package: [
@@ -11,9 +12,10 @@ defmodule ABI.Mixfile do
         licenses: ["MIT"],
         links: %{"GitHub" => "https://github.com/exthereum/abi"}
       ],
-      build_embedded: Mix.env == :prod,
-      start_permanent: Mix.env == :prod,
-      deps: deps()]
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
+      deps: deps()
+    ]
   end
 
   # Run "mix help compile.app" to learn about applications.
@@ -26,9 +28,11 @@ defmodule ABI.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:credo, "~>  0.9.1", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.14", only: :dev, runtime: false},
+      {:dialyxir, "~> 1.0.0-rc.3", only: [:dev], runtime: false},
       {:poison, "~> 3.1", only: [:dev, :test]},
-      {:exth_crypto, "~> 0.1.4"}
+      {:exth_crypto, "~> 0.1.6"}
     ]
   end
 end
