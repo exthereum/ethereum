@@ -1,7 +1,7 @@
 version: 2
 jobs:
   build:
-    working_directory: ~/blockchain
+    working_directory: ~/ethereum
     docker:
       - image: elixir:latest
     steps:
@@ -22,7 +22,8 @@ jobs:
       - run: mix credo
       - run: mix format --check-formatted
 
-      - run: mix test
+      - run: mix test --exclude network
+      - run: mix dialyzer
 
       - save_cache:
           key: v1-dependency-cache-{{ arch }}-{{ checksum "mix.lock" }}
