@@ -1,0 +1,3 @@
+# Ignore generated code from yecc and leex
+src/*_lexer.erl
+src/*_parser.erl

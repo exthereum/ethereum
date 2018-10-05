@@ -35,7 +35,7 @@ defmodule ExWire.Mixfile do
       {:exth_crypto, in_umbrella: true},
 
       # Libraries
-      {:nat_upnp, "~> 0.1.0"}
+      {:nat_upnp, "~> 0.1.0"},
 
       # Common
       {:credo, "~> 0.10.2", only: [:dev, :test], runtime: false},

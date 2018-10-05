@@ -36,7 +36,7 @@ defmodule MerklePatriciaTree.Mixfile do
       # Libaries
       {:exleveldb, "~> 0.13"},
       {:keccakf1600, "~> 2.0.0", hex: :keccakf1600_orig},
-      {:poison, "~> 3.1.0", only: [:dev, :test], runtime: false},
+      {:poison, "~> 4.0.1", only: [:dev, :test], runtime: false},
 
       # Common
       {:credo, "~> 0.10.2", only: [:dev, :test], runtime: false},

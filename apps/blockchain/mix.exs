@@ -37,7 +37,7 @@ defmodule Blockchain.Mixfile do
       # Libaries
       {:keccakf1600, "~> 2.0.0", hex: :keccakf1600_orig},
       {:libsecp256k1, "~> 0.1.9"},
-      {:poison, "~> 4.0.1", only: [:dev, :test]},
+      {:poison, "~> 4.0.1"},
 
       # Common
       {:credo, "~> 0.10.2", only: [:dev, :test], runtime: false},

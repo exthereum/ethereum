@@ -36,7 +36,7 @@ defmodule EVM.Mixfile do
 
       # Libraries
       {:keccakf1600, "~> 2.0.0", hex: :keccakf1600_orig},
-      {:poison, "~> 4.0.1", only: [:dev, :test]},
+      {:poison, "~> 4.0.1", only: [:dev, :test], runtime: false},
 
       # Common
       {:credo, "~>  0.10.2", only: [:dev, :test], runtime: false},

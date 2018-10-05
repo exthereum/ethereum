@@ -21,7 +21,3 @@ erl_crash.dump
 
 # MacOS Files
 *.DS_Store
-
-# Ignore generated code from yecc and leex
-src/*_lexer.erl
-src/*_parser.erl
