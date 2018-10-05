@@ -1,0 +1,10 @@
+# protocol warnings
+
+:0: Unknown function 'Elixir.ExRLP.Encode.Atom':'__impl__'/1
+:0: Unknown function 'Elixir.ExRLP.Encode.Float':'__impl__'/1
+:0: Unknown function 'Elixir.ExRLP.Encode.Function':'__impl__'/1
+:0: Unknown function 'Elixir.ExRLP.Encode.Map':'__impl__'/1
+:0: Unknown function 'Elixir.ExRLP.Encode.PID':'__impl__'/1
+:0: Unknown function 'Elixir.ExRLP.Encode.Port':'__impl__'/1
+:0: Unknown function 'Elixir.ExRLP.Encode.Reference':'__impl__'/1
+:0: Unknown function 'Elixir.ExRLP.Encode.Tuple':'__impl__'/1
