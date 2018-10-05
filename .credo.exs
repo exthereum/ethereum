@@ -55,7 +55,7 @@
         {Credo.Check.Consistency.LineEndings},
         {Credo.Check.Consistency.ParameterPatternMatching},
         {Credo.Check.Consistency.SpaceAroundOperators},
-        {Credo.Check.Consistency.SpaceInParentheses},
+        {Credo.Check.Consistency.SpaceInParentheses, false},
         {Credo.Check.Consistency.TabsOrSpaces},
 
         #
@@ -82,6 +82,7 @@
         #
         ## Readability Checks
         #
+        {Credo.Check.Readability.AliasOrder},
         {Credo.Check.Readability.FunctionNames},
         {Credo.Check.Readability.LargeNumbers, false},
         {Credo.Check.Readability.MaxLineLength, priority: :low, max_length: 80},
@@ -112,7 +113,8 @@
         {Credo.Check.Refactor.NegatedConditionsInUnless},
         {Credo.Check.Refactor.NegatedConditionsWithElse},
         {Credo.Check.Refactor.Nesting},
-        {Credo.Check.Refactor.PipeChainStart, false},
+        {Credo.Check.Refactor.PipeChainStart, false}, #,
+        # excluded_argument_types: [:atom, :binary, :fn, :keyword], excluded_functions: []},
         {Credo.Check.Refactor.UnlessWithElse},
 
         #
