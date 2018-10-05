@@ -4,8 +4,8 @@ defmodule ExRLP.Mixfile do
   def project do
     [
       app: :ex_rlp,
-      version: "0.3.0",
-      elixir: "~> 1.6",
+      version: "0.2.0",
+      elixir: "~> 1.7",
       description: "Ethereum's Recursive Length Prefix (RLP) encoding",
       package: [
         maintainers: ["Ayrat Badykov", "Geoffrey Hayes"],
@@ -15,7 +15,7 @@ defmodule ExRLP.Mixfile do
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      dialyzer: [ignore_warnings: ".dialyzer.ignore-warnings"],
+      dialyzer: [ignore_warnings: "../../.dialyzer.ignore-warnings"],
       elixirc_paths: elixirc_paths(Mix.env())
     ]
   end
@@ -24,12 +24,18 @@ defmodule ExRLP.Mixfile do
     [extra_applications: [:logger]]
   end
 
+  # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:credo, "~> 0.9.1", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.16", only: :dev, runtime: false},
-      {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
-      {:poison, "~> 3.1.0", only: [:dev, :test], runtime: false}
+      # Umbrella
+
+      # Libaries
+      {:poison, "~> 4.0.1", only: [:dev, :test]},
+
+      # Common
+      {:credo, "~> 0.10.2", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.0.0-rc.3", only: [:dev], runtime: false},
+      {:ex_doc, "~> 0.19.1", only: :dev, runtime: false},
     ]
   end
 

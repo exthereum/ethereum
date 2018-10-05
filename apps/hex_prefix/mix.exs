@@ -4,13 +4,13 @@ defmodule HexPrefix.Mixfile do
   def project do
     [
       app: :hex_prefix,
-      version: "0.1.0",
-      elixir: "~> 1.6",
+      version: "0.2.0",
+      elixir: "~> 1.7",
       description: "Ethereum's Hex Prefix encoding",
       package: [
         maintainers: ["Geoffrey Hayes", "Ayrat Badykov"],
         licenses: ["MIT"],
-        links: %{"GitHub" => "https://github.com/exthereum/hex_prefix"}
+        links: %{"GitHub" => "https://github.com/exthereum/ethereum"}
       ],
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -25,24 +25,17 @@ defmodule HexPrefix.Mixfile do
     [applications: [:logger]]
   end
 
-  # Dependencies can be Hex packages:
-  #
-  #   {:mydep, "~> 0.3.0"}
-  #
-  # Or git/path repositories:
-  #
-  #   {:mydep, git: "https://github.com/elixir-lang/mydep.git", tag: "0.1.0"}
-  #
-  # To depend on another app inside the umbrella:
-  #
-  #   {:myapp, in_umbrella: true}
-  #
-  # Type `mix help deps` for more examples and options
+  # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:credo, "~> 0.9", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.16", only: :dev, runtime: false},
-      {:dialyxir, "~> 0.5", only: [:dev], runtime: false}
+      # Umbrella
+
+      # Libaries
+
+      # Common
+      {:credo, "~> 0.10.2", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.0.0-rc.3", only: [:dev], runtime: false},
+      {:ex_doc, "~> 0.19.1", only: :dev, runtime: false},
     ]
   end
 end

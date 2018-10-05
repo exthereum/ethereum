@@ -4,13 +4,13 @@ defmodule ABI.Mixfile do
   def project do
     [
       app: :abi,
-      version: "0.1.12",
-      elixir: "~> 1.4",
+      version: "0.2.0",
+      elixir: "~> 1.7",
       description: "Ethereum's ABI Interface",
       package: [
         maintainers: ["Geoffrey Hayes", "Mason Fischer"],
         licenses: ["MIT"],
-        links: %{"GitHub" => "https://github.com/exthereum/abi"}
+        links: %{"GitHub" => "https://github.com/exthereum/ethereum"}
       ],
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -28,11 +28,16 @@ defmodule ABI.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:credo, "~>  0.9.1", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.14", only: :dev, runtime: false},
+      # Umbrella
+      {:exth_crypto, in_umbrella: true},
+
+      # Libraries
+      {:poison, "~> 4.0.1", only: [:dev, :test]},
+
+      # Common
+      {:credo, "~> 0.10.2", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0.0-rc.3", only: [:dev], runtime: false},
-      {:poison, "~> 3.1", only: [:dev, :test]},
-      {:exth_crypto, "~> 0.1.6"}
+      {:ex_doc, "~> 0.19.1", only: :dev, runtime: false},
     ]
   end
 end
