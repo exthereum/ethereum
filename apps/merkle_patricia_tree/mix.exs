@@ -5,6 +5,10 @@ defmodule MerklePatriciaTree.Mixfile do
     [
       app: :merkle_patricia_tree,
       version: "0.2.0",
+      build_path: "../../_build",
+      config_path: "../../config/config.exs",
+      deps_path: "../../deps",
+      lockfile: "../../mix.lock",
       elixir: "~> 1.7",
       description: "Ethereum's Merkle Patricia Trie data structure",
       package: [

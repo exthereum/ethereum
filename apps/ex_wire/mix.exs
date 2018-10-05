@@ -2,10 +2,15 @@ defmodule ExWire.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :ex_wire,
-     version: "0.2.0",
-     elixir: "~> 1.7",
-     description: "Elixir Client for Ethereum's RLPx, DevP2P and Eth Wire Protocol",
+    [
+      app: :ex_wire,
+      version: "0.2.0",
+      build_path: "../../_build",
+      config_path: "../../config/config.exs",
+      deps_path: "../../deps",
+      lockfile: "../../mix.lock",
+      elixir: "~> 1.7",
+      description: "Elixir Client for Ethereum's RLPx, DevP2P and Eth Wire Protocol",
       package: [
         maintainers: ["Mason Fischer", "Geoffrey Hayes", "Ayrat Badykov"],
         licenses: ["MIT"],

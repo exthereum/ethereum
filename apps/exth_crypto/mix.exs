@@ -2,18 +2,23 @@ defmodule ExthCrypto.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :exth_crypto,
-     version: "0.2.0",
-     elixir: "~> 1.7",
-     description: "Exthereum's Crypto Suite.",
+    [
+      app: :exth_crypto,
+      version: "0.2.0",
+      build_path: "../../_build",
+      config_path: "../../config/config.exs",
+      deps_path: "../../deps",
+      lockfile: "../../mix.lock",
+      elixir: "~> 1.7",
+      description: "Exthereum's Crypto Suite.",
       package: [
         maintainers: ["Geoffrey Hayes", "Mason Fischer"],
         licenses: ["MIT"],
         links: %{"GitHub" => "https://github.com/exthereum/ethereum"}
       ],
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     deps: deps()]
+      build_embedded: Mix.env == :prod,
+      start_permanent: Mix.env == :prod,
+      deps: deps()]
   end
 
   # Configuration for the OTP application
