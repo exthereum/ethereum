@@ -6,7 +6,7 @@ defmodule ExWire.Config do
   @port Application.get_env(:ex_wire, :port, 30303 + :rand.uniform(10_000))
   @private_key ( case Application.get_env(:ex_wire, :private_key) do
     key when is_binary(key) -> key
-    :random -> ExthCrypto.ECIES.ECDH.new_ecdh_keypair() |> Tuple.to_list() |> List.last
+    :random -> ExthCrypto.ECIES.ECDH.new_ecdh_key_pair() |> Tuple.to_list() |> List.last
   end )
   @public_key ( case ExthCrypto.Signature.get_public_key(@private_key) do
     {:ok, public_key} -> public_key

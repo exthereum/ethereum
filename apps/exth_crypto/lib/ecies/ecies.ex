@@ -46,7 +46,7 @@ defmodule ExthCrypto.ECIES do
     # First, create a new ephemeral key pair (SEC1 - §5.1.3 - Step 1)
     {my_ephemeral_public_key, my_ephemeral_private_key} = case my_ephemeral_key_pair do
       {my_ephemeral_public_key, my_ephemeral_private_key} -> {my_ephemeral_public_key, my_ephemeral_private_key}
-      nil -> ECDH.new_ecdh_keypair(@curve_name)
+      nil -> ECDH.new_ecdh_key_pair(@curve_name)
     end
 
     init_vector = if init_vector, do: init_vector, else: Cipher.generate_init_vector(key_len)

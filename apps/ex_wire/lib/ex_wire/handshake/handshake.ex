@@ -163,7 +163,7 @@ defmodule ExWire.Handshake do
   def build_auth_msg(my_static_public_key, my_static_private_key, her_static_public_key, nonce \\ nil, my_ephemeral_keypair \\ nil) do
 
     # Geneate a random ephemeral keypair
-    my_ephemeral_keypair = if my_ephemeral_keypair, do: my_ephemeral_keypair, else: ECDH.new_ecdh_keypair()
+    my_ephemeral_keypair = if my_ephemeral_keypair, do: my_ephemeral_keypair, else: ECDH.new_ecdh_key_pair()
 
     {_my_ephemeral_public_key, my_ephemeral_private_key} = my_ephemeral_keypair
 

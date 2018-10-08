@@ -8,9 +8,9 @@ defmodule ExthCrypto.Signature do
   functionality.
   """
 
-  @type signature :: binary()
-  @type r :: integer()
-  @type s :: integer()
+  @type signature :: <<_::512>>
+  @type r :: non_neg_integer()
+  @type s :: non_neg_integer()
   @type recovery_id :: integer()
 
   @doc """

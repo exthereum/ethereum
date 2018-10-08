@@ -6,13 +6,13 @@ defmodule ExthCrypto.ECIES.ECDH do
   @default_curve :secp256k1
 
   @doc """
-  Generates a new keypair for elliptic curve diffie-hellman.
+  Generates a new key_pair for elliptic curve diffie-hellman.
 
   These keys should be used as ephemeral keys in the key-exchange protocol.
 
   ## Examples
 
-      iex> {public_key, private_key} = ExthCrypto.ECIES.ECDH.new_ecdh_keypair()
+      iex> {public_key, private_key} = ExthCrypto.ECIES.ECDH.new_ecdh_key_pair()
       iex> byte_size(public_key)
       65
       iex> byte_size(private_key)
@@ -20,8 +20,8 @@ defmodule ExthCrypto.ECIES.ECDH do
       iex> {public_key, private_key} == :crypto.generate_key(:ecdh, :secp256k1, private_key)
       true
   """
-  @spec new_ecdh_keypair(ExthCrypto.named_curve) :: ExthCrypto.Key.keypair
-  def new_ecdh_keypair(curve \\ @default_curve) when is_atom(curve) do
+  @spec new_ecdh_key_pair(ExthCrypto.named_curve) :: ExthCrypto.Key.key_pair
+  def new_ecdh_key_pair(curve \\ @default_curve) when is_atom(curve) do
     :crypto.generate_key(:ecdh, curve)
   end
 
