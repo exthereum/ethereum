@@ -35,7 +35,7 @@ defmodule ExWire.Protocol do
     Crypto.hash(signed_message) <> signed_message
   end
 
-  @doc """
+  '''
   Returns a signed version of a message. This encodes
   the message type, the encoded message itself, and a signature
   for the message.
@@ -51,26 +51,27 @@ defmodule ExWire.Protocol do
       iex> signature = ExWire.Protocol.sign_message(message, ExthCrypto.Test.private_key())
       iex> ExthCrypto.Signature.verify(message |> ExWire.Message.encode |> ExWire.Crypto.hash, signature, ExthCrypto.Test.public_key())
       true
-  """
-  @spec sign_message(Message.t, Crypto.private_key) :: binary()
-  def sign_message(message, private_key) do
+  '''
+  @spec sign_message(Message.t, Crypto.private_key) :: <<_::520, _::_*8>>
+  defp sign_message(message, private_key) do
     message
       |> Message.encode()
       |> sign_binary(private_key)
   end
 
-  @doc """
+  '''
   Given a binary, returns an signed version encoded into a
   binary with signature, recovery id and the message itself.
 
+  512 bits signature + 8 bits recovery_id + (:erlang.size(value) * 8)
   ## Examples
 
       iex> signature = ExWire.Protocol.sign_binary("mace windu", ExthCrypto.Test.private_key())
       iex> ExthCrypto.Signature.verify(ExWire.Crypto.hash("mace windu"), signature, ExthCrypto.Test.public_key())
       true
-  """
-  @spec sign_binary(binary(), Crypto.private_key) :: binary()
-  def sign_binary(value, private_key) do
+  '''
+  @spec sign_binary(binary(), Crypto.private_key) :: <<_::520, _::_*8>>
+  defp sign_binary(value, private_key) do
     hashed_value = Crypto.hash(value)
 
     {signature, _r, _s, recovery_id} = ExthCrypto.Signature.sign_digest(hashed_value, private_key)

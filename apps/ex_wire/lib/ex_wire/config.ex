@@ -17,7 +17,7 @@ defmodule ExWire.Config do
   @p2p_version Application.get_env(:ex_wire, :p2p_version)
   @caps Application.get_env(:ex_wire, :caps)
   @version Mix.Project.config[:version]
-  @sync Application.get_env(:ex_wire, :sync)
+#  @sync
   @chain Application.get_env(:ex_wire, :chain) |> Blockchain.Chain.load_chain
   @bootnodes ( case Application.get_env(:ex_wire, :bootnodes) do
     nodes when is_list(nodes) -> nodes
@@ -65,7 +65,7 @@ defmodule ExWire.Config do
   def client_id, do: "Exthereum/#{@version}"
 
   @spec sync() :: boolean()
-  def sync, do: @sync
+  def sync, do: Application.get_env(:ex_wire, :sync)
 
   @spec bootnodes() :: [String.t]
   def bootnodes, do: @bootnodes

@@ -19,7 +19,13 @@ defmodule ExWire.Mixfile do
       elixirc_paths: elixirc_paths(Mix.env),
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
-      deps: deps()]
+      deps: deps(),
+      dialyzer: [
+        flags: [:underspecs, :unknown, :unmatched_returns],
+        plt_add_apps: [:mix, :iex, :logger],
+        plt_add_deps: :transitive
+      ]
+    ]
   end
 
   def application do

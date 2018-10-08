@@ -25,7 +25,7 @@ defmodule ExWire.Handshake.EIP8 do
   """
   @spec wrap_eip_8(ExRLP.t, ExthCrypto.Key.public_key, binary(), {ExthCrypto.Key.public_key, ExthCrypto.Key.private_key} | nil, Cipher.init_vector | nil) :: {:ok, binary()} | {:error, String.t}
   def wrap_eip_8(rlp, her_static_public_key, remote_addr, my_ephemeral_key_pair \\ nil, init_vector \\ nil) do
-    Logger.debug("[Network] Sending EIP8 Handshake to #{remote_addr}")
+    _ = Logger.debug("[Network] Sending EIP8 Handshake to #{remote_addr}")
 
     # According to EIP-8, we add padding to prevent length detection attacks. Thus, it should be
     # acceptable to pad with zero instead of random data. We opt for padding with zeros.
@@ -90,7 +90,7 @@ defmodule ExWire.Handshake.EIP8 do
   """
   @spec unwrap_eip_8(binary(), ExthCrypto.Key.private_key, binary()) :: {:ok, RLP.t, binary(), binary()} | {:error, String.t}
   def unwrap_eip_8(encoded_packet, my_static_private_key, remote_addr) do
-    Logger.debug("[Network] Received EIP8 Handshake from #{remote_addr}")
+    _ = Logger.debug("[Network] Received EIP8 Handshake from #{remote_addr}")
     <<auth_size_int::size(16), _::binary()>> = encoded_packet
 
     case encoded_packet do

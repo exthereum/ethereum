@@ -58,7 +58,7 @@ defmodule ExWire.Handshake.Struct.AuthMsgV4 do
   # TODO: Test
   # TODO: Multiple possible values and no recovery key?
   """
-  @spec set_remote_ephemeral_public_key(t, ExthCrypto.Key.private_key) :: t
+  @spec set_remote_ephemeral_public_key(t, ExthCrypto.Key.private_key()) :: t
   def set_remote_ephemeral_public_key(auth_msg, my_static_private_key) do
     shared_secret = ECDH.generate_shared_secret(my_static_private_key, auth_msg.remote_public_key)
     shared_secret_xor_nonce = :crypto.exor(shared_secret, auth_msg.remote_nonce)

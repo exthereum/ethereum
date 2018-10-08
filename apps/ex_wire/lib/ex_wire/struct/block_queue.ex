@@ -140,7 +140,7 @@ defmodule ExWire.Struct.BlockQueue do
       iex> block_queue.queue[1][<<1::256>>].block.ommers
       ["ommers"]
   """
-  @spec add_block_struct_to_block_queue(t, BlockStruct.t, Blocktree.t, Chain.t, MerklePatriciaTree.DB.db) :: t
+  @spec add_block_struct_to_block_queue(t, Blocktree.t, BlockStruct.t, Chain.t, MerklePatriciaTree.DB.db) :: t
   def add_block_struct_to_block_queue(block_queue=%__MODULE__{queue: queue}, block_tree, block_struct, chain, db) do
     transactions_root = get_transactions_root(block_struct.transactions_list)
     ommers_hash = get_ommers_hash(block_struct.ommers)
@@ -199,17 +199,17 @@ defmodule ExWire.Struct.BlockQueue do
     {remaining_block_queue, blocks} = get_complete_blocks(block_queue)
 
     block_tree = Enum.reduce(blocks, block_tree, fn block, block_tree ->
-      case Blockchain.Blocktree.verify_and_add_block(block_tree, chain, block, db, do_validation) do
+      case Blocktree.verify_and_add_block(block_tree, chain, block, db, do_validation) do
         :parent_not_found ->
-          Logger.debug("[Block Queue] Failed to verify block due to missing parent")
+          _ = Logger.debug("[Block Queue] Failed to verify block due to missing parent")
 
           block_tree
         {:invalid, reasons} ->
-          Logger.debug("[Block Queue] Failed to verify block due to #{inspect reasons}")
+          _ = Logger.debug("[Block Queue] Failed to verify block due to #{inspect reasons}")
 
           block_tree
         {:ok, new_block_tree} ->
-          Logger.debug("[Block Queue] Verified block and added to new block tree")
+          _ = Logger.debug("[Block Queue] Verified block and added to new block tree")
 
           new_block_tree
       end
