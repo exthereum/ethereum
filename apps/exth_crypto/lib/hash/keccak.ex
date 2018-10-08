@@ -76,5 +76,4 @@ defmodule ExthCrypto.Hash.Keccak do
   def final_mac(mac) do
     :keccakf1600.final(mac)
   end
-
 end

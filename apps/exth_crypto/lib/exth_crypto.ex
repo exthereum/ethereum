@@ -6,5 +6,4 @@ defmodule ExthCrypto do
   @type curve :: nil
   @type curve_params :: nil
   @type named_curve :: :crypto.ec_named_curve()
-
 end

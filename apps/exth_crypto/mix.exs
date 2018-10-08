@@ -16,9 +16,10 @@ defmodule ExthCrypto.Mixfile do
         licenses: ["MIT"],
         links: %{"GitHub" => "https://github.com/exthereum/ethereum"}
       ],
-      build_embedded: Mix.env == :prod,
-      start_permanent: Mix.env == :prod,
-      deps: deps()]
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
+      deps: deps()
+    ]
   end
 
   # Configuration for the OTP application
@@ -42,7 +43,7 @@ defmodule ExthCrypto.Mixfile do
       # Common
       {:credo, "~> 0.10.2", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0.0-rc.3", only: [:dev], runtime: false},
-      {:ex_doc, "~> 0.19.1", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.19.1", only: :dev, runtime: false}
     ]
   end
 end
