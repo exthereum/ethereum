@@ -190,11 +190,11 @@ defmodule EvmTest do
   end
 
   def test_directory_name(type) do
-    "test/support/ethereum_common_tests/VMTests/vm#{Macro.camelize(Atom.to_string(type))}"
+    "../../test/support/ethereum_common_tests/VMTests/vm#{Macro.camelize(Atom.to_string(type))}"
   end
 
   def test_file_name(group, name) do
-    "test/support/ethereum_common_tests/VMTests/vm#{Macro.camelize(Atom.to_string(group))}/#{name}.json"
+    "../../test/support/ethereum_common_tests/VMTests/vm#{Macro.camelize(Atom.to_string(group))}/#{name}.json"
   end
 
   def hex_to_binary(string) do

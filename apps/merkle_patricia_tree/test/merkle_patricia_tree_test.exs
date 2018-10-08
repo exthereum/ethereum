@@ -43,7 +43,7 @@ defmodule MerklePatriciaTreeTest do
   end
 
   def test_file_name(type) do
-    "test/support/ethereum_common_tests/TrieTests/trie#{Atom.to_string(type)}.json"
+    "../../test/support/ethereum_common_tests/TrieTests/trie#{Atom.to_string(type)}.json"
   end
 
   def maybe_hex(hex_string = "0x" <> _str), do: hex_to_binary(hex_string)

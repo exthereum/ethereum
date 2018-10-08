@@ -76,8 +76,7 @@ defmodule Blockchain.StateTest do
   end
 
   def state_test_file_name(type, test) do
-    System.cwd() <>
-      "/test/support/ethereum_common_tests/GeneralStateTests/#{Atom.to_string(type)}/#{test}.json"
+    "../../test/support/ethereum_common_tests/GeneralStateTests/#{Atom.to_string(type)}/#{test}.json"
   end
 
   def account_interface(test) do

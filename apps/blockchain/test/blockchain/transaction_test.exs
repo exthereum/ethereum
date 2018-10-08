@@ -8,124 +8,127 @@ defmodule Blockchain.TransactionTest do
   alias Blockchain.Transaction
   alias Blockchain.Transaction.Signature
 
+  # TODO: These eth common test cases have seemed to have moved or no longer
+  #       exist. We should add them back when we discover where they moved to.
+
   # Load filler data
   setup_all do
-    frontier_filler = load_src("TransactionTestsFiller", "ttTransactionTestFiller")
-    homestead_filler = load_src("TransactionTestsFiller/Homestead", "ttTransactionTestFiller")
+    # frontier_filler = load_src("TransactionTestsFiller", "ttTransactionTestFiller")
+    # homestead_filler = load_src("TransactionTestsFiller/Homestead", "ttTransactionTestFiller")
 
-    eip155_filler =
-      load_src("TransactionTestsFiller/EIP155", "ttTransactionTestEip155VitaliksTestsFiller")
+    # eip155_filler =
+    #   load_src("TransactionTestsFiller/EIP155", "ttTransactionTestEip155VitaliksTestsFiller")
 
     {:ok,
      %{
-       frontier_filler: frontier_filler,
-       homestead_filler: homestead_filler,
-       eip155_filler: eip155_filler
+       # frontier_filler: frontier_filler,
+       # homestead_filler: homestead_filler,
+       # eip155_filler: eip155_filler
      }}
   end
 
-  eth_test("TransactionTests", :ttTransactionTest, :all, fn test,
-                                                            test_subset,
-                                                            test_name,
-                                                            %{frontier_filler: filler} ->
-    trx_data = test["transaction"]
-    src_data = filler[test_name]
-    transaction = (trx_data || src_data["transaction"]) |> load_trx
+  # eth_test("TransactionTests", :ttTransactionTest, :all, fn test,
+  #                                                           test_subset,
+  #                                                           test_name,
+  #                                                           %{frontier_filler: filler} ->
+  #   trx_data = test["transaction"]
+  #   src_data = filler[test_name]
+  #   transaction = (trx_data || src_data["transaction"]) |> load_trx
 
-    if src_data["expect"] == "invalid" do
-      # TODO: Include checks of "invalid" tests
-      Logger.debug(fn ->
-        "Skipping `invalid` transaction test: TransactionTests - #{test_subset} - #{test_name}"
-      end)
+  #   if src_data["expect"] == "invalid" do
+  #     # TODO: Include checks of "invalid" tests
+  #     Logger.debug(fn ->
+  #       "Skipping `invalid` transaction test: TransactionTests - #{test_subset} - #{test_name}"
+  #     end)
 
-      nil
-    else
-      assert transaction |> Transaction.serialize() ==
-               test["rlp"] |> load_hex |> :binary.encode_unsigned() |> ExRLP.decode()
+  #     nil
+  #   else
+  #     assert transaction |> Transaction.serialize() ==
+  #              test["rlp"] |> load_hex |> :binary.encode_unsigned() |> ExRLP.decode()
 
-      if test["hash"],
-        do:
-          assert(
-            transaction |> Transaction.serialize() |> ExRLP.encode() |> BitHelper.kec() ==
-              test["hash"] |> maybe_hex
-          )
+  #     if test["hash"],
+  #       do:
+  #         assert(
+  #           transaction |> Transaction.serialize() |> ExRLP.encode() |> BitHelper.kec() ==
+  #             test["hash"] |> maybe_hex
+  #         )
 
-      if test["sender"],
-        do: assert(Signature.sender(transaction) == {:ok, test["sender"] |> maybe_hex})
-    end
-  end)
+  #     if test["sender"],
+  #       do: assert(Signature.sender(transaction) == {:ok, test["sender"] |> maybe_hex})
+  #   end
+  # end)
 
   # Test Homestead
-  eth_test("TransactionTests/Homestead", :ttTransactionTest, :all, fn test,
-                                                                      test_subset,
-                                                                      test_name,
-                                                                      %{homestead_filler: filler} ->
-    trx_data = test["transaction"]
-    src_data = filler[test_name]
-    transaction = (trx_data || src_data["transaction"]) |> load_trx
+  # eth_test("TransactionTests/Homestead", :ttTransactionTest, :all, fn test,
+  #                                                                     test_subset,
+  #                                                                     test_name,
+  #                                                                     %{homestead_filler: filler} ->
+  #   trx_data = test["transaction"]
+  #   src_data = filler[test_name]
+  #   transaction = (trx_data || src_data["transaction"]) |> load_trx
 
-    if src_data["expect"] == "invalid" do
-      # TODO: Include checks of "invalid" tests
-      Logger.debug(fn ->
-        "Skipping invalid transaction test: TransactionTests/Homestead - #{test_subset} - #{
-          test_name
-        }"
-      end)
+  #   if src_data["expect"] == "invalid" do
+  #     # TODO: Include checks of "invalid" tests
+  #     Logger.debug(fn ->
+  #       "Skipping invalid transaction test: TransactionTests/Homestead - #{test_subset} - #{
+  #         test_name
+  #       }"
+  #     end)
 
-      nil
-    else
-      assert transaction |> Transaction.serialize() ==
-               test["rlp"] |> load_hex |> :binary.encode_unsigned() |> ExRLP.decode()
+  #     nil
+  #   else
+  #     assert transaction |> Transaction.serialize() ==
+  #              test["rlp"] |> load_hex |> :binary.encode_unsigned() |> ExRLP.decode()
 
-      if test["hash"],
-        do:
-          assert(
-            transaction |> Transaction.serialize() |> ExRLP.encode() |> BitHelper.kec() ==
-              test["hash"] |> maybe_hex
-          )
+  #     if test["hash"],
+  #       do:
+  #         assert(
+  #           transaction |> Transaction.serialize() |> ExRLP.encode() |> BitHelper.kec() ==
+  #             test["hash"] |> maybe_hex
+  #         )
 
-      if test["sender"],
-        do: assert(Signature.sender(transaction) == {:ok, test["sender"] |> maybe_hex})
-    end
-  end)
+  #     if test["sender"],
+  #       do: assert(Signature.sender(transaction) == {:ok, test["sender"] |> maybe_hex})
+  #   end
+  # end)
 
   # Test EIP155
-  eth_test("TransactionTests/EIP155", :ttTransactionTestEip155VitaliksTests, :all, fn test,
-                                                                                      test_subset,
-                                                                                      test_name,
-                                                                                      %{
-                                                                                        eip155_filler:
-                                                                                          filler
-                                                                                      } ->
-    trx_data = test["transaction"]
-    src_data = filler[test_name]
-    transaction = (trx_data || src_data["transaction"]) |> load_trx
-    chain_id = 1
+  # eth_test("TransactionTests/EIP155", :ttTransactionTestEip155VitaliksTests, :all, fn test,
+  #                                                                                     test_subset,
+  #                                                                                     test_name,
+  #                                                                                     %{
+  #                                                                                       eip155_filler:
+  #                                                                                         filler
+  #                                                                                     } ->
+  #   trx_data = test["transaction"]
+  #   src_data = filler[test_name]
+  #   transaction = (trx_data || src_data["transaction"]) |> load_trx
+  #   chain_id = 1
 
-    if src_data["expect"] == "invalid" do
-      # TODO: Include checks of "invalid" tests
-      Logger.debug(fn ->
-        "Skipping invalid transaction test: TransactionTests/EIP555 - #{test_subset} - #{
-          test_name
-        }"
-      end)
+  #   if src_data["expect"] == "invalid" do
+  #     # TODO: Include checks of "invalid" tests
+  #     Logger.debug(fn ->
+  #       "Skipping invalid transaction test: TransactionTests/EIP555 - #{test_subset} - #{
+  #         test_name
+  #       }"
+  #     end)
 
-      nil
-    else
-      assert transaction |> Transaction.serialize() ==
-               test["rlp"] |> load_hex |> :binary.encode_unsigned() |> ExRLP.decode()
+  #     nil
+  #   else
+  #     assert transaction |> Transaction.serialize() ==
+  #              test["rlp"] |> load_hex |> :binary.encode_unsigned() |> ExRLP.decode()
 
-      if test["hash"],
-        do:
-          assert(
-            transaction |> Transaction.serialize(chain_id) |> ExRLP.encode() |> BitHelper.kec() ==
-              test["hash"] |> maybe_hex
-          )
+  #     if test["hash"],
+  #       do:
+  #         assert(
+  #           transaction |> Transaction.serialize(chain_id) |> ExRLP.encode() |> BitHelper.kec() ==
+  #             test["hash"] |> maybe_hex
+  #         )
 
-      if test["sender"],
-        do: assert(Signature.sender(transaction, chain_id) == {:ok, test["sender"] |> maybe_hex})
-    end
-  end)
+  #     if test["sender"],
+  #       do: assert(Signature.sender(transaction, chain_id) == {:ok, test["sender"] |> maybe_hex})
+  #   end
+  # end)
 
   describe "when handling transactions" do
     test "serialize and deserialize" do
