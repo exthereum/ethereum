@@ -77,7 +77,7 @@ defmodule ExWire.Packet.NewBlock do
       ...> |> ExWire.Packet.NewBlock.deserialize()
       %ExWire.Packet.NewBlock{
         block_header: %Block.Header{parent_hash: <<1::256>>, ommers_hash: <<2::256>>, beneficiary: <<3::160>>, state_root: <<4::256>>, transactions_root: <<5::256>>, receipts_root: <<6::256>>, logs_bloom: <<>>, difficulty: 5, number: 1, gas_limit: 5, gas_used: 3, timestamp: 6, extra_data: "Hi mom", mix_hash: <<7::256>>, nonce: <<8::64>>},
-        block: %ExWire.Struct.Block{transactions_list: [], ommers: []},
+        block: %ExWire.Struct.Block{transactions: [], ommers: [], transactions_list: []},
         total_difficulty: 10
       }
   """

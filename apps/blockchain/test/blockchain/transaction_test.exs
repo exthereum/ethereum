@@ -187,7 +187,7 @@ defmodule Blockchain.TransactionTest do
         })
 
       assert gas_used == 53004
-      assert logs == ""
+      assert logs == []
 
       assert Blockchain.Account.get_accounts(state, [sender, beneficiary, contract_address]) ==
                [
