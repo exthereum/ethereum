@@ -20,7 +20,12 @@ defmodule Ethereum.MixProject do
       ],
       apps_path: "apps",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      dialyzer: [
+        flags: [:underspecs, :unknown, :unmatched_returns],
+        plt_add_apps: [:mix, :iex, :logger],
+        plt_add_deps: :transitive
+      ]
     ]
   end
 
@@ -30,6 +35,7 @@ defmodule Ethereum.MixProject do
   #
   # Run "mix help deps" for examples and options.
   defp deps do
-    []
+    [{:credo, "~> 0.10.2", only: [:dev, :test], runtime: false},
+    {:dialyxir, "~> 1.0.0-rc.3", only: [:dev], runtime: false}]
   end
 end
