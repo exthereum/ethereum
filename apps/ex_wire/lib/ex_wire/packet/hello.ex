@@ -23,15 +23,15 @@ defmodule ExWire.Packet.Hello do
 
   @behaviour ExWire.Packet
 
-  @type cap :: {String.t, integer()}
+  @type cap :: {String.t(), integer()}
 
   @type t :: %__MODULE__{
-    p2p_version: integer(),
-    client_id: String.t,
-    caps: [cap],
-    listen_port: integer(),
-    node_id: ExWire.node_id
-  }
+          p2p_version: integer(),
+          client_id: String.t(),
+          caps: [cap],
+          listen_port: integer(),
+          node_id: ExWire.node_id()
+        }
 
   defstruct [
     :p2p_version,
@@ -51,15 +51,17 @@ defmodule ExWire.Packet.Hello do
       ...> |> Enum.take(5)
       [10, "Exthereum/Test", [["eth", 1], ["par", 2]], 5555, <<5>>]
   """
-  @spec serialize(t) :: ExRLP.t
-  def serialize(packet=%__MODULE__{}) do
+  @spec serialize(t) :: ExRLP.t()
+  def serialize(packet = %__MODULE__{}) do
     [
       packet.p2p_version,
       packet.client_id,
-      (for {cap, ver} <- packet.caps, do: [cap, ver]),
+      for({cap, ver} <- packet.caps, do: [cap, ver]),
       packet.listen_port,
       packet.node_id,
-      "#{ExWire.Config.local_ip() |> ExWire.Struct.Endpoint.ip_to_string}:#{ExWire.Config.listen_port()}"
+      "#{ExWire.Config.local_ip() |> ExWire.Struct.Endpoint.ip_to_string()}:#{
+        ExWire.Config.listen_port()
+      }"
     ]
   end
 
@@ -72,22 +74,30 @@ defmodule ExWire.Packet.Hello do
       iex> ExWire.Packet.Hello.deserialize([<<10>>, "Exthereum/Test", [["eth", <<1>>], ["par", <<2>>]], <<55>>, <<5>>])
       %ExWire.Packet.Hello{p2p_version: 10, client_id: "Exthereum/Test", caps: [{"eth", 1}, {"par", 2}], listen_port: 55, node_id: <<5>>}
   """
-  @spec deserialize(ExRLP.t) :: t
+  @spec deserialize(ExRLP.t()) :: t
   def deserialize(rlp) do
     [
-      p2p_version |
-      [client_id |
-      [caps |
-      [listen_port |
-      [node_id |
-      _rest
-    ]]]]] = rlp
+      p2p_version
+      | [
+          client_id
+          | [
+              caps
+              | [
+                  listen_port
+                  | [
+                      node_id
+                      | _rest
+                    ]
+                ]
+            ]
+        ]
+    ] = rlp
 
     %__MODULE__{
-      p2p_version: p2p_version |> :binary.decode_unsigned,
+      p2p_version: p2p_version |> :binary.decode_unsigned(),
       client_id: client_id,
-      caps: (for [cap, ver] <- caps, do: {cap, ver |> :binary.decode_unsigned}),
-      listen_port: listen_port |> :binary.decode_unsigned,
+      caps: for([cap, ver] <- caps, do: {cap, ver |> :binary.decode_unsigned()}),
+      listen_port: listen_port |> :binary.decode_unsigned(),
       node_id: node_id
     }
   end
@@ -107,15 +117,18 @@ defmodule ExWire.Packet.Hello do
       ...> |> ExWire.Packet.Hello.handle()
       {:disconnect, :useless_peer}
   """
-  @spec handle(ExWire.Packet.packet) :: ExWire.Packet.handle_response
-  def handle(packet=%__MODULE__{}) do
-    _ = if System.get_env("TRACE"), do: _ = Logger.debug("[Packet] Got Hello: #{inspect packet}")
+  @spec handle(ExWire.Packet.packet()) :: ExWire.Packet.handle_response()
+  def handle(packet = %__MODULE__{}) do
+    _ = if System.get_env("TRACE"), do: _ = Logger.debug("[Packet] Got Hello: #{inspect(packet)}")
 
     if packet.caps == [] do
-      _ = Logger.debug("[Packet] Disconnecting due to no matching peer caps (#{inspect packet.caps})")
+      _ =
+        Logger.debug(
+          "[Packet] Disconnecting due to no matching peer caps (#{inspect(packet.caps)})"
+        )
+
       {:disconnect, :useless_peer}
     else
-
       # TODO: Add a bunch more checks
       :activate
     end

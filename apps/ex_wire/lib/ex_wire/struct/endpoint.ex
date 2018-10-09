@@ -3,20 +3,18 @@ defmodule ExWire.Struct.Endpoint do
   Struct to represent an endpoint in ExWire.
   """
 
-  defstruct [
-    ip: nil,
-    udp_port: nil,
-    tcp_port: nil
-  ]
+  defstruct ip: nil,
+            udp_port: nil,
+            tcp_port: nil
 
-  @type ip :: :inet.ip_address
+  @type ip :: :inet.ip_address()
   @type ip_port :: non_neg_integer()
 
   @type t :: %__MODULE__{
-    ip: ip,
-    udp_port: ip_port | nil,
-    tcp_port: ip_port | nil
-  }
+          ip: ip,
+          udp_port: ip_port | nil,
+          tcp_port: ip_port | nil
+        }
 
   @doc """
   Returns a struct given an `ip` in binary form, plus an
@@ -31,12 +29,12 @@ defmodule ExWire.Struct.Endpoint do
         tcp_port: 5,
       }
   """
-  @spec decode(ExRLP.t) :: t
+  @spec decode(ExRLP.t()) :: t
   def decode([ip, udp_port, tcp_port]) do
     %__MODULE__{
       ip: decode_ip(ip),
       udp_port: decode_port(udp_port),
-      tcp_port: decode_port(tcp_port),
+      tcp_port: decode_port(tcp_port)
     }
   end
 
@@ -61,10 +59,14 @@ defmodule ExWire.Struct.Endpoint do
   @spec decode_ip(binary()) :: ip
   def decode_ip(data) do
     case data do
-      <<>> -> {}
-      <<p_0, p_1, p_2, p_3>> -> {p_0, p_1, p_2, p_3}
-      <<p_0::16, p_1::16, p_2::16, p_3::16,
-        p_4::16, p_5::16, p_6::16, p_7::16>> -> {p_0, p_1, p_2, p_3, p_4, p_5, p_6, p_7}
+      <<>> ->
+        {}
+
+      <<p_0, p_1, p_2, p_3>> ->
+        {p_0, p_1, p_2, p_3}
+
+      <<p_0::16, p_1::16, p_2::16, p_3::16, p_4::16, p_5::16, p_6::16, p_7::16>> ->
+        {p_0, p_1, p_2, p_3, p_4, p_5, p_6, p_7}
     end
   end
 
@@ -105,12 +107,12 @@ defmodule ExWire.Struct.Endpoint do
       iex> ExWire.Struct.Endpoint.encode(%ExWire.Struct.Endpoint{ip: {1, 2, 3, 4}, udp_port: nil, tcp_port: 5})
       [<<1, 2, 3, 4>>, <<>>, <<0, 5>>]
   """
-  @spec encode(t) :: ExRLP.t
+  @spec encode(t) :: ExRLP.t()
   def encode(%__MODULE__{ip: ip, tcp_port: tcp_port, udp_port: udp_port}) do
     [
       encode_ip(ip),
       encode_port(udp_port),
-      encode_port(tcp_port),
+      encode_port(tcp_port)
     ]
   end
 
@@ -132,16 +134,15 @@ defmodule ExWire.Struct.Endpoint do
   @spec encode_ip(ip) :: binary()
   def encode_ip(ip) do
     case ip do
-      {p_0, p_1, p_2, p_3} -> <<p_0, p_1, p_2, p_3>>
+      {p_0, p_1, p_2, p_3} ->
+        <<p_0, p_1, p_2, p_3>>
+
       {p_0, p_1, p_2, p_3, p_4, p_5, p_6, p_7} ->
         encode_word(p_0) <>
-        encode_word(p_1) <>
-        encode_word(p_2) <>
-        encode_word(p_3) <>
-        encode_word(p_4) <>
-        encode_word(p_5) <>
-        encode_word(p_6) <>
-        encode_word(p_7)
+          encode_word(p_1) <>
+          encode_word(p_2) <>
+          encode_word(p_3) <>
+          encode_word(p_4) <> encode_word(p_5) <> encode_word(p_6) <> encode_word(p_7)
     end
   end
 
@@ -163,7 +164,7 @@ defmodule ExWire.Struct.Endpoint do
   def encode_port(port) do
     case port do
       nil -> <<>>
-      _ -> port |> :binary.encode_unsigned |> ExthCrypto.Math.pad(2)
+      _ -> port |> :binary.encode_unsigned() |> ExthCrypto.Math.pad(2)
     end
   end
 
@@ -186,7 +187,7 @@ defmodule ExWire.Struct.Endpoint do
   end
 
   defp encode_word(word) do
-    case word |> :binary.encode_unsigned do
+    case word |> :binary.encode_unsigned() do
       <<single_byte::binary-size(1)>> -> <<0>> <> single_byte
       <<double_byte::binary-size(2)>> -> double_byte
     end

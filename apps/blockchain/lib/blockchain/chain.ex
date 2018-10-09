@@ -51,8 +51,8 @@ defmodule Blockchain.Chain do
             parent_hash: EVM.hash(),
             extra_data: binary(),
             gas_limit: EVM.Gas.t()
-            #mix_hash: binary(),
-            #nonce: binary()
+            # mix_hash: binary(),
+            # nonce: binary()
           },
           nodes: [String.t()],
           accounts: %{
@@ -66,7 +66,6 @@ defmodule Blockchain.Chain do
             }
           }
         }
-
 
   @doc """
   Loads a given blockchain, such as Homestead or Ropsten. This

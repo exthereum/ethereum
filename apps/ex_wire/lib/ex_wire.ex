@@ -18,32 +18,36 @@ defmodule ExWire do
     name = Keyword.get(args, :name, ExWire)
 
     sync_children =
-      case ExWire.Config.sync do
+      case ExWire.Config.sync() do
         true ->
-        # TODO: Replace with level db
-        db = MerklePatriciaTree.Test.random_ets_db()
+          # TODO: Replace with level db
+          db = MerklePatriciaTree.Test.random_ets_db()
 
-        [
-          worker(ExWire.Discovery, [ExWire.Config.bootnodes]),
-          worker(ExWire.PeerSupervisor, [:ok]),
-          worker(ExWire.Sync, [db])
-        ]
-    _ -> []
-    end
+          [
+            worker(ExWire.Discovery, [ExWire.Config.bootnodes()]),
+            worker(ExWire.PeerSupervisor, [:ok]),
+            worker(ExWire.Sync, [db])
+          ]
 
-    discovery
-     =
-      case ExWire.Config.sync do
+        _ ->
+          []
+      end
+
+    discovery =
+      case ExWire.Config.sync() do
         true -> ExWire.Discovery
         _ -> nil
       end
 
-    children = [
-      worker(network_adapter, [{ExWire.Network, [discovery]}, port], name: ExWire.Network, restart: :permanent),
-    ] ++ sync_children
+    children =
+      [
+        worker(network_adapter, [{ExWire.Network, [discovery]}, port],
+          name: ExWire.Network,
+          restart: :permanent
+        )
+      ] ++ sync_children
 
     opts = [strategy: :one_for_one, name: name]
     Supervisor.start_link(children, opts)
   end
-
 end

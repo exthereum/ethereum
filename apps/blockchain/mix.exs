@@ -46,7 +46,7 @@ defmodule Blockchain.Mixfile do
       # Common
       {:credo, "~> 0.10.2", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0.0-rc.3", only: [:dev], runtime: false},
-      {:ex_doc, "~> 0.19.1", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.19.1", only: :dev, runtime: false}
     ]
   end
 end

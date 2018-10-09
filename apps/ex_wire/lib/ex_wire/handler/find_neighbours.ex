@@ -23,20 +23,21 @@ defmodule ExWire.Handler.FindNeighbours do
         timestamp: 7,
       }}
   """
-  @spec handle(Handler.Params.t, identifier | nil) :: Handler.handler_response
+  @spec handle(Handler.Params.t(), identifier | nil) :: Handler.handler_response()
   def handle(params, discovery) do
     find_neighbours = ExWire.Message.FindNeighbours.decode(params.data)
 
-    nodes = if discovery do
-      ExWire.Discovery.get_neighbours(discovery, find_neighbours.target)
-    else
-      []
-    end
+    nodes =
+      if discovery do
+        ExWire.Discovery.get_neighbours(discovery, find_neighbours.target)
+      else
+        []
+      end
 
-    {:respond, %ExWire.Message.Neighbours{
-      nodes: nodes,
-      timestamp: params.timestamp,
-    }}
+    {:respond,
+     %ExWire.Message.Neighbours{
+       nodes: nodes,
+       timestamp: params.timestamp
+     }}
   end
-
 end

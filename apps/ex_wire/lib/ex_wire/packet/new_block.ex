@@ -21,10 +21,10 @@ defmodule ExWire.Packet.NewBlock do
   @behaviour ExWire.Packet
 
   @type t :: %__MODULE__{
-    block_header: Header.t,
-    block: Block.t,
-    total_difficulty: integer()
-  }
+          block_header: Header.t(),
+          block: Block.t(),
+          total_difficulty: integer()
+        }
 
   defstruct [
     :block_header,
@@ -50,8 +50,8 @@ defmodule ExWire.Packet.NewBlock do
         100000
       ]
   """
-  @spec serialize(t) :: ExRLP.t
-  def serialize(packet=%__MODULE__{}) do
+  @spec serialize(t) :: ExRLP.t()
+  def serialize(packet = %__MODULE__{}) do
     [trx_list, ommers] = Block.serialize(packet.block)
 
     [
@@ -81,7 +81,7 @@ defmodule ExWire.Packet.NewBlock do
         total_difficulty: 10
       }
   """
-  @spec deserialize(ExRLP.t) :: t
+  @spec deserialize(ExRLP.t()) :: t
   def deserialize(rlp) do
     [
       block_header,
@@ -93,7 +93,7 @@ defmodule ExWire.Packet.NewBlock do
     %__MODULE__{
       block_header: Header.deserialize(block_header),
       block: Block.deserialize([trx_list, ommers]),
-      total_difficulty: total_difficulty |> :binary.decode_unsigned
+      total_difficulty: total_difficulty |> :binary.decode_unsigned()
     }
   end
 
@@ -110,11 +110,15 @@ defmodule ExWire.Packet.NewBlock do
       ...> |> ExWire.Packet.NewBlock.handle()
       :ok
   """
-  @spec handle(ExWire.Packet.packet) :: ExWire.Packet.handle_response
-  def handle(packet=%__MODULE__{}) do
-    _ = Logger.debug("[Packet] Peer sent new block with hash #{packet.block_header |> Header.hash |> ExthCrypto.Math.bin_to_hex}")
+  @spec handle(ExWire.Packet.packet()) :: ExWire.Packet.handle_response()
+  def handle(packet = %__MODULE__{}) do
+    _ =
+      Logger.debug(
+        "[Packet] Peer sent new block with hash #{
+          packet.block_header |> Header.hash() |> ExthCrypto.Math.bin_to_hex()
+        }"
+      )
 
     :ok
   end
-
 end

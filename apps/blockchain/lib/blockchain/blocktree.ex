@@ -175,15 +175,21 @@ defmodule Blockchain.Blocktree do
         {:ok, parent} -> parent
         :not_found -> :parent_not_found
       end
+
     case parent do
       :parent_not_found -> :parent_not_found
       _ -> do_verify_and_add_block(blocktree, chain, block, db, do_validate, parent)
     end
-
   end
 
-  @spec do_verify_and_add_block(t, Chain.t(), Block.t(), MerklePatriciaTree.DB.db(), boolean(), nil |Block.t()) ::
-          {:ok, t} | {:invalid, [atom()]}
+  @spec do_verify_and_add_block(
+          t,
+          Chain.t(),
+          Block.t(),
+          MerklePatriciaTree.DB.db(),
+          boolean(),
+          nil | Block.t()
+        ) :: {:ok, t} | {:invalid, [atom()]}
   defp do_verify_and_add_block(blocktree, chain, block, db, do_validate, parent) do
     validation = if do_validate, do: Block.is_fully_valid?(block, chain, parent, db), else: :valid
 
@@ -194,9 +200,12 @@ defmodule Blockchain.Blocktree do
         block = %{block | block_hash: block_hash}
 
         {:ok, add_block(blocktree, block)}
-      _ -> validation
+
+      _ ->
+        validation
     end
   end
+
   @doc """
   Adds a block to our complete block tree. We should perform this action
   only after we've verified the block is valid.

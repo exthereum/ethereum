@@ -30,15 +30,15 @@ defmodule ExWire.Handler.Ping do
         }
       }}
   """
-  @spec handle(Handler.Params.t, identifier() | nil) :: Handler.handler_response
+  @spec handle(Handler.Params.t(), identifier() | nil) :: Handler.handler_response()
   def handle(params, _discovery) do
     ping = Ping.decode(params.data)
 
-    {:respond, %Pong{
-      to: ping.from,
-      hash: params.hash,
-      timestamp: params.timestamp,
-    }}
+    {:respond,
+     %Pong{
+       to: ping.from,
+       hash: params.hash,
+       timestamp: params.timestamp
+     }}
   end
-
 end

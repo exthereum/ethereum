@@ -17,19 +17,17 @@ defmodule ExWire.Network do
     Struct to define an inbound message from a remote peer
     """
 
-    defstruct [
-      data: nil,
-      server_pid: nil,
-      remote_host: nil,
-      timestamp: nil
-    ]
+    defstruct data: nil,
+              server_pid: nil,
+              remote_host: nil,
+              timestamp: nil
 
     @type t :: %__MODULE__{
-      data: binary(),
-      server_pid: pid(),
-      remote_host: ExWire.Struct.Endpoint.t,
-      timestamp: integer()
-    }
+            data: binary(),
+            server_pid: pid(),
+            remote_host: ExWire.Struct.Endpoint.t(),
+            timestamp: integer()
+          }
   end
 
   @type receiver_handler_action :: {:sent_message, ExWire.Message.handlers()} | :no_action
@@ -70,8 +68,11 @@ defmodule ExWire.Network do
       ...> }, nil)
       ** (ExWire.Crypto.HashMismatch) Invalid hash
   """
-  @spec receive(InboundMessage.t, identifier() | nil) :: receiver_handler_action
-  def receive(inbound_message=%InboundMessage{data: data, server_pid: server_pid}, discovery_pid) do
+  @spec receive(InboundMessage.t(), identifier() | nil) :: receiver_handler_action
+  def receive(
+        inbound_message = %InboundMessage{data: data, server_pid: server_pid},
+        discovery_pid
+      ) do
     :ok = assert_integrity(data)
 
     inbound_message
@@ -91,8 +92,9 @@ defmodule ExWire.Network do
       iex> ExWire.Network.assert_integrity(<<1::256>> <> "hi mom")
       ** (ExWire.Crypto.HashMismatch) Invalid hash
   '''
+
   @spec assert_integrity(binary()) :: :ok
-  defp assert_integrity(<< hash :: size(256), payload :: bits >>) do
+  defp assert_integrity(<<hash::size(256), payload::bits>>) do
     Crypto.assert_hash(payload, <<hash::256>>)
   end
 
@@ -135,30 +137,32 @@ defmodule ExWire.Network do
       iex> params.type
       255
   '''
-  @spec get_params(InboundMessage.t) :: Handler.Params.t
+
+  @spec get_params(InboundMessage.t()) :: Handler.Params.t()
   defp get_params(%InboundMessage{
-    data: <<
-      hash :: binary-size(32),
-      signature :: binary-size(64),
-      recovery_id:: integer-size(8),
-      type:: binary-size(1),
-      data :: bitstring
-    >>,
-    remote_host: remote_host,
-    timestamp: timestamp
-  }) do
+         data: <<
+           hash::binary-size(32),
+           signature::binary-size(64),
+           recovery_id::integer-size(8),
+           type::binary-size(1),
+           data::bitstring
+         >>,
+         remote_host: remote_host,
+         timestamp: timestamp
+       }) do
     # Recover public key
-    {:ok, node_id} = ExthCrypto.Signature.recover(Crypto.hash(type <> data), signature, recovery_id)
+    {:ok, node_id} =
+      ExthCrypto.Signature.recover(Crypto.hash(type <> data), signature, recovery_id)
 
     %Handler.Params{
       remote_host: remote_host,
       signature: signature,
       recovery_id: recovery_id,
       hash: hash,
-      type: type |> :binary.decode_unsigned,
+      type: type |> :binary.decode_unsigned(),
       data: data,
       timestamp: timestamp,
-      node_id: node_id |> ExthCrypto.Key.der_to_raw
+      node_id: node_id |> ExthCrypto.Key.der_to_raw()
     }
   end
 
@@ -194,10 +198,14 @@ defmodule ExWire.Network do
       ...> |> ExWire.Network.dispatch_handler(nil, nil)
       :no_action
   '''
-  @spec dispatch_handler(Handler.Params.t, identifier(), identifier() | nil) :: receiver_handler_action
+
+  @spec dispatch_handler(Handler.Params.t(), identifier(), identifier() | nil) ::
+          receiver_handler_action
   defp dispatch_handler(params, server_pid, discovery_pid) do
     case Handler.dispatch(params.type, params, discovery_pid) do
-      :no_response -> :no_action
+      :no_response ->
+        :no_action
+
       {:respond, response_message} ->
         # TODO: This is a simple way to determine who to send the message to,
         #       but we may want to revise.
@@ -233,20 +241,27 @@ defmodule ExWire.Network do
         }
       }
   """
-  @spec send(ExWire.Message.t, identifier(), ExWire.Struct.Endpoint.t) :: sender_handler_action
+  @spec send(ExWire.Message.t(), identifier(), ExWire.Struct.Endpoint.t()) ::
+          sender_handler_action
   def send(message, server_pid, to) do
-    _ = Logger.debug("[Network] Sending #{to_string(message.__struct__)} message to #{to.ip |> Endpoint.ip_to_string}")
+    _ =
+      Logger.debug(
+        "[Network] Sending #{to_string(message.__struct__)} message to #{
+          to.ip |> Endpoint.ip_to_string()
+        }"
+      )
 
-    :ok = GenServer.cast(
-      server_pid,
-      {
-        :send,
-        %{
-          to: to,
-          data: Protocol.encode(message, ExWire.Config.private_key()),
+    :ok =
+      GenServer.cast(
+        server_pid,
+        {
+          :send,
+          %{
+            to: to,
+            data: Protocol.encode(message, ExWire.Config.private_key())
+          }
         }
-      }
-    )
+      )
 
     {:sent_message, message.__struct__}
   end

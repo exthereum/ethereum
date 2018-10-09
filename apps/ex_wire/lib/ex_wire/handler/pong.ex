@@ -21,7 +21,7 @@ defmodule ExWire.Handler.Pong do
       ...> }, nil)
       :no_response
   """
-  @spec handle(Handler.Params.t, identifier() | nil) :: Handler.handler_response
+  @spec handle(Handler.Params.t(), identifier() | nil) :: Handler.handler_response()
   def handle(params, discovery) do
     _pong = Pong.decode(params.data)
 
@@ -29,5 +29,4 @@ defmodule ExWire.Handler.Pong do
 
     :no_response
   end
-
 end
