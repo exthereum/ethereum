@@ -140,7 +140,7 @@ defmodule ExWire.Struct.BlockQueue do
       iex> block_queue.queue[1][<<1::256>>].block.ommers
       ["ommers"]
   """
-  @spec add_block_struct_to_block_queue(t, Blocktree.t, BlockStruct.t, Chain.t, MerklePatriciaTree.DB.db) :: t
+  @spec add_block_struct_to_block_queue(t, Blocktree.t, BlockStruct.t, Chain.t, MerklePatriciaTree.DB.db) :: {t, Blocktree.t}
   def add_block_struct_to_block_queue(block_queue=%__MODULE__{queue: queue}, block_tree, block_struct, chain, db) do
     transactions_root = get_transactions_root(block_struct.transactions_list)
     ommers_hash = get_ommers_hash(block_struct.ommers)

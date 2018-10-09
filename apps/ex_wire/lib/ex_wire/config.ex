@@ -12,7 +12,7 @@ defmodule ExWire.Config do
     {:ok, public_key} -> public_key
   end )
   @node_id @public_key |> ExthCrypto.Key.der_to_raw
-  @protocol_version Application.get_env(:ex_wire, :protocol_version)
+
   @network_id Application.get_env(:ex_wire, :network_id)
   @p2p_version Application.get_env(:ex_wire, :p2p_version)
   @caps Application.get_env(:ex_wire, :caps)
@@ -50,7 +50,7 @@ defmodule ExWire.Config do
   def listen_port, do: @port
 
   @spec protocol_version() :: integer()
-  def protocol_version, do: @protocol_version
+  def protocol_version, do: Application.get_env(:ex_wire, :protocol_version)
 
   @spec network_id() :: integer()
   def network_id, do: @network_id
@@ -80,6 +80,6 @@ defmodule ExWire.Config do
   def local_ip, do: @local_ip
 
   @spec use_nat() :: boolean()
-  def use_nat, do: @use_nat
+  def use_nat, do: false
 
 end

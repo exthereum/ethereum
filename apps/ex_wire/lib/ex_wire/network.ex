@@ -32,7 +32,7 @@ defmodule ExWire.Network do
     }
   end
 
-  @type handler_action :: :no_action | {:sent_message, atom()}
+  @type handler_action :: {:sent_message, ExWire.Message.t()} | :no_action
 
   @doc """
   Top-level receiver function to process an incoming message.
@@ -196,7 +196,6 @@ defmodule ExWire.Network do
   @spec dispatch_handler(Handler.Params.t, identifier(), identifier() | nil) :: handler_action
   def dispatch_handler(params, server_pid, discovery_pid) do
     case Handler.dispatch(params.type, params, discovery_pid) do
-      :not_implemented -> :no_action
       :no_response -> :no_action
       {:respond, response_message} ->
         # TODO: This is a simple way to determine who to send the message to,
@@ -235,7 +234,7 @@ defmodule ExWire.Network do
   """
   @spec send(ExWire.Message.t, identifier(), ExWire.Struct.Endpoint.t) :: handler_action
   def send(message, server_pid, to) do
-    Logger.debug("[Network] Sending #{to_string(message.__struct__)} message to #{to.ip |> Endpoint.ip_to_string}")
+    _ = Logger.debug("[Network] Sending #{to_string(message.__struct__)} message to #{to.ip |> Endpoint.ip_to_string}")
 
     GenServer.cast(
       server_pid,

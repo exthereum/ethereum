@@ -154,7 +154,7 @@ defmodule ExWire.Packet.Disconnect do
   """
   @spec handle(ExWire.Packet.packet) :: ExWire.Packet.handle_response
   def handle(packet=%__MODULE__{}) do
-    Logger.info("[Packet] Peer asked to disconnect for #{get_reason_msg(packet.reason) || packet.reason}.")
+    _ = Logger.info("[Packet] Peer asked to disconnect for #{get_reason_msg(packet.reason)}.")
 
     :peer_disconnect
   end

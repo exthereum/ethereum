@@ -6,8 +6,8 @@ defmodule ExWire.Packet do
   """
 
   alias ExWire.Packet
-  alias ExWire.Packet.Transactions
-  @type packet :: Transactions.t()
+
+  @type packet :: Packet.Hello.t() | Packet.Disconnect.t() | Packet.Ping.t() | Packet.Pong.t() | Packet.Status.t() | Packet.NewBlockHashes.t() | Packet.Transactions.t() | Packet.GetBlockHeaders.t() | Packet.BlockHeaders.t() | Packet.GetBlockBodies.t() | Packet.BlockBodies.t() | Packet.NewBlock.t()
   @type block_identifier :: binary() | integer()
   @type block_hash :: {binary(), integer()}
 
