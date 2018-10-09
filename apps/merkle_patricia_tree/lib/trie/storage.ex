@@ -10,7 +10,7 @@ defmodule MerklePatriciaTree.Trie.Storage do
 
   @max_rlp_len 32
 
-  @spec max_rlp_len() :: integer()
+  @spec max_rlp_len() :: 32
   def max_rlp_len(), do: @max_rlp_len
 
   @doc """

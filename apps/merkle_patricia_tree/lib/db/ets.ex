@@ -14,7 +14,7 @@ defmodule MerklePatriciaTree.DB.ETS do
   """
   @spec init(DB.db_name()) :: DB.db()
   def init(db_name) do
-    :ets.new(db_name, [:set, :public, :named_table])
+    ^db_name = :ets.new(db_name, [:set, :public, :named_table])
 
     {__MODULE__, db_name}
   end

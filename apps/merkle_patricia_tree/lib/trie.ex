@@ -10,7 +10,7 @@ defmodule MerklePatriciaTree.Trie do
 
   defstruct db: nil, root_hash: nil
 
-  @type root_hash :: binary()
+  @type root_hash :: <<_::256>>
 
   @type t :: %__MODULE__{
           db: DB.db(),
@@ -60,7 +60,7 @@ defmodule MerklePatriciaTree.Trie do
     iex> db
     MerklePatriciaTree.DB.LevelDB
   """
-  @spec new(DB.db(), root_hash) :: __MODULE__.t()
+  @spec new(DB.db(), root_hash | binary()) :: __MODULE__.t()
   def new(db = {_, _}, root_hash \\ @empty_trie) do
     %__MODULE__{db: db, root_hash: root_hash} |> store
   end
@@ -157,7 +157,7 @@ defmodule MerklePatriciaTree.Trie do
     |> store
   end
 
-  def store(trie) do
+  defp store(trie) do
     root_hash =
       if not is_binary(trie.root_hash) or trie.root_hash == <<>>,
         do: ExRLP.encode(trie.root_hash),
