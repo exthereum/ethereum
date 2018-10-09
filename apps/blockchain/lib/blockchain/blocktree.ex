@@ -99,7 +99,7 @@ defmodule Blockchain.Blocktree do
       ...> |> Blockchain.Blocktree.get_canonical_block()
       %Blockchain.Block{block_hash: <<41>>, header: %Block.Header{difficulty: 129, number: 8, parent_hash: <<30>>}}
   """
-  @spec get_canonical_block(t) :: Block.t()
+  @spec get_canonical_block(t) :: :root | Block.t()
   def get_canonical_block(blocktree) do
     case Enum.count(blocktree.children) do
       0 ->
@@ -170,23 +170,33 @@ defmodule Blockchain.Blocktree do
           {:ok, t} | :parent_not_found | {:invalid, [atom()]}
   def verify_and_add_block(blocktree, chain, block, db, do_validate \\ true) do
     parent =
-      case Blockchain.Block.get_parent_block(block, db) do
+      case Block.get_parent_block(block, db) do
         :genesis -> nil
         {:ok, parent} -> parent
         :not_found -> :parent_not_found
       end
-
-    validation = if do_validate, do: Block.is_fully_valid?(block, chain, parent, db), else: :valid
-
-    with :valid <- validation do
-      {:ok, block_hash} = Block.put_block(block, db)
-      # Cache computed block hash
-      block = %{block | block_hash: block_hash}
-
-      {:ok, add_block(blocktree, block)}
+    case parent do
+      :parent_not_found -> :parent_not_found
+      _ -> do_verify_and_add_block(blocktree, chain, block, db, do_validate, parent)
     end
+
   end
 
+  @spec do_verify_and_add_block(t, Chain.t(), Block.t(), MerklePatriciaTree.DB.db(), boolean(), nil |Block.t()) ::
+          {:ok, t} | {:invalid, [atom()]}
+  defp do_verify_and_add_block(blocktree, chain, block, db, do_validate, parent) do
+    validation = if do_validate, do: Block.is_fully_valid?(block, chain, parent, db), else: :valid
+
+    case validation do
+      :valid ->
+        {:ok, block_hash} = Block.put_block(block, db)
+        # Cache computed block hash
+        block = %{block | block_hash: block_hash}
+
+        {:ok, add_block(blocktree, block)}
+      _ -> validation
+    end
+  end
   @doc """
   Adds a block to our complete block tree. We should perform this action
   only after we've verified the block is valid.

@@ -14,16 +14,16 @@ defmodule ExWire.PeerSupervisor do
 
   @name __MODULE__
 
-  def start_link(:ok) do
+  def start_link(_opts) do
     Supervisor.start_link(__MODULE__, :ok, name: @name)
   end
 
-  def init(:ok) do
+  def init(_args) do
     children = [
       worker(ExWire.Adapter.TCP, [], restart: :transient)
     ]
 
-    Supervisor.init(children, strategy: :simple_one_for_one)
+    supervise(children, strategy: :simple_one_for_one)
   end
 
   @doc """
@@ -44,7 +44,7 @@ defmodule ExWire.PeerSupervisor do
   Informs our peer supervisor a new neighbour that we should connect to.
   """
   def connect(neighbour) do
-    Logger.debug("[Peer Supervisor] Starting TCP connection to neighbour #{neighbour.endpoint.ip |> ExWire.Struct.Endpoint.ip_to_string}:#{neighbour.endpoint.tcp_port} (#{neighbour.node |> ExthCrypto.Math.bin_to_hex})")
+    _ = Logger.debug("[Peer Supervisor] Starting TCP connection to neighbour #{neighbour.endpoint.ip |> ExWire.Struct.Endpoint.ip_to_string}:#{neighbour.endpoint.tcp_port} (#{neighbour.node |> ExthCrypto.Math.bin_to_hex})")
 
     peer = ExWire.Struct.Peer.from_neighbour(neighbour)
 

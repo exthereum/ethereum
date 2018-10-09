@@ -35,7 +35,7 @@ defmodule ExWire.Adapter.TCP do
 
     {:ok, socket} = :gen_tcp.connect(peer.host |> String.to_charlist, peer.port, [:binary])
 
-    Logger.debug("[Network] [#{peer}] Established outbound connection with #{peer.host}, sending auth.")
+    _ = Logger.debug("[Network] [#{peer}] Established outbound connection with #{peer.host}, sending auth.")
 
     {my_auth_msg, my_ephemeral_key_pair, my_nonce} = ExWire.Handshake.build_auth_msg(
       ExWire.Config.public_key(),
@@ -48,7 +48,7 @@ defmodule ExWire.Adapter.TCP do
       |> ExWire.Handshake.EIP8.wrap_eip_8(peer.remote_id, peer.host, my_ephemeral_key_pair)
 
     # Send auth message
-    GenServer.cast(self(), {:send, %{data: encoded_auth_msg}})
+    :ok = GenServer.cast(self(), {:send, %{data: encoded_auth_msg}})
 
     {:ok, Map.merge(state, %{
       socket: socket,
@@ -90,7 +90,7 @@ defmodule ExWire.Adapter.TCP do
     case Handshake.try_handle_ack(data, auth_data, my_ephemeral_private_key, my_nonce, peer.host) do
       {:ok, secrets, frame_rest} ->
 
-        Logger.debug("[Network] [#{peer}] Got ack from #{peer.host}, deriving secrets and sending HELLO")
+        _ = Logger.debug("[Network] [#{peer}] Got ack from #{peer.host}, deriving secrets and sending HELLO")
 
         send_hello(self())
 
@@ -107,7 +107,7 @@ defmodule ExWire.Adapter.TCP do
           handle_info({:tcp, socket, frame_rest}, updated_state)
         end
       {:invalid, reason} ->
-        Logger.warn("[Network] [#{peer}] Failed to get handshake message when expecting ack - #{reason}")
+        _ = Logger.warn("[Network] [#{peer}] Failed to get handshake message when expecting ack - #{reason}")
 
         {:noreply, state}
     end
@@ -118,10 +118,10 @@ defmodule ExWire.Adapter.TCP do
     case Handshake.try_handle_auth(data, my_ephemeral_key_pair, my_nonce, peer.remote_id, peer.host) do
       {:ok, ack_data, secrets} ->
 
-        Logger.debug("[Network] [#{peer}] Received auth from #{peer.host}")
+        _ = Logger.debug("[Network] [#{peer}] Received auth from #{peer.host}")
 
         # Send ack back to sender
-        GenServer.cast(self(), {:send, %{data: ack_data}})
+        :ok = GenServer.cast(self(), {:send, %{data: ack_data}})
 
         send_hello(self())
 
@@ -133,7 +133,7 @@ defmodule ExWire.Adapter.TCP do
           my_nonce: nil
           })}
       {:invalid, reason} ->
-        Logger.warn("[Network] [#{peer}] Received unknown handshake message when expecting auth - #{reason}")
+        _ = Logger.warn("[Network] [#{peer}] Received unknown handshake message when expecting auth - #{reason}")
         {:noreply, state}
     end
   end
@@ -166,13 +166,13 @@ defmodule ExWire.Adapter.TCP do
           :activate -> Map.merge(state, %{active: true})
           :peer_disconnect ->
             # Doesn't matter if this succeeds or not
-            :gen_tcp.shutdown(socket, :read_write)
+            _ = :gen_tcp.shutdown(socket, :read_write)
 
             Map.merge(state, %{active: false})
           {:disconnect, reason} ->
             Logger.warn("[Network] [#{peer}] Disconnecting to peer due to: #{Packet.Disconnect.get_reason_msg(reason)}")
             # TODO: Add a timeout and disconnect ourselves
-            send_packet(self(), Packet.Disconnect.new(reason))
+            _ = send_packet(self(), Packet.Disconnect.new(reason))
 
             state
           {:send, packet} ->
@@ -202,14 +202,14 @@ defmodule ExWire.Adapter.TCP do
       {:error, "Insufficent data"} ->
         {:noreply, Map.put(state, :queued_data, total_data)}
       {:error, reason} ->
-        Logger.error("[Network] [#{peer}] Failed to read incoming packet from #{peer.host} `#{reason}`)")
+        _ = Logger.error("[Network] [#{peer}] Failed to read incoming packet from #{peer.host} `#{reason}`)")
 
         {:noreply, state}
     end
   end
 
   def handle_info({:tcp_closed, _socket}, state=%{peer: peer}) do
-    Logger.warn("[Network] [#{peer}] Peer closed connection.")
+    _ = Logger.warn("[Network] [#{peer}] Peer closed connection.")
 
     {:noreply, state
       |> Map.put(:active, false)
@@ -217,9 +217,9 @@ defmodule ExWire.Adapter.TCP do
   end
 
   def handle_info({:timeout, _ref, :pinger}, state=%{socket: _socket, peer: peer, active: true}) do
-    Logger.warn("[Network] [#{peer}] Sending peer ping.")
+    _ = Logger.warn("[Network] [#{peer}] Sending peer ping.")
 
-    send_status(self())
+    _ = send_status(self())
 
     timer_ref = :erlang.start_timer(@ping_interval, self(), :pinger)
 
@@ -227,7 +227,7 @@ defmodule ExWire.Adapter.TCP do
   end
 
   def handle_info({:timeout, _ref, :pinger}, state=%{socket: _socket, peer: peer, active: false}) do
-    Logger.warn("[Network] [#{peer}] Not sending peer ping.")
+    _ = Logger.warn("[Network] [#{peer}] Not sending peer ping.")
 
     {:noreply, state}
   end
@@ -236,7 +236,7 @@ defmodule ExWire.Adapter.TCP do
   If we receive a `send` before secrets are set, we'll send the data directly over the wire.
   """
   def handle_cast({:send, %{data: data}}, state = %{socket: socket, peer: peer}) do
-    Logger.debug("[Network] [#{peer}] Sending raw data message of length #{byte_size(data)} byte(s) to #{peer.host}")
+    _ = Logger.debug("[Network] [#{peer}] Sending raw data message of length #{byte_size(data)} byte(s) to #{peer.host}")
 
     :ok = :gen_tcp.send(socket, data)
 
@@ -250,27 +250,27 @@ defmodule ExWire.Adapter.TCP do
   servers will disconnect if we send a non-Hello message as our first message.
   """
   def handle_cast({:send, %{packet: {packet_mod, _packet_type, _packet_data}}}=_data, state = %{peer: peer, closed: true}) do
-    Logger.info("[Network] [#{peer}] Dropping packet #{Atom.to_string(packet_mod)} for #{peer.host} due to closed connection.")
+    _ = Logger.info("[Network] [#{peer}] Dropping packet #{Atom.to_string(packet_mod)} for #{peer.host} due to closed connection.")
 
     {:noreply, state}
   end
 
   def handle_cast({:send, %{packet: {packet_mod, _packet_type, _packet_data}}}=data, state = %{peer: peer, active: false}) when packet_mod != ExWire.Packet.Hello do
-    Logger.info("[Network] [#{peer}] Queueing packet #{Atom.to_string(packet_mod)} to #{peer.host}")
+    _ = Logger.info("[Network] [#{peer}] Queueing packet #{Atom.to_string(packet_mod)} to #{peer.host}")
 
     # TODO: Should we monitor this process, etc?
     pid = self()
     spawn fn ->
       :timer.sleep(500)
 
-      GenServer.cast(pid, data)
+      :ok = GenServer.cast(pid, data)
     end
 
     {:noreply, state}
   end
 
   def handle_cast({:send, %{packet: {packet_mod, packet_type, packet_data}}}, state = %{socket: socket, secrets: secrets, peer: peer}) do
-    Logger.info("[Network] [#{peer}] Sending packet #{Atom.to_string(packet_mod)} to #{peer.host}")
+    _ = Logger.info("[Network] [#{peer}] Sending packet #{Atom.to_string(packet_mod)} to #{peer.host}")
 
     {frame, updated_secrets} = Frame.frame(packet_type, packet_data, secrets)
 

@@ -54,8 +54,8 @@ defmodule ExWire.Sync do
 
       {block_queue, block_tree, should_request_block} = BlockQueue.add_header_to_block_queue(block_queue, block_tree, header, header_hash, peer.remote_id, chain, db)
 
-      if should_request_block do
-        Logger.debug("[Sync] Requesting block body #{header.number}")
+      _ = if should_request_block do
+        _ = Logger.debug("[Sync] Requesting block body #{header.number}")
 
         # TODO: Bulk up these requests?
         PeerSupervisor.send_packet(PeerSupervisor, %ExWire.Packet.GetBlockBodies{hashes: [header_hash]})
@@ -100,20 +100,21 @@ defmodule ExWire.Sync do
   end
 
   def handle_info({:packet, packet, peer}, state) do
-    Logger.debug("[Sync] Ignoring packet #{packet.__struct__} from #{peer}")
+    _ = Logger.debug("[Sync] Ignoring packet #{packet.__struct__} from #{peer}")
 
     {:noreply, state}
   end
 
   def request_next_block(block_tree) do
-    next_number = case Blockchain.Blocktree.get_canonical_block(block_tree) do
-      :root -> 0
-      %Blockchain.Block{header: %Block.Header{number: number}} -> number + 1
-    end
+    next_number =
+      case Blockchain.Blocktree.get_canonical_block(block_tree) do
+        :root -> 0
+        %Blockchain.Block{header: %Block.Header{number: number}} -> number + 1
+      end
 
-    Logger.debug("[Sync] Requesting block #{next_number}")
+    _ = Logger.debug("[Sync] Requesting block #{next_number}")
 
-    ExWire.PeerSupervisor.send_packet(ExWire.PeerSupervisor, %ExWire.Packet.GetBlockHeaders{block_identifier: next_number, max_headers: 1, skip: 0, reverse: false})
+    _ = ExWire.PeerSupervisor.send_packet(ExWire.PeerSupervisor, %ExWire.Packet.GetBlockHeaders{block_identifier: next_number, max_headers: 1, skip: 0, reverse: false})
 
     next_number
   end

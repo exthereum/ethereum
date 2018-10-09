@@ -8,7 +8,8 @@ defmodule ExWire.Message do
     defexception [:message]
   end
 
-  @type t :: module()
+  @type t :: ExWire.Message.Ping.t() | ExWire.Message.Pong.t() | ExWire.Message.FindNeighbours.t() | ExWire.Message.Neighbours.t()
+  @type handlers :: ExWire.Message.Ping | ExWire.Message.Pong | ExWire.Message.FindNeighbours | ExWire.Message.Neighbours
   @type message_id :: integer()
 
   @callback message_id() :: message_id

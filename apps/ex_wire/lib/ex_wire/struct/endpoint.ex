@@ -10,7 +10,7 @@ defmodule ExWire.Struct.Endpoint do
   ]
 
   @type ip :: :inet.ip_address
-  @type ip_port :: integer()
+  @type ip_port :: non_neg_integer()
 
   @type t :: %__MODULE__{
     ip: ip,

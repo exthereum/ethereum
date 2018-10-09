@@ -50,9 +50,9 @@ defmodule Blockchain.Chain do
             timestamp: integer(),
             parent_hash: EVM.hash(),
             extra_data: binary(),
-            gas_limit: EVM.Gas.t(),
-            mix_hash: binary(),
-            nonce: binary()
+            gas_limit: EVM.Gas.t()
+            #mix_hash: binary(),
+            #nonce: binary()
           },
           nodes: [String.t()],
           accounts: %{
@@ -66,6 +66,7 @@ defmodule Blockchain.Chain do
             }
           }
         }
+
 
   @doc """
   Loads a given blockchain, such as Homestead or Ropsten. This
@@ -159,7 +160,7 @@ defmodule Blockchain.Chain do
 
   @spec chain_filename(atom()) :: String.t()
   defp chain_filename(chain) do
-    "chains/#{Atom.to_string(chain)}.json"
+    :code.priv_dir(:blockchain) |> Path.join("#{Atom.to_string(chain)}.json")
   end
 
   @spec load_address(String.t()) :: binary()

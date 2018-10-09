@@ -32,7 +32,8 @@ defmodule ExWire.Network do
     }
   end
 
-  @type handler_action :: :no_action | {:sent_message, atom()}
+  @type receiver_handler_action :: {:sent_message, ExWire.Message.handlers()} | :no_action
+  @type sender_handler_action :: {:sent_message, ExWire.Message.handlers()}
 
   @doc """
   Top-level receiver function to process an incoming message.
@@ -69,7 +70,7 @@ defmodule ExWire.Network do
       ...> }, nil)
       ** (ExWire.Crypto.HashMismatch) Invalid hash
   """
-  @spec receive(InboundMessage.t, identifier() | nil) :: handler_action
+  @spec receive(InboundMessage.t, identifier() | nil) :: receiver_handler_action
   def receive(inbound_message=%InboundMessage{data: data, server_pid: server_pid}, discovery_pid) do
     :ok = assert_integrity(data)
 
@@ -78,7 +79,7 @@ defmodule ExWire.Network do
     |> dispatch_handler(server_pid, discovery_pid)
   end
 
-  @doc """
+  '''
   Given the data of an inbound message, we'll run a quick SHA3 sum to verify
   the integrity of the message.
 
@@ -89,13 +90,13 @@ defmodule ExWire.Network do
 
       iex> ExWire.Network.assert_integrity(<<1::256>> <> "hi mom")
       ** (ExWire.Crypto.HashMismatch) Invalid hash
-  """
+  '''
   @spec assert_integrity(binary()) :: :ok
-  def assert_integrity(<< hash :: size(256), payload :: bits >>) do
+  defp assert_integrity(<< hash :: size(256), payload :: bits >>) do
     Crypto.assert_hash(payload, <<hash::256>>)
   end
 
-  @doc """
+  '''
   Returns a Handler Params for the given inbound message.
 
   ## Examples
@@ -133,9 +134,9 @@ defmodule ExWire.Network do
       <<54, 241, 224, 126, 85, 135, 69, 213, 129, 115, 3, 41, 161, 217, 87, 215, 159, 64, 17, 167, 128, 113, 172, 232, 46, 34, 145, 136, 72, 160, 207, 161, 171, 255, 26, 163, 160, 158, 227, 196, 92, 62, 119, 84, 156, 99, 224, 155, 120, 250, 153, 134, 180, 218, 177, 186, 200, 199, 106, 97, 103, 50, 215, 114>>
       iex> params.type
       255
-  """
+  '''
   @spec get_params(InboundMessage.t) :: Handler.Params.t
-  def get_params(%InboundMessage{
+  defp get_params(%InboundMessage{
     data: <<
       hash :: binary-size(32),
       signature :: binary-size(64),
@@ -161,7 +162,7 @@ defmodule ExWire.Network do
     }
   end
 
-  @doc """
+  '''
   Function to pass message to the appropriate handler. E.g. for a ping
   we'll pass the decoded message to `ExWire.Handlers.Ping.handle/1`.
 
@@ -192,11 +193,10 @@ defmodule ExWire.Network do
       ...> }
       ...> |> ExWire.Network.dispatch_handler(nil, nil)
       :no_action
-  """
-  @spec dispatch_handler(Handler.Params.t, identifier(), identifier() | nil) :: handler_action
-  def dispatch_handler(params, server_pid, discovery_pid) do
+  '''
+  @spec dispatch_handler(Handler.Params.t, identifier(), identifier() | nil) :: receiver_handler_action
+  defp dispatch_handler(params, server_pid, discovery_pid) do
     case Handler.dispatch(params.type, params, discovery_pid) do
-      :not_implemented -> :no_action
       :no_response -> :no_action
       {:respond, response_message} ->
         # TODO: This is a simple way to determine who to send the message to,
@@ -233,11 +233,11 @@ defmodule ExWire.Network do
         }
       }
   """
-  @spec send(ExWire.Message.t, identifier(), ExWire.Struct.Endpoint.t) :: handler_action
+  @spec send(ExWire.Message.t, identifier(), ExWire.Struct.Endpoint.t) :: sender_handler_action
   def send(message, server_pid, to) do
-    Logger.debug("[Network] Sending #{to_string(message.__struct__)} message to #{to.ip |> Endpoint.ip_to_string}")
+    _ = Logger.debug("[Network] Sending #{to_string(message.__struct__)} message to #{to.ip |> Endpoint.ip_to_string}")
 
-    GenServer.cast(
+    :ok = GenServer.cast(
       server_pid,
       {
         :send,
