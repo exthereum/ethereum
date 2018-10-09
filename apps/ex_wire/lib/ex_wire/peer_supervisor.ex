@@ -44,11 +44,15 @@ defmodule ExWire.PeerSupervisor do
   Informs our peer supervisor a new neighbour that we should connect to.
   """
   def connect(neighbour) do
-    _ = Logger.debug("[Peer Supervisor] Starting TCP connection to neighbour #{neighbour.endpoint.ip |> ExWire.Struct.Endpoint.ip_to_string}:#{neighbour.endpoint.tcp_port} (#{neighbour.node |> ExthCrypto.Math.bin_to_hex})")
+    _ =
+      Logger.debug(
+        "[Peer Supervisor] Starting TCP connection to neighbour #{
+          neighbour.endpoint.ip |> ExWire.Struct.Endpoint.ip_to_string()
+        }:#{neighbour.endpoint.tcp_port} (#{neighbour.node |> ExthCrypto.Math.bin_to_hex()})"
+      )
 
     peer = ExWire.Struct.Peer.from_neighbour(neighbour)
 
     Supervisor.start_child(@name, [:outbound, peer, [{:server, ExWire.Sync}]])
   end
-
 end

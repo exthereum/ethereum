@@ -5,4 +5,5 @@ config :ex_wire,
   sync: true,
   use_nat: true,
   local_ip: {127, 0, 0, 1},
-  commitment_count: 2 # Number of peer advertisements before we trust a block
+  # Number of peer advertisements before we trust a block
+  commitment_count: 2

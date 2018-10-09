@@ -8,19 +8,27 @@ defmodule ExWire.Message do
     defexception [:message]
   end
 
-  @type t :: ExWire.Message.Ping.t() | ExWire.Message.Pong.t() | ExWire.Message.FindNeighbours.t() | ExWire.Message.Neighbours.t()
-  @type handlers :: ExWire.Message.Ping | ExWire.Message.Pong | ExWire.Message.FindNeighbours | ExWire.Message.Neighbours
+  @type t ::
+          ExWire.Message.Ping.t()
+          | ExWire.Message.Pong.t()
+          | ExWire.Message.FindNeighbours.t()
+          | ExWire.Message.Neighbours.t()
+  @type handlers ::
+          ExWire.Message.Ping
+          | ExWire.Message.Pong
+          | ExWire.Message.FindNeighbours
+          | ExWire.Message.Neighbours
   @type message_id :: integer()
 
   @callback message_id() :: message_id
   @callback encode(t) :: binary()
-  @callback to(t) :: ExWire.Endpoint.t | nil
+  @callback to(t) :: ExWire.Endpoint.t() | nil
 
   @message_types %{
     0x01 => ExWire.Message.Ping,
     0x02 => ExWire.Message.Pong,
     0x03 => ExWire.Message.FindNeighbours,
-    0x04 => ExWire.Message.Neighbours,
+    0x04 => ExWire.Message.Neighbours
   }
 
   @doc """
@@ -48,7 +56,7 @@ defmodule ExWire.Message do
   @spec decode(integer(), binary()) :: t
   def decode(type, data) do
     case @message_types[type] do
-      nil -> raise UnknownMessageError, "Unknown message type: #{inspect type, base: :hex}"
+      nil -> raise UnknownMessageError, "Unknown message type: #{inspect(type, base: :hex)}"
       mod -> mod.decode(data)
     end
   end
@@ -76,5 +84,4 @@ defmodule ExWire.Message do
   def encode(message) do
     <<message.__struct__.message_id()>> <> message.__struct__.encode(message)
   end
-
 end

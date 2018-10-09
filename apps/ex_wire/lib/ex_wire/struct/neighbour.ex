@@ -5,15 +5,13 @@ defmodule ExWire.Struct.Neighbour do
 
   alias ExWire.Struct.Endpoint
 
-  defstruct [
-    endpoint: nil,
-    node: nil
-  ]
+  defstruct endpoint: nil,
+            node: nil
 
   @type t :: %__MODULE__{
-    endpoint: ExWire.Struct.Endpoint.t,
-    node: ExWire.node_id,
-  }
+          endpoint: ExWire.Struct.Endpoint.t(),
+          node: ExWire.node_id()
+        }
 
   @doc """
   Returns an Neighbour based on a URI.
@@ -36,7 +34,7 @@ defmodule ExWire.Struct.Neighbour do
       iex> ExWire.Struct.Neighbour.from_uri("abc")
       {:error, :invalid_uri}
   """
-  @spec from_uri(String.t) :: {:ok, t} | {:error, atom()}
+  @spec from_uri(String.t()) :: {:ok, t} | {:error, atom()}
   def from_uri(uri) do
     case URI.parse(uri) do
       %URI{
@@ -45,18 +43,23 @@ defmodule ExWire.Struct.Neighbour do
         host: remote_host,
         port: remote_peer_port
       } ->
-        {:ok, remote_ip} = :inet.ip(remote_host |> String.to_charlist)
+        {:ok, remote_ip} = :inet.ip(remote_host |> String.to_charlist())
 
-        {:ok, %ExWire.Struct.Neighbour{
-          endpoint: %ExWire.Struct.Endpoint{
-            ip: remote_ip,
-            udp_port: remote_peer_port,
-            tcp_port: remote_peer_port,
-          },
-          node: remote_id |> ExthCrypto.Math.hex_to_bin
-        }}
-      %URI{scheme: nil} -> {:error, :invalid_uri}
-      %URI{} -> {:error, :invalid_scheme}
+        {:ok,
+         %ExWire.Struct.Neighbour{
+           endpoint: %ExWire.Struct.Endpoint{
+             ip: remote_ip,
+             udp_port: remote_peer_port,
+             tcp_port: remote_peer_port
+           },
+           node: remote_id |> ExthCrypto.Math.hex_to_bin()
+         }}
+
+      %URI{scheme: nil} ->
+        {:error, :invalid_uri}
+
+      %URI{} ->
+        {:error, :invalid_scheme}
     end
   end
 
@@ -77,11 +80,11 @@ defmodule ExWire.Struct.Neighbour do
         node: <<7, 7>>
       }
   """
-  @spec decode(ExRLP.t) :: t
+  @spec decode(ExRLP.t()) :: t
   def decode([ip, udp_port, tcp_port, node_id]) do
     %__MODULE__{
       endpoint: Endpoint.decode([ip, udp_port, tcp_port]),
-      node: node_id,
+      node: node_id
     }
   end
 
@@ -103,9 +106,8 @@ defmodule ExWire.Struct.Neighbour do
       ...> )
       [<<1, 2, 3, 4>>, <<>>, <<0, 5>>, <<7, 8>>]
   """
-  @spec encode(t) :: ExRLP.t
+  @spec encode(t) :: ExRLP.t()
   def encode(%__MODULE__{endpoint: endpoint, node: node_id}) do
     Endpoint.encode(endpoint) ++ [node_id]
   end
-
 end

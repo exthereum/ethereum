@@ -32,7 +32,7 @@ defmodule ExWire.Handler.Neighbours do
       ...> }, nil)
       :no_response
   """
-  @spec handle(Handler.Params.t, identifier() | nil) :: Handler.handler_response
+  @spec handle(Handler.Params.t(), identifier() | nil) :: Handler.handler_response()
   def handle(params, discovery) do
     neighbours = Neighbours.decode(params.data)
 
@@ -40,5 +40,4 @@ defmodule ExWire.Handler.Neighbours do
 
     :no_response
   end
-
 end

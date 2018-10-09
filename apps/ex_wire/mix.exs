@@ -16,9 +16,9 @@ defmodule ExWire.Mixfile do
         licenses: ["MIT"],
         links: %{"GitHub" => "https://github.com/exthereum/ethereum"}
       ],
-      elixirc_paths: elixirc_paths(Mix.env),
-      build_embedded: Mix.env == :prod,
-      start_permanent: Mix.env == :prod,
+      elixirc_paths: elixirc_paths(Mix.env()),
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
       deps: deps(),
       dialyzer: [
         flags: [:underspecs, :unknown, :unmatched_returns],
@@ -29,12 +29,11 @@ defmodule ExWire.Mixfile do
   end
 
   def application do
-    [mod: {ExWire, []},
-      extra_applications: [:logger]]
+    [mod: {ExWire, []}, extra_applications: [:logger]]
   end
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(_),     do: ["lib"]
+  defp elixirc_paths(_), do: ["lib"]
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
@@ -51,7 +50,7 @@ defmodule ExWire.Mixfile do
       # Common
       {:credo, "~> 0.10.2", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0.0-rc.3", only: [:dev], runtime: false},
-      {:ex_doc, "~> 0.19.1", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.19.1", only: :dev, runtime: false}
     ]
   end
 end

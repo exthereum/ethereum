@@ -1,9 +1,9 @@
 defmodule Blockchain.Block.Validation do
-
   @moduledoc """
   This module provides functions to validate a block.
   """
   alias Blockchain.Block
+
   @doc """
   Determines whether or not a block is valid. This is
   defined in Eq.(29) of the Yellow Paper.
@@ -48,7 +48,8 @@ defmodule Blockchain.Block.Validation do
       ...> |> Blockchain.Block.Validation.is_holistic_valid?(chain, parent_block, db)
       {:invalid, [:state_root_mismatch, :ommers_hash_mismatch, :transactions_root_mismatch, :receipts_root_mismatch]}
   """
-  @spec is_holistic_valid?(Block.t(), Chain.t(), Block.t() | nil, DB.db()) :: :valid | {:invalid, [atom()]}
+  @spec is_holistic_valid?(Block.t(), Chain.t(), Block.t() | nil, DB.db()) ::
+          :valid | {:invalid, [atom()]}
   def is_holistic_valid?(block, chain, parent_block, db) do
     base_block =
       if parent_block |> is_nil do
