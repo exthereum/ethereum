@@ -60,7 +60,7 @@ defmodule EthCommonTest.Helpers do
 
   @spec test_file_name(atom(), atom()) :: String.t()
   def test_file_name(test_set, test_subset) do
-    "test/support/ethereum_common_tests/#{test_set}/#{to_string(test_subset)}.json"
+    "../../test/support/ethereum_common_tests/#{test_set}/#{to_string(test_subset)}.json"
   end
 
   @spec load_src(String.t(), String.t()) :: any()
