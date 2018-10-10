@@ -141,16 +141,17 @@ defmodule ExWire.Packet.Status do
   @spec handle(t) :: ExWire.Packet.handle_response()
   def handle(packet = %__MODULE__{}) do
     _ =
-      if System.get_env("TRACE"), do: _ = Logger.debug("[Packet] Got Status: #{inspect(packet)}")
+      if System.get_env("TRACE"),
+        do: _ = Logger.debug(fn -> "[Packet] Got Status: #{inspect(packet)}" end)
 
     unless packet.protocol_version == ExWire.Config.protocol_version() do
       # TODO: We need to follow up on disconnection packets with disconnection ourselves
       _ =
-        Logger.debug(
+        Logger.debug(fn ->
           "[Packet] Disconnecting to due incompatible protocol version (them #{
             packet.protocol_version
           }, us: #{ExWire.Config.protocol_version()})"
-        )
+        end)
 
       {:disconnect, :useless_peer}
     else

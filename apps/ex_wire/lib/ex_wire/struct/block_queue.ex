@@ -255,7 +255,10 @@ defmodule ExWire.Struct.BlockQueue do
             block_tree
 
           {:invalid, reasons} ->
-            _ = Logger.debug("[Block Queue] Failed to verify block due to #{inspect(reasons)}")
+            _ =
+              Logger.debug(fn ->
+                "[Block Queue] Failed to verify block due to #{inspect(reasons)}"
+              end)
 
             block_tree
 

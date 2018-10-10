@@ -245,11 +245,11 @@ defmodule ExWire.Network do
           sender_handler_action
   def send(message, server_pid, to) do
     _ =
-      Logger.debug(
+      Logger.debug(fn ->
         "[Network] Sending #{to_string(message.__struct__)} message to #{
           to.ip |> Endpoint.ip_to_string()
         }"
-      )
+      end)
 
     :ok =
       GenServer.cast(

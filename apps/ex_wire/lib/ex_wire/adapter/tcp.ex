@@ -42,9 +42,9 @@ defmodule ExWire.Adapter.TCP do
     {:ok, socket} = :gen_tcp.connect(peer.host |> String.to_charlist(), peer.port, [:binary])
 
     _ =
-      Logger.debug(
+      Logger.debug(fn ->
         "[Network] [#{peer}] Established outbound connection with #{peer.host}, sending auth."
-      )
+      end)
 
     {my_auth_msg, my_ephemeral_key_pair, my_nonce} =
       ExWire.Handshake.build_auth_msg(
@@ -115,9 +115,9 @@ defmodule ExWire.Adapter.TCP do
     case Handshake.try_handle_ack(data, auth_data, my_ephemeral_private_key, my_nonce, peer.host) do
       {:ok, secrets, frame_rest} ->
         _ =
-          Logger.debug(
+          Logger.debug(fn ->
             "[Network] [#{peer}] Got ack from #{peer.host}, deriving secrets and sending HELLO"
-          )
+          end)
 
         send_hello(self())
 
@@ -163,7 +163,7 @@ defmodule ExWire.Adapter.TCP do
            peer.host
          ) do
       {:ok, ack_data, secrets} ->
-        _ = Logger.debug("[Network] [#{peer}] Received auth from #{peer.host}")
+        _ = Logger.debug(fn -> "[Network] [#{peer}] Received auth from #{peer.host}" end)
 
         # Send ack back to sender
         :ok = GenServer.cast(self(), {:send, %{data: ack_data}})
@@ -202,9 +202,9 @@ defmodule ExWire.Adapter.TCP do
         {packet, handle_result} =
           case Packet.get_packet_mod(packet_type) do
             {:ok, packet_mod} ->
-              Logger.debug(
+              Logger.debug(fn ->
                 "[Network] [#{peer}] Got packet #{Atom.to_string(packet_mod)} from #{peer.host}"
-              )
+              end)
 
               packet =
                 packet_data
@@ -320,11 +320,11 @@ defmodule ExWire.Adapter.TCP do
   """
   def handle_cast({:send, %{data: data}}, state = %{socket: socket, peer: peer}) do
     _ =
-      Logger.debug(
+      Logger.debug(fn ->
         "[Network] [#{peer}] Sending raw data message of length #{byte_size(data)} byte(s) to #{
           peer.host
         }"
-      )
+      end)
 
     :ok = :gen_tcp.send(socket, data)
 
@@ -338,7 +338,7 @@ defmodule ExWire.Adapter.TCP do
   servers will disconnect if we send a non-Hello message as our first message.
   """
   def handle_cast(
-        {:send, %{packet: {packet_mod, _packet_type, _packet_data}}} = _data,
+        {:send, %{packet: {packet_mod, _packet_type, _packet_data}}},
         state = %{peer: peer, closed: true}
       ) do
     _ =
@@ -432,7 +432,7 @@ defmodule ExWire.Adapter.TCP do
       best_hash: ExWire.Config.chain().genesis.parent_hash,
       genesis_hash: <<>>
     })
-    |> Exth.inspect("status")
+    |> Exth.view("status")
   end
 
   @doc """

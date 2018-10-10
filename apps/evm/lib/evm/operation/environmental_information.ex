@@ -189,7 +189,7 @@ defmodule EVM.Operation.EnvironmentalInformation do
         exec_env: exec_env,
         machine_state: machine_state
       }) do
-    if length == 0 do
+    if length === 0 do
       0
     else
       data = EVM.Memory.read_zeroed_memory(exec_env.machine_code, code_offset, length)
@@ -262,7 +262,7 @@ defmodule EVM.Operation.EnvironmentalInformation do
         machine_state: machine_state,
         exec_env: exec_env
       }) do
-    if length == 0 || length + mem_offset > EVM.max_int() do
+    if length === 0 || length + mem_offset > EVM.max_int() do
       0
     else
       wrapped_address = Helpers.wrap_address(address)

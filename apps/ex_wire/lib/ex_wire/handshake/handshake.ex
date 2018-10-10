@@ -283,7 +283,7 @@ defmodule ExWire.Handshake do
           {:ok, binary(), Secrets.t()} | {:invalid, String.t()}
   def try_handle_auth(
         auth_data,
-        {my_ephemeral_public_key, my_ephemeral_private_key} = my_ephemeral_key_pair,
+        my_ephemeral_key_pair = {my_ephemeral_public_key, my_ephemeral_private_key},
         my_nonce,
         remote_id,
         host

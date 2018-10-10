@@ -77,7 +77,7 @@ defmodule ExWire.Sync do
 
         _ =
           if should_request_block do
-            _ = Logger.debug("[Sync] Requesting block body #{header.number}")
+            _ = Logger.debug(fn -> "[Sync] Requesting block body #{header.number}" end)
 
             # TODO: Bulk up these requests?
             PeerSupervisor.send_packet(PeerSupervisor, %ExWire.Packet.GetBlockBodies{
@@ -135,7 +135,7 @@ defmodule ExWire.Sync do
   end
 
   def handle_info({:packet, packet, peer}, state) do
-    _ = Logger.debug("[Sync] Ignoring packet #{packet.__struct__} from #{peer}")
+    _ = Logger.debug(fn -> "[Sync] Ignoring packet #{packet.__struct__} from #{peer}" end)
 
     {:noreply, state}
   end
@@ -147,7 +147,7 @@ defmodule ExWire.Sync do
         %Blockchain.Block{header: %Block.Header{number: number}} -> number + 1
       end
 
-    _ = Logger.debug("[Sync] Requesting block #{next_number}")
+    _ = Logger.debug(fn -> "[Sync] Requesting block #{next_number}" end)
 
     _ =
       ExWire.PeerSupervisor.send_packet(ExWire.PeerSupervisor, %ExWire.Packet.GetBlockHeaders{

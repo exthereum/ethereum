@@ -2,12 +2,13 @@ defmodule Exth do
   @moduledoc """
   General helper functions, like for inspection.
   """
+  require Logger
 
-  @spec inspect(any(), String.t() | nil) :: any()
-  def inspect(variable, prefix \\ nil) do
+  @spec view(any(), String.t() | nil) :: any()
+  def view(variable, prefix \\ nil) do
     args = if prefix, do: [prefix, variable], else: variable
 
-    IO.inspect(args, limit: :infinity)
+    _ = Logger.debug(fn -> "#{inspect(args)}" end)
 
     variable
   end

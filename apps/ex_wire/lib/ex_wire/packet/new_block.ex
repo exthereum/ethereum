@@ -113,11 +113,11 @@ defmodule ExWire.Packet.NewBlock do
   @spec handle(ExWire.Packet.packet()) :: ExWire.Packet.handle_response()
   def handle(packet = %__MODULE__{}) do
     _ =
-      Logger.debug(
+      Logger.debug(fn ->
         "[Packet] Peer sent new block with hash #{
           packet.block_header |> Header.hash() |> ExthCrypto.Math.bin_to_hex()
         }"
-      )
+      end)
 
     :ok
   end

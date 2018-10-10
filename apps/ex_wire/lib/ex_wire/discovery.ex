@@ -79,7 +79,9 @@ defmodule ExWire.Discovery do
   end
 
   def handle_cast({:ping, node_id}, state) do
-    Logger.debug("[Discovery] Received ping to #{node_id |> ExthCrypto.Math.bin_to_hex()}")
+    Logger.debug(fn ->
+      "[Discovery] Received ping to #{node_id |> ExthCrypto.Math.bin_to_hex()}"
+    end)
 
     # For now, do nothing.
 
@@ -87,7 +89,9 @@ defmodule ExWire.Discovery do
   end
 
   def handle_cast({:pong, node_id}, state = %{neighbours: neighbours}) do
-    Logger.debug("[Discovery] Received pong from #{node_id |> ExthCrypto.Math.bin_to_hex()}")
+    Logger.debug(fn ->
+      "[Discovery] Received pong from #{node_id |> ExthCrypto.Math.bin_to_hex()}"
+    end)
 
     # If we get a pong and we like it, we should connect via TCP.
     case Enum.find(neighbours, fn neighbour -> neighbour.node == node_id end) do
@@ -118,11 +122,11 @@ defmodule ExWire.Discovery do
           not Enum.member?(known_nodes, neighbour.node)
       end)
 
-    Logger.debug(
+    Logger.debug(fn ->
       "[Discovery] Hi-dilly-ho received #{Enum.count(add_neighbours.nodes)} neighboureenos, #{
         Enum.count(new_neighbours)
       } newerific"
-    )
+    end)
 
     # For each new neighbour, send a ping
     for neighbour <- new_neighbours do
@@ -135,7 +139,7 @@ defmodule ExWire.Discovery do
 
     total_neighbours = neighbours ++ new_neighbours
 
-    Logger.debug("[Discovery] Neighbour Count: #{Enum.count(total_neighbours)}")
+    Logger.debug(fn -> "[Discovery] Neighbour Count: #{Enum.count(total_neighbours)}" end)
 
     {:noreply, Map.put(state, :neighbours, total_neighbours)}
   end
@@ -182,11 +186,11 @@ defmodule ExWire.Discovery do
   end
 
   defp ping_neighbour(neighbour, local_endpoint) do
-    Logger.debug(
+    Logger.debug(fn ->
       "[Discovery] Initiating ping to #{inspect(neighbour, limit: :infinity)}, #{
         inspect(local_endpoint, limit: :infinity)
       }"
-    )
+    end)
 
     # Send a ping to each node
     ping = %ExWire.Message.Ping{

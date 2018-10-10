@@ -218,7 +218,7 @@ defmodule EVM.Gas do
   end
 
   # From Eq 220: Cmem(μ′i)−Cmem(μi)
-  def memory_expansion_cost(machine_state, offset, length) do
+  defp memory_expansion_cost(machine_state, offset, length) do
     memory_expansion_value = memory_expansion_value(machine_state.active_words, offset, length)
 
     if memory_expansion_value > machine_state.active_words do
@@ -230,19 +230,26 @@ defmodule EVM.Gas do
   end
 
   # Eq 223
-  def memory_expansion_value(
-        # s
-        active_words,
-        # f
-        offset,
-        # l
-        length
-      ) do
-    if length == 0 do
-      active_words
-    else
-      max(active_words, round(:math.ceil((offset + length) / 32)))
-    end
+  defp memory_expansion_value(
+         # s
+         active_words,
+         # f
+         _offset,
+         # l
+         _length = 0
+       ) do
+    active_words
+  end
+
+  defp memory_expansion_value(
+         # s
+         active_words,
+         # f
+         offset,
+         # l
+         length
+       ) do
+    max(active_words, round(:math.ceil((offset + length) / 32)))
   end
 
   # Eq 222 - Cmem
