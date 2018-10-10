@@ -182,21 +182,7 @@ defmodule ExWire.Struct.BlockQueue do
     updated_queue =
       Enum.reduce(queue, queue, fn {number, block_map}, queue ->
         updated_block_map =
-          Enum.reduce(block_map, block_map, fn {hash, block_item}, block_map ->
-            if block_item.block.header.transactions_root == transactions_root and
-                 block_item.block.header.ommers_hash == ommers_hash do
-              # This is now ready! (though, it may not still have enough commitments)
-              block = %{
-                block_item.block
-                | transactions: block_struct.transactions,
-                  ommers: block_struct.ommers
-              }
-
-              Map.put(block_map, hash, %{block_item | block: block, ready: true})
-            else
-              block_map
-            end
-          end)
+          reduce_block_item(block_map, block_struct, ommers_hash, transactions_root)
 
         Map.put(queue, number, updated_block_map)
       end)
@@ -248,25 +234,7 @@ defmodule ExWire.Struct.BlockQueue do
 
     block_tree =
       Enum.reduce(blocks, block_tree, fn block, block_tree ->
-        case Blocktree.verify_and_add_block(block_tree, chain, block, db, do_validation) do
-          :parent_not_found ->
-            _ = Logger.debug("[Block Queue] Failed to verify block due to missing parent")
-
-            block_tree
-
-          {:invalid, reasons} ->
-            _ =
-              Logger.debug(fn ->
-                "[Block Queue] Failed to verify block due to #{inspect(reasons)}"
-              end)
-
-            block_tree
-
-          {:ok, new_block_tree} ->
-            _ = Logger.debug("[Block Queue] Verified block and added to new block tree")
-
-            new_block_tree
-        end
+        verify_and_add_block(block_tree, chain, block, db, do_validation)
       end)
 
     {remaining_block_queue, block_tree}
@@ -423,5 +391,58 @@ defmodule ExWire.Struct.BlockQueue do
   @spec get_ommers_hash([EVM.hash()]) :: ExthCrypto.hash()
   defp get_ommers_hash(ommers) do
     ommers |> ExRLP.encode() |> ExthCrypto.Hash.Keccak.kec()
+  end
+
+  @spec reduce_block_item(
+          block_map,
+          BlockStruct.t(),
+          ExthCrypto.hash(),
+          MerklePatriciaTree.Trie.root_hash()
+        ) :: block_map
+  defp reduce_block_item(
+         block_map,
+         block_struct,
+         ommers_hash,
+         transactions_root
+       ) do
+    Enum.reduce(block_map, block_map, fn {hash, block_item}, block_map ->
+      if block_item.block.header.transactions_root == transactions_root and
+           block_item.block.header.ommers_hash == ommers_hash do
+        # This is now ready! (though, it may not still have enough commitments)
+        block = %{
+          block_item.block
+          | transactions: block_struct.transactions,
+            ommers: block_struct.ommers
+        }
+
+        Map.put(block_map, hash, %{block_item | block: block, ready: true})
+      else
+        block_map
+      end
+    end)
+  end
+
+  @spec verify_and_add_block(
+          Blocktree.t(),
+          Chain.t(),
+          Block.t(),
+          MerklePatriciaTree.DB.db(),
+          boolean()
+        ) :: Blocktree.t()
+  defp verify_and_add_block(block_tree, chain, block, db, do_validation) do
+    case Blocktree.verify_and_add_block(block_tree, chain, block, db, do_validation) do
+      {:invalid, reasons} ->
+        _ =
+          Logger.debug(fn ->
+            "[Block Queue] Failed to verify block due to #{inspect(reasons)}"
+          end)
+
+        block_tree
+
+      {:ok, new_block_tree} ->
+        _ = Logger.debug("[Block Queue] Verified block and added to new block tree")
+
+        new_block_tree
+    end
   end
 end

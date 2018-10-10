@@ -155,6 +155,34 @@ defmodule ExthCrypto.ECIES do
       byte_size(ecies_encoded_msg) - header_size - public_key_len - key_len - hash_len
 
     # Decode the ECIES encoded message
+    decomposed_ecies_encoded_message_or_error =
+      decode_ecies_encoded_message(
+        header_size_bits,
+        public_key_len,
+        key_len,
+        encoded_message_len,
+        hash_len,
+        ecies_encoded_msg
+      )
+
+    do_decode_ecies_encoded_message(
+      decomposed_ecies_encoded_message_or_error,
+      key_len,
+      my_static_private_key,
+      params,
+      shared_info_1,
+      shared_info_2
+    )
+  end
+
+  defp decode_ecies_encoded_message(
+         header_size_bits,
+         public_key_len,
+         key_len,
+         encoded_message_len,
+         hash_len,
+         ecies_encoded_msg
+       ) do
     case ecies_encoded_msg do
       # SEC1 - §5.1.4 - Step 1
       # Note, we only allow 0x04 as the header byte
@@ -170,55 +198,69 @@ defmodule ExthCrypto.ECIES do
         # message tag
         message_tag::binary-size(hash_len)
       >> ->
-        # TODO: SEC1 - §5.1.4 - Steps 2, 3 - Verify curve
-
-        # SEC1 - §5.1.4 - Steps 4, 5
-        # Generate a shared secret based on our ephemeral private key and the ephemeral public key from the message
-        her_ephemeral_public_key = ExthCrypto.Key.raw_to_der(her_ephemeral_public_key_raw)
-
-        shared_secret =
-          ECDH.generate_shared_secret(
-            my_static_private_key,
-            her_ephemeral_public_key,
-            @curve_name
-          )
-
-        # SEC1 - §5.1.4 - Step 6
-        # Geneate our KDF as before
-        kdf =
-          ExthCrypto.KDF.NistSp80056.single_step_kdf(
-            shared_secret,
-            2 * params.key_len,
-            params.hasher,
-            shared_info_1
-          )
-
-        # The first half becomes the encoded key, the second half becomes a mac
-        with {:ok, derived_keys} <- kdf do
-          # SEC1 - §5.1.4 - Step 7
-          <<key_enc::binary-size(key_len), key_mac::binary-size(key_len)>> = derived_keys
-
-          # Hash the key mac
-          key_mac_hashed = Hash.hash(key_mac, params.hasher)
-
-          # SEC1 - §5.1.4 - Step 8
-          # Tag the messsage and shared_info_2 data
-          generated_message_tag =
-            MAC.mac(cipher_iv <> encoded_message <> shared_info_2, key_mac_hashed, params.mac)
-
-          unless message_tag == generated_message_tag do
-            {:error, "Invalid message tag"}
-          else
-            # SEC1 - §5.1.4 - Step 9
-            message = Cipher.decrypt(encoded_message, key_enc, cipher_iv, params.cipher)
-
-            # SEC1 - §5.1.4 - Step 10
-            {:ok, message}
-          end
-        end
+        {her_ephemeral_public_key_raw, cipher_iv, encoded_message, message_tag}
 
       _els ->
         {:error, "Invalid ECIES encoded message"}
+    end
+  end
+
+  defp do_decode_ecies_encoded_message(error = {:error, _}, _, _, _, _, _), do: error
+
+  defp do_decode_ecies_encoded_message(
+         {her_ephemeral_public_key_raw, cipher_iv, encoded_message, message_tag},
+         key_len,
+         my_static_private_key,
+         params,
+         shared_info_1,
+         shared_info_2
+       ) do
+    # TODO: SEC1 - §5.1.4 - Steps 2, 3 - Verify curve
+
+    # SEC1 - §5.1.4 - Steps 4, 5
+    # Generate a shared secret based on our ephemeral private key and the ephemeral public key from the message
+    her_ephemeral_public_key = ExthCrypto.Key.raw_to_der(her_ephemeral_public_key_raw)
+
+    shared_secret =
+      ECDH.generate_shared_secret(
+        my_static_private_key,
+        her_ephemeral_public_key,
+        @curve_name
+      )
+
+    # SEC1 - §5.1.4 - Step 6
+    # Geneate our KDF as before
+    kdf =
+      ExthCrypto.KDF.NistSp80056.single_step_kdf(
+        shared_secret,
+        2 * params.key_len,
+        params.hasher,
+        shared_info_1
+      )
+
+    # The first half becomes the encoded key, the second half becomes a mac
+    {:ok, derived_keys} = kdf
+    # SEC1 - §5.1.4 - Step 7
+    <<key_enc::binary-size(key_len), key_mac::binary-size(key_len)>> = derived_keys
+
+    # Hash the key mac
+    key_mac_hashed = Hash.hash(key_mac, params.hasher)
+
+    # SEC1 - §5.1.4 - Step 8
+    # Tag the messsage and shared_info_2 data
+    generated_message_tag =
+      MAC.mac(cipher_iv <> encoded_message <> shared_info_2, key_mac_hashed, params.mac)
+
+    case message_tag do
+      ^generated_message_tag ->
+        # SEC1 - §5.1.4 - Step 9
+        message = Cipher.decrypt(encoded_message, key_enc, cipher_iv, params.cipher)
+
+        # SEC1 - §5.1.4 - Step 10
+        {:ok, message}
+
+      _ ->
+        {:error, "Invalid message tag"}
     end
   end
 end

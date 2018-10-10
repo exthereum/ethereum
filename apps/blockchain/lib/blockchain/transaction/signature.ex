@@ -295,7 +295,11 @@ defmodule Blockchain.Transaction.Signature do
           {:ok, EVM.address()} | {:error, String.t()}
   def sender(trx, chain_id \\ nil) do
     # Ignore chain_id if transaction has a `v` value before EIP-155 minimum
-    chain_id = if not uses_chain_id?(trx.v), do: nil, else: chain_id
+    chain_id =
+      case uses_chain_id?(trx.v) do
+        false -> nil
+        true -> chain_id
+      end
 
     with {:ok, public_key} <-
            recover_public(transaction_hash(trx, chain_id), trx.v, trx.r, trx.s, chain_id) do

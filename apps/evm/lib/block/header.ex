@@ -292,43 +292,40 @@ defmodule Block.Header do
     # Eq.(53), Eq.(54) and Eq.(55)
     # Eq.(56)
     # Eq.(57)
+    difficulty =
+      get_difficulty(
+        header,
+        parent_header,
+        initial_difficulty,
+        minimum_difficulty,
+        difficulty_bound_divisor,
+        homestead_block
+      )
+
+    difficulty_errors = check_difficulty(difficulty, header.difficulty)
+    gas_errors = check_gas(header.gas_used, header.gas_limit)
+
+    gas_limit_errors =
+      if(
+        is_gas_limit_valid?(
+          header.gas_limit,
+          parent_gas_limit,
+          gas_limit_bound_divisor,
+          min_gas_limit
+        ),
+        do: [],
+        else: [:invalid_gas_limit]
+      )
+
+    header_timestamps_errors = check_header_timestamps(parent_header, header)
+
+    header_errors = check_header(parent_header, header)
+    extra_data_size_errors = check_extra_data_size(header.extra_data)
+
     errors =
-      [] ++
-        if(
-          header.difficulty ==
-            get_difficulty(
-              header,
-              parent_header,
-              initial_difficulty,
-              minimum_difficulty,
-              difficulty_bound_divisor,
-              homestead_block
-            ),
-          do: [],
-          else: [:invalid_difficulty]
-        ) ++
-        if(header.gas_used <= header.gas_limit, do: [], else: [:exceeded_gas_limit]) ++
-        if(
-          is_gas_limit_valid?(
-            header.gas_limit,
-            parent_gas_limit,
-            gas_limit_bound_divisor,
-            min_gas_limit
-          ),
-          do: [],
-          else: [:invalid_gas_limit]
-        ) ++
-        if(is_nil(parent_header) or header.timestamp > parent_header.timestamp,
-          do: [],
-          else: [:child_timestamp_invalid]
-        ) ++
-        if(header.number == 0 or header.number == parent_header.number + 1,
-          do: [],
-          else: [:child_number_invalid]
-        ) ++
-        if byte_size(header.extra_data) <= @max_extra_data_bytes,
-          do: [],
-          else: [:extra_data_too_large]
+      difficulty_errors ++
+        gas_errors ++
+        gas_limit_errors ++ header_timestamps_errors ++ header_errors ++ extra_data_size_errors
 
     case errors do
       [] -> :valid
@@ -539,4 +536,39 @@ defmodule Block.Header do
         gas_limit > min_gas_limit
     end
   end
+
+  defp check_difficulty(difficulty, difficulty), do: []
+  defp check_difficulty(_difficulty, _header_difficulty), do: [:invalid_difficulty]
+  defp check_gas(gas_used, gas_limit) when gas_used <= gas_limit, do: []
+  defp check_gas(_gas_used, _gas_limit), do: [:exceeded_gas_limit]
+  defp check_header_timestamps(nil, _header), do: []
+
+  defp check_header_timestamps(parent_header, header),
+    do: do_check_header_timestamps(parent_header.timestamp, header.timestamp)
+
+  defp do_check_header_timestamps(parent_header_timestamp, header_timestamp)
+       when parent_header_timestamp < header_timestamp,
+       do: []
+
+  defp do_check_header_timestamps(_, _), do: [:child_timestamp_invalid]
+
+  defp check_header(nil, _), do: []
+  defp check_header(_, nil), do: [:child_number_invalid]
+
+  defp check_header(parent_header, header),
+    do: do_check_header(parent_header.number, header.number)
+
+  defp do_check_header(_, 0), do: []
+
+  defp do_check_header(parent_header_number, header_number)
+       when parent_header_number + 1 == header_number,
+       do: []
+
+  defp do_check_header(_, _), do: [:child_number_invalid]
+
+  defp check_extra_data_size(header_extra_data)
+       when byte_size(header_extra_data) <= @max_extra_data_bytes,
+       do: []
+
+  defp check_extra_data_size(_), do: [:extra_data_too_large]
 end
