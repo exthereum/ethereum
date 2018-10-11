@@ -54,13 +54,13 @@ defmodule ExWire.Struct.BlockQueue do
 
       iex> chain = Blockchain.Test.ropsten_chain()
       iex> db = MerklePatriciaTree.Test.random_ets_db(:proces_block_queue)
-      iex> header = %Block.Header{number: 5, parent_hash: <<0::256>>, beneficiary: <<2, 3, 4>>, difficulty: 100, timestamp: 11, mix_hash: <<1>>, nonce: <<2>>}
+      iex> header = %Block.Header{number: 0, parent_hash: <<0::256>>, beneficiary: <<2, 3, 4>>, difficulty: 100, timestamp: 11, mix_hash: <<1>>, nonce: <<2>>}
       iex> header_hash = <<78, 28, 127, 10, 192, 253, 127, 239, 254, 179, 39, 34, 245, 44, 152, 98, 128, 71, 238, 155, 100, 161, 199, 71, 243, 223, 172, 191, 74, 99, 128, 63>>
       iex> {block_queue, block_tree, false} = ExWire.Struct.BlockQueue.add_header_to_block_queue(%ExWire.Struct.BlockQueue{do_validation: false}, Blockchain.Blocktree.new_tree(), header, header_hash, "remote_id", chain, db)
       iex> block_queue.queue
       %{}
       iex> block_tree.parent_map
-      %{<<109, 191, 166, 180, 1, 44, 85, 48, 107, 43, 51, 4, 81, 128, 110, 188, 130, 1, 5, 255, 21, 204, 250, 214, 105, 55, 182, 104, 0, 94, 102, 6>> => <<0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>}
+      %{<<52, 135, 4, 5, 74, 2, 167, 221, 88, 74, 64, 210, 209, 25, 208, 14, 187, 181, 226, 234, 205, 235, 150, 211, 109, 83, 167, 23, 94, 231, 29, 232>> => <<0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>}
 
       # TODO: Add a second addition example
   """
@@ -214,7 +214,7 @@ defmodule ExWire.Struct.BlockQueue do
 
       iex> chain = Blockchain.Test.ropsten_chain()
       iex> db = MerklePatriciaTree.Test.random_ets_db(:process_block_queue)
-      iex> header = %Block.Header{number: 1, parent_hash: <<0::256>>, beneficiary: <<2, 3, 4>>, difficulty: 100, timestamp: 11, mix_hash: <<1>>, nonce: <<2>>}
+      iex> header = %Block.Header{number: 0, parent_hash: <<0::256>>, beneficiary: <<2, 3, 4>>, difficulty: 100, timestamp: 11, mix_hash: <<1>>, nonce: <<2>>}
       iex> {block_queue, block_tree} = %ExWire.Struct.BlockQueue{
       ...>   queue: %{
       ...>     1 => %{
@@ -230,7 +230,7 @@ defmodule ExWire.Struct.BlockQueue do
       ...> }
       ...> |> ExWire.Struct.BlockQueue.process_block_queue(Blockchain.Blocktree.new_tree(), chain, db)
       iex> block_tree.parent_map
-      %{<<226, 210, 216, 149, 139, 194, 100, 151, 35, 86, 131, 75, 10, 203, 201, 20, 232, 134, 23, 195, 24, 34, 181, 6, 142, 4, 57, 85, 121, 223, 246, 87>> => <<0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>}
+      %{<<52, 135, 4, 5, 74, 2, 167, 221, 88, 74, 64, 210, 209, 25, 208, 14, 187, 181, 226, 234, 205, 235, 150, 211, 109, 83, 167, 23, 94, 231, 29, 232>> => <<0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>}
       iex> block_queue.queue
       %{}
   """
