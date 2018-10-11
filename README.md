@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/exthereum/ethereum.svg?style=svg)](https://circleci.com/gh/exthereum/ethereum)
+
 # Exthereum
 
 Exthereum is an Elixir client for the Ethereum blockchain.
