@@ -19,6 +19,30 @@ defmodule ExWire.Adapter.TCP do
   @ping_interval 2_000
 
   @doc """
+  Client function for sending a packet over to a peer.
+  """
+  @spec send_packet(pid(), struct()) :: :ok
+  def send_packet(pid, packet) do
+    {:ok, packet_type} = Packet.get_packet_type(packet)
+    {:ok, packet_mod} = Packet.get_packet_mod(packet_type)
+    packet_data = packet_mod.serialize(packet)
+
+    GenServer.cast(pid, {:send, %{packet: {packet_mod, packet_type, packet_data}}})
+  end
+
+  @doc """
+  Client function to subscribe to incoming packets.
+
+  A subscription should be in the form of `{:server, server_pid}`, and we will
+  send a packet to that server with contents `{:packet, packet, peer}` for
+  each received packet.
+  """
+  @spec subscribe(pid(), {module(), atom(), list()} | {:server, pid()}) :: :ok
+  def subscribe(pid, subscription) do
+    :ok = GenServer.call(pid, {:subscribe, subscription})
+  end
+
+  @doc """
   Starts an outbound peer to peer connection.
   """
   def start_link(:outbound, peer, subscribers \\ []) do
@@ -195,32 +219,10 @@ defmodule ExWire.Adapter.TCP do
     total_data = Map.get(state, :queued_data, <<>>) <> data
 
     case Frame.unframe(total_data, secrets) do
-      {:ok, packet_type, packet_data, frame_rest, updated_secrets} ->
+      {:ok, _packet_type, _packet_data, frame_rest, updated_secrets} = unframed ->
         # TODO: Ignore non-HELLO messages unless state is active.
 
-        # TODO: Maybe move into smaller functions for testing
-        {packet, handle_result} =
-          case Packet.get_packet_mod(packet_type) do
-            {:ok, packet_mod} ->
-              Logger.debug(fn ->
-                "[Network] [#{peer}] Got packet #{Atom.to_string(packet_mod)} from #{peer.host}"
-              end)
-
-              packet =
-                packet_data
-                |> packet_mod.deserialize()
-
-              {packet, packet_mod.handle(packet)}
-
-            :unknown_packet_type ->
-              Logger.warn(
-                "[Network] [#{peer}] Received unknown or unhandled packet type `#{packet_type}` from #{
-                  peer.host
-                }"
-              )
-
-              {nil, :ok}
-          end
+        {packet, handle_result} = handle_unframing(unframed, peer)
 
         # Updates our given state and does any actions necessary
         handled_state =
@@ -256,14 +258,8 @@ defmodule ExWire.Adapter.TCP do
           end
 
         # Let's inform any subscribers
-        if not is_nil(packet) do
-          for subscriber <- Map.get(state, :subscribers, []) do
-            case subscriber do
-              {module, function, args} -> apply(module, function, [packet | args])
-              {:server, server} -> send(server, {:packet, packet, peer})
-            end
-          end
-        end
+        subscribers = Map.get(state, :subscribers, [])
+        _ = notify_subscribers(packet, subscribers, peer)
 
         updated_state = Map.merge(handled_state, %{secrets: updated_secrets, queued_data: <<>>})
 
@@ -338,7 +334,7 @@ defmodule ExWire.Adapter.TCP do
   servers will disconnect if we send a non-Hello message as our first message.
   """
   def handle_cast(
-        {:send, %{packet: {packet_mod, _packet_type, _packet_data}}},
+        {:send, %{packet: {packet_mod, _packet_type, _packet_data}}} = _data,
         state = %{peer: peer, closed: true}
       ) do
     _ =
@@ -387,24 +383,8 @@ defmodule ExWire.Adapter.TCP do
     {:noreply, Map.merge(state, %{secrets: updated_secrets})}
   end
 
-  @doc """
-  Client function for sending a packet over to a peer.
-  """
-  @spec send_packet(pid(), struct()) :: :ok
-  def send_packet(pid, packet) do
-    {:ok, packet_type} = Packet.get_packet_type(packet)
-    {:ok, packet_mod} = Packet.get_packet_mod(packet_type)
-    packet_data = packet_mod.serialize(packet)
-
-    GenServer.cast(pid, {:send, %{packet: {packet_mod, packet_type, packet_data}}})
-
-    :ok
-  end
-
-  @doc """
-  Client function to send HELLO message after connecting.
-  """
-  def send_hello(pid) do
+  # Client function to send HELLO message after connecting.
+  defp send_hello(pid) do
     send_packet(pid, %Packet.Hello{
       p2p_version: ExWire.Config.p2p_version(),
       client_id: ExWire.Config.client_id(),
@@ -414,17 +394,8 @@ defmodule ExWire.Adapter.TCP do
     })
   end
 
-  @doc """
-  Client function to send PING message.
-  """
-  def send_ping(pid) do
-    send_packet(pid, %Packet.Ping{})
-  end
-
-  @doc """
-  Client function to send STATUS message.
-  """
-  def send_status(pid) do
+  # Client function to send STATUS message.
+  defp send_status(pid) do
     send_packet(pid, %Packet.Status{
       protocol_version: ExWire.Config.protocol_version(),
       network_id: ExWire.Config.network_id(),
@@ -435,15 +406,41 @@ defmodule ExWire.Adapter.TCP do
     |> Exth.view("status")
   end
 
-  @doc """
-  Client function to subscribe to incoming packets.
+  defp handle_unframing({:ok, packet_type, packet_data, _frame_rest, _updated_secrets}, peer) do
+    case Packet.get_packet_mod(packet_type) do
+      {:ok, packet_mod} ->
+        Logger.debug(fn ->
+          "[Network] [#{peer}] Got packet #{Atom.to_string(packet_mod)} from #{peer.host}"
+        end)
 
-  A subscription should be in the form of `{:server, server_pid}`, and we will
-  send a packet to that server with contents `{:packet, packet, peer}` for
-  each received packet.
-  """
-  @spec subscribe(pid(), {module(), atom(), list()} | {:server, pid()}) :: :ok
-  def subscribe(pid, subscription) do
-    :ok = GenServer.call(pid, {:subscribe, subscription})
+        packet =
+          packet_data
+          |> packet_mod.deserialize()
+
+        {packet, packet_mod.handle(packet)}
+
+      :unknown_packet_type ->
+        Logger.warn(
+          "[Network] [#{peer}] Received unknown or unhandled packet type `#{packet_type}` from #{
+            peer.host
+          }"
+        )
+
+        {nil, :ok}
+    end
+  end
+
+  defp notify_subscribers(nil, _packet, _peer), do: :ok
+  defp notify_subscribers([], _packet, _peer), do: :ok
+
+  # the assumption is we're not interested in the result of calling the subscriber
+  defp notify_subscribers([{module, function, args} | t], packet, peer) do
+    _ = spawn(fn -> apply(module, function, [packet | args]) end)
+    notify_subscribers(t, packet, peer)
+  end
+
+  defp notify_subscribers([{:server, server} | t], packet, peer) do
+    _ = spawn(fn -> send(server, {:packet, packet, peer}) end)
+    notify_subscribers(t, packet, peer)
   end
 end
