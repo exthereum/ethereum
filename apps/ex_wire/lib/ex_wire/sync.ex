@@ -75,15 +75,7 @@ defmodule ExWire.Sync do
             db
           )
 
-        _ =
-          if should_request_block do
-            _ = Logger.debug(fn -> "[Sync] Requesting block body #{header.number}" end)
-
-            # TODO: Bulk up these requests?
-            PeerSupervisor.send_packet(PeerSupervisor, %ExWire.Packet.GetBlockBodies{
-              hashes: [header_hash]
-            })
-          end
+        _ = request_next_block(should_request_block, header, header_hash)
 
         {block_queue, block_tree}
       end)
@@ -140,7 +132,24 @@ defmodule ExWire.Sync do
     {:noreply, state}
   end
 
-  def request_next_block(block_tree) do
+  @spec request_next_block(boolean(), Block.Header.t(), EVM.hash()) :: :ok
+  defp request_next_block(_should_request_block = true, header, header_hash) do
+    _ = Logger.debug(fn -> "[Sync] Requesting block body #{header.number}" end)
+
+    # TODO: Bulk up these requests?
+    _ =
+      PeerSupervisor.send_packet(PeerSupervisor, %ExWire.Packet.GetBlockBodies{
+        hashes: [header_hash]
+      })
+
+    :ok
+  end
+
+  defp request_next_block(_should_request_block = false, _, _) do
+    :ok
+  end
+
+  defp request_next_block(block_tree) do
     next_number =
       case Blockchain.Blocktree.get_canonical_block(block_tree) do
         :root -> 0

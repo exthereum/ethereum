@@ -36,16 +36,8 @@ defmodule EVM.Gas do
   @g_sset 20000
   # Paid for an SSTORE operation when the storage value’s zeroness remains unchanged or is set to zero.
   @g_sreset 5000
-  # Refund given (added into refund counter) when the storage value is set to zero from non-zero.
-  @g_sclear 15000
-  # Refund given (added into refund counter) for suiciding an account.
-  @g_suicide 24000
-  # Amount of gas to pay for a SUICIDE operation.
-  @g_suicide 5000
   # Paid for a CREATE operation.
   @g_create 32000
-  # Paid per byte for a CREATE operation to succeed in placing code into state.
-  @g_codedeposit 200
   # Paid for a CALL operation.
   @g_call 40
   # Paid for a non-zero value transfer as part of the CALL operation.
@@ -62,8 +54,6 @@ defmodule EVM.Gas do
   @g_memory 3
   # The divsor of quadratic costs
   @g_quad_coeff_div 512
-  # Paid by all contract-creating transactions after the Homestead transition.
-  @g_txcreate 32000
   # Paid for every zero byte of data or code for a transaction.
   @g_txdatazero 4
   # Paid for every non-zero byte of data or code for a transaction.
@@ -107,7 +97,6 @@ defmodule EVM.Gas do
   @push_instrs Enum.map(0..32, fn n -> :"push#{n}" end)
   @dup_instrs Enum.map(0..16, fn n -> :"dup#{n}" end)
   @swap_instrs Enum.map(0..16, fn n -> :"swap#{n}" end)
-  @log_instrs Enum.map(0..4, fn n -> :"log#{n}" end)
   @w_very_low_instr [
                       :add,
                       :sub,
@@ -134,7 +123,6 @@ defmodule EVM.Gas do
   @w_high_instr [:jumpi]
   @w_extcode_instr [:extcodesize]
   @call_operations [:call, :callcode, :delegatecall]
-  @memory_operations [:mstore, :mstore8, :sha3, :codecopy, :extcodecopy, :calldatacopy, :mload]
 
   @doc """
   Returns the cost to execute the given a cycle of the VM. This is defined
@@ -417,6 +405,26 @@ defmodule EVM.Gas do
     @g_log + @g_logdata * size + @g_logtopic * 4
   end
 
+  def operation_cost(:create, _inputs, _machine_state, _exec_env) do
+    @g_create
+  end
+
+  def operation_cost(:blockhash, _inputs, _machine_state, _exec_env) do
+    @g_blockhash
+  end
+
+  def operation_cost(:balance, _inputs, _machine_state, _exec_env) do
+    @g_balance
+  end
+
+  def operation_cost(:sload, _inputs, _machine_state, _exec_env) do
+    @g_sload
+  end
+
+  def operation_cost(:jumpdest, _inputs, _machine_state, _exec_env) do
+    @g_jumpdest
+  end
+
   def operation_cost(operation, _inputs, _machine_state, _exec_env) do
     cond do
       operation in @w_very_low_instr -> @g_verylow
@@ -427,11 +435,6 @@ defmodule EVM.Gas do
       operation in @w_high_instr -> @g_high
       operation in @w_extcode_instr -> @g_extcode
       operation in @call_operations -> @g_call
-      operation == :create -> @g_create
-      operation == :blockhash -> @g_blockhash
-      operation == :balance -> @g_balance
-      operation == :sload -> @g_sload
-      operation == :jumpdest -> @g_jumpdest
       true -> 0
     end
   end
