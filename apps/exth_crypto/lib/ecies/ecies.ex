@@ -10,6 +10,7 @@ defmodule ExthCrypto.ECIES do
   alias ExthCrypto.MAC
   alias ExthCrypto.Hash
   alias ExthCrypto.Cipher
+  alias ExthCrypto.KDF.NistSp80056
 
   @curve_name :secp256k1
 
@@ -81,7 +82,7 @@ defmodule ExthCrypto.ECIES do
     # Next, derive a KDF twice the length as needed, with shared_info_1 as the extra_data
     # SEC1 - §5.1.3 - Step 5
     kdf =
-      ExthCrypto.KDF.NistSp80056.single_step_kdf(
+      NistSp80056.single_step_kdf(
         shared_secret,
         2 * params.key_len,
         params.hasher,
@@ -231,7 +232,7 @@ defmodule ExthCrypto.ECIES do
     # SEC1 - §5.1.4 - Step 6
     # Geneate our KDF as before
     kdf =
-      ExthCrypto.KDF.NistSp80056.single_step_kdf(
+      NistSp80056.single_step_kdf(
         shared_secret,
         2 * params.key_len,
         params.hasher,

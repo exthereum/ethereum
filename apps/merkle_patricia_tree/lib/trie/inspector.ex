@@ -4,8 +4,9 @@ defmodule MerklePatriciaTree.Trie.Inspector do
   of tries.
   """
   alias MerklePatriciaTree.Trie
-  alias MerklePatriciaTree.Trie.Node
   alias MerklePatriciaTree.Trie.Helper
+  alias MerklePatriciaTree.Trie.Node
+
   require Logger
 
   @doc """

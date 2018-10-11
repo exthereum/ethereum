@@ -10,9 +10,9 @@ defmodule MerklePatriciaTree.Trie.Destroyer do
   unit tests to this module.
 
   """
+  alias MerklePatriciaTree.ListHelper
   alias MerklePatriciaTree.Trie
   alias MerklePatriciaTree.Trie.Node
-  alias MerklePatriciaTree.ListHelper
 
   @empty_branch <<>>
 

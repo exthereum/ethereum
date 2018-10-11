@@ -1,5 +1,7 @@
 defmodule EVM.Operation.Logging do
-  alias EVM.{Operation, Memory, SubState}
+  alias EVM.Operation
+  alias EVM.Memory
+  alias EVM.SubState
 
   @doc """
   Append log record with no topics.

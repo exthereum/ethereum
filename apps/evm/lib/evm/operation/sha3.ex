@@ -1,7 +1,7 @@
 defmodule EVM.Operation.Sha3 do
-  alias EVM.Stack
   alias EVM.Helpers
   alias EVM.Operation
+  alias EVM.Stack
 
   @doc """
   Compute Keccak-256 hash.

@@ -3,7 +3,8 @@ defmodule EVM.LogEntry do
   This module contains functions to work with logs.
   """
 
-  alias EVM.{Address, Helpers}
+  alias EVM.Address
+  alias EVM.Helpers
 
   defstruct address: nil, topics: [], data: nil
 

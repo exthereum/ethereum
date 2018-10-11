@@ -74,7 +74,7 @@ defmodule EVM.Debugger do
 
       iex> EVM.Debugger.enable
       :ok
-      iex> EVM.Debugger.is_enabled?
+      iex> EVM.Debugger.enabled?
       true
       iex> EVM.Debugger.disable
       :ok
@@ -115,20 +115,20 @@ defmodule EVM.Debugger do
   ## Examples
 
       iex> Application.put_env(EVM.Debugger, :enabled, true)
-      iex> EVM.Debugger.is_enabled?
+      iex> EVM.Debugger.enabled?
       true
       iex> Application.put_env(EVM.Debugger, :enabled, false)
       :ok
 
       iex> Application.put_env(EVM.Debugger, :enabled, false)
-      iex> EVM.Debugger.is_enabled?
+      iex> EVM.Debugger.enabled?
       false
 
-      iex> EVM.Debugger.is_enabled?
+      iex> EVM.Debugger.enabled?
       false
   """
-  @spec is_enabled?() :: boolean()
-  def is_enabled? do
+  @spec enabled?() :: boolean()
+  def enabled? do
     Application.get_env(__MODULE__, :enabled, false)
   end
 
