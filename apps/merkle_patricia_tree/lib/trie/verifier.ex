@@ -33,15 +33,17 @@ defmodule MerklePatriciaTree.Trie.Verifier do
 
   defp verify_node(:empty, _trie, _dict, _values), do: :ok
 
-  defp verify_node({:leaf, k, v}, _trie, _dict, values) do
-    if v == "" do
-      {:error, "empty leaf value at #{inspect(k)}"}
-    else
-      if not Enum.member?(values, v) do
+  defp verify_node({:leaf, k, _v = ""}, _trie, _dict, _values) do
+    {:error, "empty leaf value at #{inspect(k)}"}
+  end
+
+  defp verify_node({:leaf, _k, v}, _trie, _dict, values) do
+    case Enum.member?(values, v) do
+      false ->
         {:error, "leaf value v does not appear in values (#{inspect(v)})"}
-      else
+
+      true ->
         :ok
-      end
     end
   end
 

@@ -45,11 +45,11 @@ defmodule ExWire.PeerSupervisor do
   """
   def connect(neighbour) do
     _ =
-      Logger.debug(
+      Logger.debug(fn ->
         "[Peer Supervisor] Starting TCP connection to neighbour #{
           neighbour.endpoint.ip |> ExWire.Struct.Endpoint.ip_to_string()
         }:#{neighbour.endpoint.tcp_port} (#{neighbour.node |> ExthCrypto.Math.bin_to_hex()})"
-      )
+      end)
 
     peer = ExWire.Struct.Peer.from_neighbour(neighbour)
 

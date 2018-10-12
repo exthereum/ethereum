@@ -81,7 +81,10 @@ defmodule ExWire.Packet.Transactions do
   @spec handle(ExWire.Packet.packet()) :: ExWire.Packet.handle_response()
   def handle(packet = %__MODULE__{}) do
     # TODO: Do.
-    _ = Logger.debug("[Packet] Peer sent #{Enum.count(packet.transactions)} transaction(s).")
+    _ =
+      Logger.debug(fn ->
+        "[Packet] Peer sent #{Enum.count(packet.transactions)} transaction(s)."
+      end)
 
     :ok
   end

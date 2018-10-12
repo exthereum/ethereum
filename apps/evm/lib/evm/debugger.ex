@@ -10,6 +10,8 @@ defmodule EVM.Debugger do
   alias EVM.ExecEnv
   alias EVM.MachineState
 
+  require Logger
+
   @commands [
     %Command{
       command: :next,
@@ -362,7 +364,9 @@ defmodule EVM.Debugger do
          exec_env,
          input_sequence
        ) do
-    IO.inspect([machine_state, sub_state, exec_env], limit: :infinity)
+    Logger.debug(fn ->
+      "Debugger output #{inspect(machine_state)} #{inspect(sub_state)} #{inspect(exec_env)}"
+    end)
 
     prompt(breakpoint, machine_state, sub_state, exec_env, input_sequence)
   end

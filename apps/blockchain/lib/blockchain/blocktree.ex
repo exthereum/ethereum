@@ -166,8 +166,9 @@ defmodule Blockchain.Blocktree do
       iex> Blockchain.Blocktree.verify_and_add_block(tree_1, chain, block_2, trie.db)
       {:invalid, [:invalid_difficulty, :invalid_gas_limit, :child_timestamp_invalid]}
   """
+
   @spec verify_and_add_block(t, Chain.t(), Block.t(), MerklePatriciaTree.DB.db(), boolean()) ::
-          {:ok, t} | :parent_not_found | {:invalid, [atom()]}
+          {:ok, t} | {:invalid, [atom()]}
   def verify_and_add_block(blocktree, chain, block, db, do_validate \\ true) do
     parent =
       case Block.get_parent_block(block, db) do
@@ -176,10 +177,7 @@ defmodule Blockchain.Blocktree do
         :not_found -> :parent_not_found
       end
 
-    case parent do
-      :parent_not_found -> :parent_not_found
-      _ -> do_verify_and_add_block(blocktree, chain, block, db, do_validate, parent)
-    end
+    do_verify_and_add_block(blocktree, chain, block, db, do_validate, parent)
   end
 
   @spec do_verify_and_add_block(

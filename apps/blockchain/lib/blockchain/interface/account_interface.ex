@@ -172,7 +172,10 @@ defimpl EVM.Interface.AccountInterface, for: Blockchain.Interface.AccountInterfa
 
   @spec account_exists?(EVM.Interface.AccountInterface.t(), EVM.address()) :: boolean()
   def account_exists?(account_interface, address) do
-    !!Blockchain.Account.get_account(account_interface.state, address)
+    case Blockchain.Account.get_account(account_interface.state, address) do
+      nil -> false
+      _ -> true
+    end
   end
 
   @doc """

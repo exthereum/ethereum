@@ -31,8 +31,7 @@ defmodule EVM.Helpers do
   @spec invert(map()) :: map()
   def invert(m) do
     m
-    |> Enum.into([])
-    |> Enum.map(fn {a, b} -> {b, a} end)
+    |> Enum.into([], fn {a, b} -> {b, a} end)
     |> Enum.into(%{})
   end
 

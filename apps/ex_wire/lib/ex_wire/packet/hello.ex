@@ -119,13 +119,15 @@ defmodule ExWire.Packet.Hello do
   """
   @spec handle(ExWire.Packet.packet()) :: ExWire.Packet.handle_response()
   def handle(packet = %__MODULE__{}) do
-    _ = if System.get_env("TRACE"), do: _ = Logger.debug("[Packet] Got Hello: #{inspect(packet)}")
+    _ =
+      if System.get_env("TRACE"),
+        do: _ = Logger.debug(fn -> "[Packet] Got Hello: #{inspect(packet)}" end)
 
     if packet.caps == [] do
       _ =
-        Logger.debug(
+        Logger.debug(fn ->
           "[Packet] Disconnecting due to no matching peer caps (#{inspect(packet.caps)})"
-        )
+        end)
 
       {:disconnect, :useless_peer}
     else
