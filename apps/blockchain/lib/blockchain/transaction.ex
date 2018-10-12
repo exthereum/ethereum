@@ -6,6 +6,7 @@ defmodule Blockchain.Transaction do
   """
 
   alias Blockchain.Account
+  alias Blockchain.Contract
   alias EVM.Block.Header
 
   defstruct nonce: 0,
@@ -323,35 +324,43 @@ defmodule Blockchain.Transaction do
       case trx.to do
         # Λ
         <<>> ->
-          Blockchain.Contract.create_contract(
-            state_0,
-            sender,
-            originator,
-            gas,
-            trx.gas_price,
-            trx.value,
-            trx.init,
-            stack_depth,
-            block_header
+          contract = %Contract{
+            state: state_0,
+            sender: sender,
+            originator: originator,
+            available_gas: gas,
+            gas_price: trx.gas_price,
+            stack_depth: stack_depth,
+            block_header: block_header,
+            value_in_wei: trx.value
+          }
+
+          Contract.create_contract(
+            contract,
+            trx.init
           )
 
         recipient ->
           # Note, we only want to take the first 3 items from the tuples, as designated Θ_3 in the literature
           # Θ_3
+          contract = %Contract{
+            state: state_0,
+            sender: sender,
+            originator: originator,
+            available_gas: gas,
+            gas_price: trx.gas_price,
+            stack_depth: stack_depth,
+            block_header: block_header,
+            value_in_wei: trx.value
+          }
+
           {state, remaining_gas_, sub_state_, _output} =
-            Blockchain.Contract.message_call(
-              state_0,
-              sender,
-              originator,
+            Contract.message_call(
+              contract,
               recipient,
               recipient,
-              gas,
-              trx.gas_price,
-              trx.value,
               apparent_value,
-              trx.data,
-              stack_depth,
-              block_header
+              trx.data
             )
 
           {state, remaining_gas_, sub_state_}

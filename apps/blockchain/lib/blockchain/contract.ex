@@ -5,7 +5,25 @@ defmodule Blockchain.Contract do
   Λ and Θ, as defined in Eq.(70) and described in detail
   in sections 7 and 8 of the Yellow Paper.
   """
+  defstruct state: nil,
+            sender: %{},
+            originator: %{},
+            available_gas: %{},
+            gas_price: [],
+            stack_depth: 0,
+            block_header: nil,
+            value_in_wei: nil
 
+  @type t :: %__MODULE__{
+          state: EVM.state(),
+          sender: EVM.address(),
+          originator: EVM.address(),
+          available_gas: EVM.Gas.t(),
+          gas_price: EVM.Gas.gas_price(),
+          stack_depth: integer(),
+          block_header: Header.t(),
+          value_in_wei: EVM.Wei.t()
+        }
   alias Blockchain.Account
   alias EVM.Block.Header
 
@@ -21,42 +39,43 @@ defmodule Blockchain.Contract do
   ## Examples
 
       iex> db = MerklePatriciaTree.Test.random_ets_db(:contract_create_test)
-      iex> {state, _gas, _sub_state} = MerklePatriciaTree.Trie.new(db)
-      ...> |> Blockchain.Account.put_account(<<0x10::160>>, %Blockchain.Account{balance: 11, nonce: 5})
-      ...> |> Blockchain.Contract.create_contract(<<0x10::160>>, <<0x10::160>>, 1000, 1, 5, EVM.MachineCode.compile([:push1, 3, :push1, 5, :add, :push1, 0x00, :mstore, :push1, 32, :push1, 0, :return]), 5, %EVM.Block.Header{nonce: 1})
+      iex> state = MerklePatriciaTree.Trie.new(db)
+      iex> state = Blockchain.Account.put_account(state, <<0x10::160>>, %Blockchain.Account{balance: 11, nonce: 5})
+      iex> endowment = 5
+      iex> contract = %Blockchain.Contract{state: state, sender: <<0x10::160>>, originator: <<0x10::160>>, available_gas: 1000, gas_price: 1, stack_depth: 5, block_header: %EVM.Block.Header{nonce: 1}, value_in_wei: endowment }
+      iex> init_code = EVM.MachineCode.compile([:push1, 3, :push1, 5, :add, :push1, 0x00, :mstore, :push1, 32, :push1, 0, :return])
+      iex> {resultant_state, _resultant_gas, _accrued_sub_state} = Blockchain.Contract.create_contract(contract, init_code)
       {
         %MerklePatriciaTree.Trie{db: {MerklePatriciaTree.DB.ETS, :contract_create_test}, root_hash: <<9, 235, 32, 146, 153, 242, 209, 192, 224, 61, 214, 174, 48, 24, 148, 28, 51, 254, 7, 82, 58, 82, 220, 157, 29, 159, 203, 51, 52, 240, 37, 122>>},
         976,
         %EVM.SubState{}
       }
-      iex> Blockchain.Account.get_accounts(state, [<<0x10::160>>, Blockchain.Contract.new_contract_address(<<0x10::160>>, 5)])
+      iex> Blockchain.Account.get_accounts(resultant_state, [<<0x10::160>>, Blockchain.Contract.new_contract_address(<<0x10::160>>, 5)])
       [%Blockchain.Account{balance: 6, nonce: 5}, %Blockchain.Account{balance: 5, code_hash: <<243, 247, 169, 254, 54, 79, 170, 185, 59, 33, 109, 165, 10, 50, 20, 21, 79, 34, 160, 162, 180, 21, 178, 58, 132, 200, 22, 158, 139, 99, 110, 227>>}]
-      iex> Blockchain.Account.get_machine_code(state, Blockchain.Contract.new_contract_address(<<0x10::160>>, 5))
+      iex> Blockchain.Account.get_machine_code(resultant_state, Blockchain.Contract.new_contract_address(<<0x10::160>>, 5))
       {:ok, <<0x08::256>>}
-      iex> MerklePatriciaTree.Trie.Inspector.all_keys(state) |> Enum.count
+      iex> MerklePatriciaTree.Trie.Inspector.all_keys(resultant_state) |> Enum.count
       2
   """
+
   @spec create_contract(
-          EVM.state(),
-          EVM.address(),
-          EVM.address(),
-          EVM.Gas.t(),
-          EVM.Gas.gas_price(),
-          EVM.Wei.t(),
-          EVM.MachineCode.t(),
-          integer(),
-          Header.t()
+          t,
+          EVM.MachineCode.t()
         ) :: {EVM.state(), EVM.Gas.t(), EVM.SubState.t()}
+
   def create_contract(
-        state,
-        sender,
-        originator,
-        available_gas,
-        gas_price,
-        endowment,
-        init_code,
-        stack_depth,
-        block_header
+        %__MODULE__{
+          state: state,
+          sender: sender,
+          originator: originator,
+          available_gas: available_gas,
+          gas_price: gas_price,
+          stack_depth: stack_depth,
+          block_header: block_header,
+          value_in_wei: endowment
+        },
+        # machine_code
+        init_code
       ) do
     sender_account = Account.get_account(state, sender)
     contract_address = new_contract_address(sender, sender_account.nonce)
@@ -118,11 +137,12 @@ defmodule Blockchain.Contract do
   ## Examples
 
       iex> db = MerklePatriciaTree.Test.random_ets_db(:message_call_test)
-      iex> {state, _gas, _sub_state, _output} = MerklePatriciaTree.Trie.new(db)
+      iex> state = MerklePatriciaTree.Trie.new(db)
       ...> |> Blockchain.Account.put_account(<<0x10::160>>, %Blockchain.Account{balance: 10})
       ...> |> Blockchain.Account.put_account(<<0x20::160>>, %Blockchain.Account{balance: 20})
       ...> |> Blockchain.Account.put_code(<<0x20::160>>, EVM.MachineCode.compile([:push1, 3, :push1, 5, :add, :push1, 0x00, :mstore, :push1, 32, :push1, 0, :return]))
-      ...> |> Blockchain.Contract.message_call(<<0x10::160>>, <<0x10::160>>, <<0x20::160>>, <<0x20::160>>, 1000, 1, 5, 5, <<1, 2, 3>>, 5, %EVM.Block.Header{nonce: 1})
+      ...> contract = %Blockchain.Contract{state: state, sender: <<0x10::160>>, originator: <<0x10::160>>, available_gas: 1000, gas_price: 1, stack_depth: 5, block_header: %EVM.Block.Header{nonce: 1}, value_in_wei: 5 }
+      ...> {state, _gas, _sub_state, _output} = Blockchain.Contract.message_call(contract, <<0x20::160>>, <<0x20::160>>, <<1, 2, 3>>, 5)
       {
         %MerklePatriciaTree.Trie{db: {MerklePatriciaTree.DB.ETS, :message_call_test}, root_hash: <<163, 151, 95, 0, 149, 63, 81, 220, 74, 101, 219, 175, 240, 97, 153, 167, 249, 229, 144, 75, 101, 233, 126, 177, 8, 188, 105, 165, 28, 248, 67, 156>>},
         976,
@@ -135,32 +155,27 @@ defmodule Blockchain.Contract do
       2
   """
   @spec message_call(
-          EVM.state(),
+          t,
           EVM.address(),
           EVM.address(),
-          EVM.address(),
-          EVM.address(),
-          EVM.Gas.t(),
-          EVM.Gas.gas_price(),
           EVM.Wei.t(),
-          EVM.Wei.t(),
-          binary(),
-          integer(),
-          Header.t()
+          binary()
         ) :: {EVM.state(), EVM.Gas.t(), EVM.SubState.t(), EVM.VM.output()}
   def message_call(
-        state,
-        sender,
-        originator,
+        %__MODULE__{
+          state: state,
+          sender: sender,
+          originator: originator,
+          available_gas: available_gas,
+          gas_price: gas_price,
+          stack_depth: stack_depth,
+          block_header: block_header,
+          value_in_wei: value
+        },
         recipient,
         contract,
-        available_gas,
-        gas_price,
-        value,
         apparent_value,
-        data,
-        stack_depth,
-        block_header
+        data
       ) do
     exec_fun = get_message_call_exec_fun(recipient)
 
@@ -211,26 +226,6 @@ defmodule Blockchain.Contract do
     |> ExRLP.encode()
     |> BitHelper.kec()
     |> BitHelper.mask_bitstring(160)
-  end
-
-  @doc """
-  Creates a blank contract prior to initialization code being run,
-  as defined in Eq.(83), Eq.(84) and Eq.(85) of the Yellow Paper.
-
-  We also indirectly cover Eq.(86)
-
-  ## Examples
-
-      iex> MerklePatriciaTree.Trie.new(MerklePatriciaTree.Test.random_ets_db())
-      ...> |> Blockchain.Account.put_account(<<0x01::160>>, %Blockchain.Account{balance: 10})
-      ...> |> Blockchain.Contract.create_blank_contract(<<0x02::160>>, <<0x01::160>>, 6)
-      ...> |> Blockchain.Account.get_accounts([<<0x01::160>>, <<0x02::160>>])
-      [%Blockchain.Account{balance: 4}, %Blockchain.Account{balance: 6}]
-  """
-  @spec create_blank_contract(EVM.state(), EVM.address(), EVM.address(), EVM.Wei.t()) ::
-          EVM.state()
-  def create_blank_contract(state, contract_address, sender, endowment) do
-    Account.transfer!(state, sender, contract_address, endowment)
   end
 
   @doc """
@@ -428,4 +423,25 @@ defmodule Blockchain.Contract do
           {EVM.state(), EVM.Gas.t(), EVM.SubState.t(), EVM.VM.output()}
   defp interpret_vm_result({gas, sub_state, exec_env, output}),
     do: {exec_env.account_interface.state, gas, sub_state, output}
+
+  '''
+  Creates a blank contract prior to initialization code being run,
+  as defined in Eq.(83), Eq.(84) and Eq.(85) of the Yellow Paper.
+
+  We also indirectly cover Eq.(86)
+
+  ## Examples
+
+      iex> MerklePatriciaTree.Trie.new(MerklePatriciaTree.Test.random_ets_db())
+      ...> |> Blockchain.Account.put_account(<<0x01::160>>, %Blockchain.Account{balance: 10})
+      ...> |> Blockchain.Contract.create_blank_contract(<<0x02::160>>, <<0x01::160>>, 6)
+      ...> |> Blockchain.Account.get_accounts([<<0x01::160>>, <<0x02::160>>])
+      [%Blockchain.Account{balance: 4}, %Blockchain.Account{balance: 6}]
+  '''
+
+  @spec create_blank_contract(EVM.state(), EVM.address(), EVM.address(), EVM.Wei.t()) ::
+          EVM.state()
+  defp create_blank_contract(state, contract_address, sender, endowment) do
+    Account.transfer!(state, sender, contract_address, endowment)
+  end
 end

@@ -20,6 +20,7 @@ end
 
 defimpl EVM.Interface.AccountInterface, for: EVM.Interface.Mock.MockAccountInterface do
   alias EVM.Block.Header
+  alias Blockchain.Contract
 
   @spec account_exists?(EVM.Interface.AccountInterface.t(), EVM.address()) :: boolean()
   def account_exists?(mock_account_interface, address) do
@@ -165,31 +166,19 @@ defimpl EVM.Interface.AccountInterface, for: EVM.Interface.Mock.MockAccountInter
 
   @spec message_call(
           EVM.Interface.AccountInterface.t(),
+          Contract.t(),
           EVM.address(),
           EVM.address(),
-          EVM.address(),
-          EVM.address(),
-          EVM.Gas.t(),
-          EVM.Gas.gas_price(),
           EVM.Wei.t(),
-          EVM.Wei.t(),
-          binary(),
-          integer(),
-          Header.t()
+          binary()
         ) :: {EVM.Interface.AccountInterface.t(), EVM.Gas.t(), EVM.SubState.t(), EVM.VM.output()}
   def message_call(
         mock_account_interface,
-        _sender,
-        _originator,
+        _contract0,
         _recipient,
         _contract,
-        _available_gas,
-        _gas_price,
-        _value,
         _apparent_value,
-        _data,
-        _stack_depth,
-        _block_header
+        _data
       ) do
     {
       mock_account_interface,

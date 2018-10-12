@@ -1,5 +1,6 @@
 defprotocol EVM.Interface.AccountInterface do
   alias EVM.Block.Header
+  alias Blockchain.Contract
 
   @moduledoc """
   Interface for interacting with accounts.
@@ -43,31 +44,19 @@ defprotocol EVM.Interface.AccountInterface do
 
   @spec message_call(
           t,
+          Contract.t(),
           EVM.address(),
           EVM.address(),
-          EVM.address(),
-          EVM.address(),
-          EVM.Gas.t(),
-          EVM.Gas.gas_price(),
           EVM.Wei.t(),
-          EVM.Wei.t(),
-          binary(),
-          integer(),
-          Header.t()
+          binary()
         ) :: {t, EVM.Gas.t(), EVM.SubState.t(), EVM.VM.output()}
   def message_call(
         t,
-        sender,
-        originator,
+        contract0,
         recipient,
         contract,
-        available_gas,
-        gas_price,
-        value,
         apparent_value,
-        data,
-        stack_depth,
-        block_header
+        data
       )
 
   @spec create_contract(
