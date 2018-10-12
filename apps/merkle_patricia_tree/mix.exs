@@ -10,6 +10,7 @@ defmodule MerklePatriciaTree.Mixfile do
       deps_path: "../../deps",
       lockfile: "../../mix.lock",
       elixir: "~> 1.7",
+      elixirc_options: [warnings_as_errors: true],
       description: "Ethereum's Merkle Patricia Trie data structure",
       package: [
         maintainers: ["Geoffrey Hayes", "Ayrat Badykov", "Mason Forest"],

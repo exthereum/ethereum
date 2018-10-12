@@ -42,7 +42,7 @@ defmodule HexPrefix do
       end
 
     # Group in pairs, we know it's even
-    Enum.reduce(nibbles |> Enum.chunk(2), base, fn [n1, n2], acc ->
+    Enum.reduce(nibbles |> Enum.chunk_every(2), base, fn [n1, n2], acc ->
       acc <> <<16 * n1 + n2::8>>
     end)
   end

@@ -6,7 +6,7 @@ defmodule Blockchain.TransactionTest do
   require Logger
 
   alias Blockchain.Transaction
-  alias Blockchain.Transaction.Signature
+  alias EVM.Block.Header
 
   # TODO: These eth common test cases have seemed to have moved or no longer
   #       exist. We should add them back when we discover where they moved to.
@@ -182,7 +182,7 @@ defmodule Blockchain.TransactionTest do
         })
 
       {state, gas_used, logs} =
-        Blockchain.Transaction.execute_transaction(account, trx, %Block.Header{
+        Blockchain.Transaction.execute_transaction(account, trx, %Header{
           beneficiary: beneficiary
         })
 
@@ -196,23 +196,5 @@ defmodule Blockchain.TransactionTest do
                  %Blockchain.Account{balance: 5}
                ]
     end
-  end
-
-  defp load_trx(trx_data) do
-    to = trx_data["to"] |> maybe_address
-    data = trx_data["data"] |> maybe_hex
-
-    %Blockchain.Transaction{
-      nonce: trx_data["nonce"] |> load_integer,
-      gas_price: trx_data["gasPrice"] |> load_integer,
-      gas_limit: trx_data["gasLimit"] |> load_integer,
-      to: to,
-      value: trx_data["value"] |> load_integer,
-      v: trx_data["v"] |> load_integer,
-      r: trx_data["r"] |> load_integer,
-      s: trx_data["s"] |> load_integer,
-      init: if(to == <<>>, do: data, else: <<>>),
-      data: if(to == <<>>, do: <<>>, else: data)
-    }
   end
 end

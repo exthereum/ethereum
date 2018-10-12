@@ -13,7 +13,7 @@ defmodule ExWire.Sync do
 
   require Logger
 
-  alias Block.Header
+  alias EVM.Block.Header
   alias ExWire.Struct.BlockQueue
   alias ExWire.Packet.BlockHeaders
   alias ExWire.Packet.BlockBodies
@@ -153,7 +153,7 @@ defmodule ExWire.Sync do
     next_number =
       case Blockchain.Blocktree.get_canonical_block(block_tree) do
         :root -> 0
-        %Blockchain.Block{header: %Block.Header{number: number}} -> number + 1
+        %Blockchain.Block{header: %Header{number: number}} -> number + 1
       end
 
     _ = Logger.debug(fn -> "[Sync] Requesting block #{next_number}" end)

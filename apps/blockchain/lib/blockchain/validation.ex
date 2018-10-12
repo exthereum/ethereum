@@ -24,7 +24,7 @@ defmodule Blockchain.Block.Validation do
       ...>       |> Blockchain.Transaction.Signature.sign_transaction(private_key)
       iex> state = MerklePatriciaTree.Trie.new(db)
       ...>         |> Blockchain.Account.put_account(sender, %Blockchain.Account{balance: 400_000, nonce: 5})
-      iex> parent_block = %Blockchain.Block{header: %Block.Header{number: 50, state_root: state.root_hash, difficulty: 50_000, timestamp: 9999, gas_limit: 125_001}}
+      iex> parent_block = %Blockchain.Block{header: %EVM.Block.Header{number: 50, state_root: state.root_hash, difficulty: 50_000, timestamp: 9999, gas_limit: 125_001}}
       iex> block = Blockchain.Block.gen_child_block(parent_block, chain, beneficiary: beneficiary, timestamp: 10000, gas_limit: 125_001)
       ...>         |> Blockchain.Block.add_transactions_to_block([trx], db)
       ...>         |> Blockchain.Block.add_rewards_to_block(db)
@@ -41,7 +41,7 @@ defmodule Blockchain.Block.Validation do
       ...>       |> Blockchain.Transaction.Signature.sign_transaction(private_key)
       iex> state = MerklePatriciaTree.Trie.new(db)
       ...>         |> Blockchain.Account.put_account(sender, %Blockchain.Account{balance: 400_000, nonce: 5})
-      iex> parent_block = %Blockchain.Block{header: %Block.Header{number: 50, state_root: state.root_hash, difficulty: 50_000, timestamp: 9999, gas_limit: 125_001}}
+      iex> parent_block = %Blockchain.Block{header: %EVM.Block.Header{number: 50, state_root: state.root_hash, difficulty: 50_000, timestamp: 9999, gas_limit: 125_001}}
       iex> block = Blockchain.Block.gen_child_block(parent_block, chain, beneficiary: beneficiary, timestamp: 10000, gas_limit: 125_001)
       ...>         |> Blockchain.Block.add_transactions_to_block([trx], db)
       iex> %{block | header: %{block.header | state_root: <<1,2,3>>, ommers_hash: <<2,3,4>>, transactions_root: <<3,4,5>>, receipts_root: <<4,5,6>>}}

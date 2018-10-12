@@ -3,7 +3,6 @@ defmodule EVM.Operation.EnvironmentalInformation do
   alias EVM.Stack
   alias EVM.Helpers
   alias EVM.Interface.AccountInterface
-  alias MerklePatriciaTree.Trie
 
   @doc """
   Get address of currently executing account.

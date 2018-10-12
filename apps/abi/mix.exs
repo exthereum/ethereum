@@ -11,6 +11,7 @@ defmodule ABI.Mixfile do
       lockfile: "../../mix.lock",
       elixir: "~> 1.7",
       description: "Ethereum's ABI Interface",
+      elixirc_options: [warnings_as_errors: true],
       package: [
         maintainers: ["Geoffrey Hayes", "Mason Fischer"],
         licenses: ["MIT"],

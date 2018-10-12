@@ -77,18 +77,18 @@ defmodule Blockchain.Blocktree do
       iex> Blockchain.Blocktree.new_tree() |> Blockchain.Blocktree.get_canonical_block()
       :root
 
-      iex> block_1 = %Blockchain.Block{block_hash: <<1>>, header: %Block.Header{number: 0, parent_hash: <<0::256>>, difficulty: 100}}
+      iex> block_1 = %Blockchain.Block{block_hash: <<1>>, header: %EVM.Block.Header{number: 0, parent_hash: <<0::256>>, difficulty: 100}}
       iex> Blockchain.Blocktree.new_tree()
       ...> |> Blockchain.Blocktree.add_block(block_1)
       ...> |> Blockchain.Blocktree.get_canonical_block()
-      %Blockchain.Block{block_hash: <<1>>, header: %Block.Header{difficulty: 100, number: 0, parent_hash: <<0::256>>}}
+      %Blockchain.Block{block_hash: <<1>>, header: %EVM.Block.Header{difficulty: 100, number: 0, parent_hash: <<0::256>>}}
 
-      iex> block_10 = %Blockchain.Block{block_hash: <<10>>, header: %Block.Header{number: 5, parent_hash: <<0::256>>, difficulty: 100}}
-      iex> block_20 = %Blockchain.Block{block_hash: <<20>>, header: %Block.Header{number: 6, parent_hash: <<10>>, difficulty: 110}}
-      iex> block_21 = %Blockchain.Block{block_hash: <<21>>, header: %Block.Header{number: 6, parent_hash: <<10>>, difficulty: 109}}
-      iex> block_30 = %Blockchain.Block{block_hash: <<30>>, header: %Block.Header{number: 7, parent_hash: <<20>>, difficulty: 120}}
-      iex> block_31 = %Blockchain.Block{block_hash: <<31>>, header: %Block.Header{number: 7, parent_hash: <<20>>, difficulty: 119}}
-      iex> block_41 = %Blockchain.Block{block_hash: <<41>>, header: %Block.Header{number: 8, parent_hash: <<30>>, difficulty: 129}}
+      iex> block_10 = %Blockchain.Block{block_hash: <<10>>, header: %EVM.Block.Header{number: 5, parent_hash: <<0::256>>, difficulty: 100}}
+      iex> block_20 = %Blockchain.Block{block_hash: <<20>>, header: %EVM.Block.Header{number: 6, parent_hash: <<10>>, difficulty: 110}}
+      iex> block_21 = %Blockchain.Block{block_hash: <<21>>, header: %EVM.Block.Header{number: 6, parent_hash: <<10>>, difficulty: 109}}
+      iex> block_30 = %Blockchain.Block{block_hash: <<30>>, header: %EVM.Block.Header{number: 7, parent_hash: <<20>>, difficulty: 120}}
+      iex> block_31 = %Blockchain.Block{block_hash: <<31>>, header: %EVM.Block.Header{number: 7, parent_hash: <<20>>, difficulty: 119}}
+      iex> block_41 = %Blockchain.Block{block_hash: <<41>>, header: %EVM.Block.Header{number: 8, parent_hash: <<30>>, difficulty: 129}}
       iex> Blockchain.Blocktree.new_tree()
       ...> |> Blockchain.Blocktree.add_block(block_10)
       ...> |> Blockchain.Blocktree.add_block(block_20)
@@ -97,7 +97,7 @@ defmodule Blockchain.Blocktree do
       ...> |> Blockchain.Blocktree.add_block(block_41)
       ...> |> Blockchain.Blocktree.add_block(block_21)
       ...> |> Blockchain.Blocktree.get_canonical_block()
-      %Blockchain.Block{block_hash: <<41>>, header: %Block.Header{difficulty: 129, number: 8, parent_hash: <<30>>}}
+      %Blockchain.Block{block_hash: <<41>>, header: %EVM.Block.Header{difficulty: 129, number: 8, parent_hash: <<30>>}}
   """
   @spec get_canonical_block(t) :: :root | Block.t()
   def get_canonical_block(blocktree) do
@@ -126,7 +126,7 @@ defmodule Blockchain.Blocktree do
       # For a genesis block
       iex> trie = MerklePatriciaTree.Trie.new(MerklePatriciaTree.Test.random_ets_db())
       iex> chain = Blockchain.Chain.load_chain(:ropsten)
-      iex> gen_block = %Blockchain.Block{header: %Block.Header{number: 0, parent_hash: <<0::256>>, beneficiary: <<2, 3, 4>>, difficulty: 0x100000, gas_limit: 0x1000000, timestamp: 11, mix_hash: <<1>>, nonce: <<2>>, state_root: <<33, 123, 11, 188, 251, 114, 226, 213, 126, 40, 243, 60, 179, 97, 185, 152, 53, 19, 23, 119, 85, 220, 63, 51, 206, 62, 112, 34, 237, 98, 183, 123>>}}
+      iex> gen_block = %Blockchain.Block{header: %EVM.Block.Header{number: 0, parent_hash: <<0::256>>, beneficiary: <<2, 3, 4>>, difficulty: 0x100000, gas_limit: 0x1000000, timestamp: 11, mix_hash: <<1>>, nonce: <<2>>, state_root: <<33, 123, 11, 188, 251, 114, 226, 213, 126, 40, 243, 60, 179, 97, 185, 152, 53, 19, 23, 119, 85, 220, 63, 51, 206, 62, 112, 34, 237, 98, 183, 123>>}}
       iex> tree = Blockchain.Blocktree.new_tree()
       iex> {:ok, tree_1} = Blockchain.Blocktree.verify_and_add_block(tree, chain, gen_block, trie.db)
       iex> Blockchain.Blocktree.inspect_tree(tree_1)
@@ -139,8 +139,8 @@ defmodule Blockchain.Blocktree do
       iex> chain = Blockchain.Chain.load_chain(:ropsten)
       iex> parent = Blockchain.Block.gen_genesis_block(chain, trie.db)
       iex> child = Blockchain.Block.gen_child_block(parent, chain)
-      iex> block_1 = %Blockchain.Block{header: %Block.Header{number: 0, parent_hash: <<0::256>>, beneficiary: <<2, 3, 4>>, difficulty: 1_048_576, timestamp: 0, gas_limit: 200_000, mix_hash: <<1>>, nonce: <<2>>, state_root: parent.header.state_root}}
-      iex> block_2 = %Blockchain.Block{header: %Block.Header{number: 1, parent_hash: block_1 |> Blockchain.Block.hash, beneficiary: <<2::160>>, difficulty: 997_888, timestamp: 1_479_642_530, gas_limit: 200_000, mix_hash: <<1>>, nonce: <<2>>, state_root: child.header.state_root}} |> Blockchain.Block.add_rewards_to_block(trie.db)
+      iex> block_1 = %Blockchain.Block{header: %EVM.Block.Header{number: 0, parent_hash: <<0::256>>, beneficiary: <<2, 3, 4>>, difficulty: 1_048_576, timestamp: 0, gas_limit: 200_000, mix_hash: <<1>>, nonce: <<2>>, state_root: parent.header.state_root}}
+      iex> block_2 = %Blockchain.Block{header: %EVM.Block.Header{number: 1, parent_hash: block_1 |> Blockchain.Block.hash, beneficiary: <<2::160>>, difficulty: 997_888, timestamp: 1_479_642_530, gas_limit: 200_000, mix_hash: <<1>>, nonce: <<2>>, state_root: child.header.state_root}} |> Blockchain.Block.add_rewards_to_block(trie.db)
       iex> tree = Blockchain.Blocktree.new_tree()
       iex> {:ok, tree_1} = Blockchain.Blocktree.verify_and_add_block(tree, chain, block_1, trie.db)
       iex> {:ok, tree_2} = Blockchain.Blocktree.verify_and_add_block(tree_1, chain, block_2, trie.db)
@@ -159,8 +159,8 @@ defmodule Blockchain.Blocktree do
       iex> trie = MerklePatriciaTree.Trie.new(MerklePatriciaTree.Test.random_ets_db())
       iex> chain = Blockchain.Chain.load_chain(:ropsten)
       iex> parent = Blockchain.Block.gen_genesis_block(chain, trie.db)
-      iex> block_1 = %Blockchain.Block{header: %Block.Header{number: 0, parent_hash: <<0::256>>, beneficiary: <<2, 3, 4>>, difficulty: 1_048_576, timestamp: 11, gas_limit: 200_000, mix_hash: <<1>>, nonce: <<2>>, state_root: parent.header.state_root}}
-      iex> block_2 = %Blockchain.Block{header: %Block.Header{number: 1, parent_hash: block_1 |> Blockchain.Block.hash, beneficiary: <<2, 3, 4>>, difficulty: 110, timestamp: 11, mix_hash: <<1>>, nonce: <<2>>}}
+      iex> block_1 = %Blockchain.Block{header: %EVM.Block.Header{number: 0, parent_hash: <<0::256>>, beneficiary: <<2, 3, 4>>, difficulty: 1_048_576, timestamp: 11, gas_limit: 200_000, mix_hash: <<1>>, nonce: <<2>>, state_root: parent.header.state_root}}
+      iex> block_2 = %Blockchain.Block{header: %EVM.Block.Header{number: 1, parent_hash: block_1 |> Blockchain.Block.hash, beneficiary: <<2, 3, 4>>, difficulty: 110, timestamp: 11, mix_hash: <<1>>, nonce: <<2>>}}
       iex> tree = Blockchain.Blocktree.new_tree()
       iex> {:ok, tree_1} = Blockchain.Blocktree.verify_and_add_block(tree, chain, block_1, trie.db)
       iex> Blockchain.Blocktree.verify_and_add_block(tree_1, chain, block_2, trie.db)
@@ -215,8 +215,8 @@ defmodule Blockchain.Blocktree do
 
   ## Examples
 
-      iex> block_1 = %Blockchain.Block{block_hash: <<1>>, header: %Block.Header{number: 5, parent_hash: <<0::256>>, difficulty: 100}}
-      iex> block_2 = %Blockchain.Block{block_hash: <<2>>, header: %Block.Header{number: 6, parent_hash: <<1>>, difficulty: 110}}
+      iex> block_1 = %Blockchain.Block{block_hash: <<1>>, header: %EVM.Block.Header{number: 5, parent_hash: <<0::256>>, difficulty: 100}}
+      iex> block_2 = %Blockchain.Block{block_hash: <<2>>, header: %EVM.Block.Header{number: 6, parent_hash: <<1>>, difficulty: 110}}
       iex> Blockchain.Blocktree.new_tree()
       ...> |> Blockchain.Blocktree.add_block(block_1)
       ...> |> Blockchain.Blocktree.add_block(block_2)
@@ -224,11 +224,11 @@ defmodule Blockchain.Blocktree do
         block: :root,
         children: %{
           <<1>> => %Blockchain.Blocktree{
-            block: %Blockchain.Block{block_hash: <<1>>, header: %Block.Header{difficulty: 100, number: 5, parent_hash: <<0::256>>}},
+            block: %Blockchain.Block{block_hash: <<1>>, header: %EVM.Block.Header{difficulty: 100, number: 5, parent_hash: <<0::256>>}},
             children: %{
               <<2>> =>
                 %Blockchain.Blocktree{
-                  block: %Blockchain.Block{block_hash: <<2>>, header: %Block.Header{difficulty: 110, number: 6, parent_hash: <<1>>}},
+                  block: %Blockchain.Block{block_hash: <<2>>, header: %EVM.Block.Header{difficulty: 110, number: 6, parent_hash: <<1>>}},
                   children: %{},
                   parent_map: %{},
                   total_difficulty: 110

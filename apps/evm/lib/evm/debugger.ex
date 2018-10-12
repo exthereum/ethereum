@@ -432,7 +432,7 @@ defmodule EVM.Debugger do
     IO.puts("")
 
     for {chunk, n} <-
-          Enum.chunk(memory |> String.codepoints(), @chunk_size, @chunk_size, [])
+          Enum.chunk_every(memory |> String.codepoints(), @chunk_size, @chunk_size, [])
           |> Enum.with_index() do
       offset = n * @chunk_size
 
