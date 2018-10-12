@@ -1,7 +1,7 @@
 defmodule Blockchain.StateTest do
   alias MerklePatriciaTree.Trie
   alias Blockchain.Account
-
+  alias EVM.Block.Header
   use EthCommonTest.Harness
   use ExUnit.Case, async: true
 
@@ -31,7 +31,7 @@ defmodule Blockchain.StateTest do
           )
 
         {state, _, _} =
-          Blockchain.Transaction.execute_transaction(state, transaction, %Block.Header{
+          Blockchain.Transaction.execute_transaction(state, transaction, %Header{
             beneficiary: maybe_hex(test["env"]["currentCoinbase"])
           })
 

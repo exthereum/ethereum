@@ -17,7 +17,7 @@ defmodule ExWire.RemoteConnectionTest do
 
   alias ExWire.Packet
   alias ExWire.Adapter.TCP
-
+  alias EVM.Block.Header
   @moduletag integration: true
   @moduletag network: true
 
@@ -175,7 +175,7 @@ defmodule ExWire.RemoteConnectionTest do
     receive do
       {:incoming_packet, _packet = %Packet.BlockHeaders{headers: [header]}} ->
         ExWire.Adapter.TCP.send_packet(client_pid, %ExWire.Packet.GetBlockBodies{
-          hashes: [header |> Block.Header.hash()]
+          hashes: [header |> Header.hash()]
         })
 
         receive_block_bodies(client_pid)

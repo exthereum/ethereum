@@ -7,6 +7,7 @@ defmodule Ethereum.MixProject do
       version: "0.2.0",
       elixir: "~> 1.7",
       description: "Exthereum - The Elixir Ethereum Client",
+      elixirc_options: [warnings_as_errors: true],
       package: [
         maintainers: [
           "Geoffrey Hayes",

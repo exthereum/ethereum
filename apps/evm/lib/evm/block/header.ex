@@ -1,8 +1,7 @@
-defmodule Block.Header do
+defmodule EVM.Block.Header do
   @moduledoc """
   This structure codifies the header of a block in the blockchain.
   """
-
   @empty_trie MerklePatriciaTree.Trie.empty_trie_root_hash()
   @empty_keccak [] |> ExRLP.encode() |> :keccakf1600.sha3_256()
 
@@ -91,7 +90,7 @@ defmodule Block.Header do
 
   ## Examples
 
-      iex> Block.Header.serialize(%Block.Header{parent_hash: <<1::256>>, ommers_hash: <<2::256>>, beneficiary: <<3::160>>, state_root: <<4::256>>, transactions_root: <<5::256>>, receipts_root: <<6::256>>, logs_bloom: <<>>, difficulty: 5, number: 1, gas_limit: 5, gas_used: 3, timestamp: 6, extra_data: "Hi mom", mix_hash: <<7::256>>, nonce: <<8::64>>})
+      iex> EVM.Block.Header.serialize(%EVM.Block.Header{parent_hash: <<1::256>>, ommers_hash: <<2::256>>, beneficiary: <<3::160>>, state_root: <<4::256>>, transactions_root: <<5::256>>, receipts_root: <<6::256>>, logs_bloom: <<>>, difficulty: 5, number: 1, gas_limit: 5, gas_used: 3, timestamp: 6, extra_data: "Hi mom", mix_hash: <<7::256>>, nonce: <<8::64>>})
       [<<1::256>>, <<2::256>>, <<3::160>>, <<4::256>>, <<5::256>>, <<6::256>>, <<>>, 5, 1, 5, 3, 6, "Hi mom", <<7::256>>, <<8::64>>]
   """
   @spec serialize(t) :: ExRLP.t()
@@ -122,8 +121,8 @@ defmodule Block.Header do
 
   ## Examples
 
-      iex> Block.Header.deserialize([<<1::256>>, <<2::256>>, <<3::160>>, <<4::256>>, <<5::256>>, <<6::256>>, <<>>, <<5>>, <<1>>, <<5>>, <<3>>, <<6>>, "Hi mom", <<7::256>>, <<8::64>>])
-      %Block.Header{parent_hash: <<1::256>>, ommers_hash: <<2::256>>, beneficiary: <<3::160>>, state_root: <<4::256>>, transactions_root: <<5::256>>, receipts_root: <<6::256>>, logs_bloom: <<>>, difficulty: 5, number: 1, gas_limit: 5, gas_used: 3, timestamp: 6, extra_data: "Hi mom", mix_hash: <<7::256>>, nonce: <<8::64>>}
+      iex> EVM.Block.Header.deserialize([<<1::256>>, <<2::256>>, <<3::160>>, <<4::256>>, <<5::256>>, <<6::256>>, <<>>, <<5>>, <<1>>, <<5>>, <<3>>, <<6>>, "Hi mom", <<7::256>>, <<8::64>>])
+      %EVM.Block.Header{parent_hash: <<1::256>>, ommers_hash: <<2::256>>, beneficiary: <<3::160>>, state_root: <<4::256>>, transactions_root: <<5::256>>, receipts_root: <<6::256>>, logs_bloom: <<>>, difficulty: 5, number: 1, gas_limit: 5, gas_used: 3, timestamp: 6, extra_data: "Hi mom", mix_hash: <<7::256>>, nonce: <<8::64>>}
   """
   @spec deserialize(ExRLP.t()) :: t
   def deserialize(rlp) do
@@ -171,12 +170,12 @@ defmodule Block.Header do
 
   ## Examples
 
-      iex> %Block.Header{number: 5, parent_hash: <<1, 2, 3>>, beneficiary: <<2, 3, 4>>, difficulty: 100, timestamp: 11, mix_hash: <<1>>, nonce: <<2>>}
-      ...> |> Block.Header.hash()
+      iex> %EVM.Block.Header{number: 5, parent_hash: <<1, 2, 3>>, beneficiary: <<2, 3, 4>>, difficulty: 100, timestamp: 11, mix_hash: <<1>>, nonce: <<2>>}
+      ...> |> EVM.Block.Header.hash()
       <<78, 28, 127, 10, 192, 253, 127, 239, 254, 179, 39, 34, 245, 44, 152, 98, 128, 71, 238, 155, 100, 161, 199, 71, 243, 223, 172, 191, 74, 99, 128, 63>>
 
-      iex> %Block.Header{number: 0, parent_hash: <<1, 2, 3>>, beneficiary: <<2, 3, 4>>, difficulty: 100, timestamp: 11, mix_hash: <<1>>, nonce: <<2>>}
-      ...> |> Block.Header.hash()
+      iex> %EVM.Block.Header{number: 0, parent_hash: <<1, 2, 3>>, beneficiary: <<2, 3, 4>>, difficulty: 100, timestamp: 11, mix_hash: <<1>>, nonce: <<2>>}
+      ...> |> EVM.Block.Header.hash()
       <<218, 225, 46, 241, 196, 160, 136, 96, 109, 216, 73, 167, 92, 174, 91, 228, 85, 112, 234, 129, 99, 200, 158, 61, 223, 166, 165, 132, 187, 24, 142, 193>>
   """
   @spec hash(t) :: EVM.hash()
@@ -190,19 +189,19 @@ defmodule Block.Header do
 
   ## Examples
 
-      iex> Block.Header.is_before_homestead?(%Block.Header{number: 5})
+      iex> EVM.Block.Header.is_before_homestead?(%EVM.Block.Header{number: 5})
       true
 
-      iex> Block.Header.is_before_homestead?(%Block.Header{number: 5_000_000})
+      iex> EVM.Block.Header.is_before_homestead?(%EVM.Block.Header{number: 5_000_000})
       false
 
-      iex> Block.Header.is_before_homestead?(%Block.Header{number: 1_150_000})
+      iex> EVM.Block.Header.is_before_homestead?(%EVM.Block.Header{number: 1_150_000})
       false
 
-      iex> Block.Header.is_before_homestead?(%Block.Header{number: 5}, 6)
+      iex> EVM.Block.Header.is_before_homestead?(%EVM.Block.Header{number: 5}, 6)
       true
 
-      iex> Block.Header.is_before_homestead?(%Block.Header{number: 5}, 4)
+      iex> EVM.Block.Header.is_before_homestead?(%EVM.Block.Header{number: 5}, 4)
       false
   """
   @spec is_before_homestead?(t, integer()) :: boolean()
@@ -216,16 +215,16 @@ defmodule Block.Header do
 
   ## Examples
 
-      iex> Block.Header.is_after_homestead?(%Block.Header{number: 5})
+      iex> EVM.Block.Header.is_after_homestead?(%EVM.Block.Header{number: 5})
       false
 
-      iex> Block.Header.is_after_homestead?(%Block.Header{number: 5_000_000})
+      iex> EVM.Block.Header.is_after_homestead?(%EVM.Block.Header{number: 5_000_000})
       true
 
-      iex> Block.Header.is_after_homestead?(%Block.Header{number: 1_150_000})
+      iex> EVM.Block.Header.is_after_homestead?(%EVM.Block.Header{number: 1_150_000})
       true
 
-      iex> Block.Header.is_after_homestead?(%Block.Header{number: 5}, 6)
+      iex> EVM.Block.Header.is_after_homestead?(%EVM.Block.Header{number: 5}, 6)
       false
   """
   @spec is_after_homestead?(t, integer()) :: boolean()
@@ -242,28 +241,28 @@ defmodule Block.Header do
 
   ## Examples
 
-      iex> Block.Header.is_valid?(%Block.Header{number: 0, difficulty: 131_072, gas_limit: 200_000}, nil)
+      iex> EVM.Block.Header.is_valid?(%EVM.Block.Header{number: 0, difficulty: 131_072, gas_limit: 200_000}, nil)
       :valid
 
-      iex> Block.Header.is_valid?(%Block.Header{number: 0, difficulty: 5, gas_limit: 5}, nil, true)
+      iex> EVM.Block.Header.is_valid?(%EVM.Block.Header{number: 0, difficulty: 5, gas_limit: 5}, nil, true)
       {:invalid, [:invalid_difficulty, :invalid_gas_limit]}
 
-      iex> Block.Header.is_valid?(%Block.Header{number: 1, difficulty: 131_136, gas_limit: 200_000, timestamp: 65}, %Block.Header{number: 0, difficulty: 131_072, gas_limit: 200_000, timestamp: 55})
+      iex> EVM.Block.Header.is_valid?(%EVM.Block.Header{number: 1, difficulty: 131_136, gas_limit: 200_000, timestamp: 65}, %EVM.Block.Header{number: 0, difficulty: 131_072, gas_limit: 200_000, timestamp: 55})
       :valid
 
-      iex> Block.Header.is_valid?(%Block.Header{number: 1, difficulty: 131_000, gas_limit: 200_000, timestamp: 65}, %Block.Header{number: 0, difficulty: 131_072, gas_limit: 200_000, timestamp: 55}, true)
+      iex> EVM.Block.Header.is_valid?(%EVM.Block.Header{number: 1, difficulty: 131_000, gas_limit: 200_000, timestamp: 65}, %EVM.Block.Header{number: 0, difficulty: 131_072, gas_limit: 200_000, timestamp: 55}, true)
       {:invalid, [:invalid_difficulty]}
 
-      iex> Block.Header.is_valid?(%Block.Header{number: 1, difficulty: 131_136, gas_limit: 200_000, timestamp: 45}, %Block.Header{number: 0, difficulty: 131_072, gas_limit: 200_000, timestamp: 55})
+      iex> EVM.Block.Header.is_valid?(%EVM.Block.Header{number: 1, difficulty: 131_136, gas_limit: 200_000, timestamp: 45}, %EVM.Block.Header{number: 0, difficulty: 131_072, gas_limit: 200_000, timestamp: 55})
       {:invalid, [:child_timestamp_invalid]}
 
-      iex> Block.Header.is_valid?(%Block.Header{number: 1, difficulty: 131_136, gas_limit: 300_000, timestamp: 65}, %Block.Header{number: 0, difficulty: 131_072, gas_limit: 200_000, timestamp: 55})
+      iex> EVM.Block.Header.is_valid?(%EVM.Block.Header{number: 1, difficulty: 131_136, gas_limit: 300_000, timestamp: 65}, %EVM.Block.Header{number: 0, difficulty: 131_072, gas_limit: 200_000, timestamp: 55})
       {:invalid, [:invalid_gas_limit]}
 
-      iex> Block.Header.is_valid?(%Block.Header{number: 2, difficulty: 131_136, gas_limit: 200_000, timestamp: 65}, %Block.Header{number: 0, difficulty: 131_072, gas_limit: 200_000, timestamp: 55})
+      iex> EVM.Block.Header.is_valid?(%EVM.Block.Header{number: 2, difficulty: 131_136, gas_limit: 200_000, timestamp: 65}, %EVM.Block.Header{number: 0, difficulty: 131_072, gas_limit: 200_000, timestamp: 55})
       {:invalid, [:child_number_invalid]}
 
-      iex> Block.Header.is_valid?(%Block.Header{number: 1, difficulty: 131_136, gas_limit: 200_000, timestamp: 65, extra_data: "0123456789012345678901234567890123456789"}, %Block.Header{number: 0, difficulty: 131_072, gas_limit: 200_000, timestamp: 55})
+      iex> EVM.Block.Header.is_valid?(%EVM.Block.Header{number: 1, difficulty: 131_136, gas_limit: 200_000, timestamp: 65, extra_data: "0123456789012345678901234567890123456789"}, %EVM.Block.Header{number: 0, difficulty: 131_072, gas_limit: 200_000, timestamp: 55})
       {:invalid, [:extra_data_too_large]}
 
       # TODO: Add tests for setting homestead_block
@@ -340,7 +339,7 @@ defmodule Block.Header do
 
   ## Examples
 
-      iex> Block.Header.available_gas(%Block.Header{gas_limit: 50_000, gas_used: 30_000})
+      iex> EVM.Block.Header.available_gas(%EVM.Block.Header{gas_limit: 50_000, gas_used: 30_000})
       20_000
   """
   @spec available_gas(t) :: EVM.Gas.t()
@@ -354,46 +353,46 @@ defmodule Block.Header do
 
   ## Examples
 
-      iex> Block.Header.get_difficulty(
-      ...>   %Block.Header{number: 0, timestamp: 55},
+      iex> EVM.Block.Header.get_difficulty(
+      ...>   %EVM.Block.Header{number: 0, timestamp: 55},
       ...>   nil
       ...> )
       131_072
 
-      iex> Block.Header.get_difficulty(
-      ...>   %Block.Header{number: 1, timestamp: 1479642530},
-      ...>   %Block.Header{number: 0, timestamp: 0, difficulty: 1_048_576}
+      iex> EVM.Block.Header.get_difficulty(
+      ...>   %EVM.Block.Header{number: 1, timestamp: 1479642530},
+      ...>   %EVM.Block.Header{number: 0, timestamp: 0, difficulty: 1_048_576}
       ...> )
       1_048_064
 
-      iex> Block.Header.get_difficulty(
-      ...>  %Block.Header{number: 33, timestamp: 66},
-      ...>  %Block.Header{number: 32, timestamp: 55, difficulty: 300_000}
+      iex> EVM.Block.Header.get_difficulty(
+      ...>  %EVM.Block.Header{number: 33, timestamp: 66},
+      ...>  %EVM.Block.Header{number: 32, timestamp: 55, difficulty: 300_000}
       ...> )
       300_146
 
-      iex> Block.Header.get_difficulty(
-      ...>  %Block.Header{number: 33, timestamp: 88},
-      ...>  %Block.Header{number: 32, timestamp: 55, difficulty: 300_000}
+      iex> EVM.Block.Header.get_difficulty(
+      ...>  %EVM.Block.Header{number: 33, timestamp: 88},
+      ...>  %EVM.Block.Header{number: 32, timestamp: 55, difficulty: 300_000}
       ...> )
       299_854
 
       # TODO: Is this right? These numbers are quite a jump
-      iex> Block.Header.get_difficulty(
-      ...>  %Block.Header{number: 3_000_001, timestamp: 66},
-      ...>  %Block.Header{number: 3_000_000, timestamp: 55, difficulty: 300_000}
+      iex> EVM.Block.Header.get_difficulty(
+      ...>  %EVM.Block.Header{number: 3_000_001, timestamp: 66},
+      ...>  %EVM.Block.Header{number: 3_000_000, timestamp: 55, difficulty: 300_000}
       ...> )
       268_735_456
 
-      iex> Block.Header.get_difficulty(
-      ...>  %Block.Header{number: 3_000_001, timestamp: 155},
-      ...>  %Block.Header{number: 3_000_000, timestamp: 55, difficulty: 300_000}
+      iex> EVM.Block.Header.get_difficulty(
+      ...>  %EVM.Block.Header{number: 3_000_001, timestamp: 155},
+      ...>  %EVM.Block.Header{number: 3_000_000, timestamp: 55, difficulty: 300_000}
       ...> )
       268_734_142
 
       Test actual Ropsten genesis block
-      iex> Block.Header.get_difficulty(
-      ...>   %Block.Header{number: 0, timestamp: 0},
+      iex> EVM.Block.Header.get_difficulty(
+      ...>   %EVM.Block.Header{number: 0, timestamp: 0},
       ...>   nil,
       ...>   0x100000,
       ...>   0x020000,
@@ -403,9 +402,9 @@ defmodule Block.Header do
       1_048_576
 
       # Test actual Ropsten first block
-      iex> Block.Header.get_difficulty(
-      ...>   %Block.Header{number: 1, timestamp: 1_479_642_530},
-      ...>   %Block.Header{number: 0, timestamp: 0, difficulty: 1_048_576},
+      iex> EVM.Block.Header.get_difficulty(
+      ...>   %EVM.Block.Header{number: 1, timestamp: 1_479_642_530},
+      ...>   %EVM.Block.Header{number: 0, timestamp: 0, difficulty: 1_048_576},
       ...>   0x100000,
       ...>   0x020000,
       ...>   0x0800,
@@ -490,31 +489,31 @@ defmodule Block.Header do
 
   ## Examples
 
-      iex> Block.Header.is_gas_limit_valid?(1_000_000, nil)
+      iex> EVM.Block.Header.is_gas_limit_valid?(1_000_000, nil)
       true
 
-      iex> Block.Header.is_gas_limit_valid?(1_000, nil)
+      iex> EVM.Block.Header.is_gas_limit_valid?(1_000, nil)
       false
 
-      iex> Block.Header.is_gas_limit_valid?(1_000_000, 1_000_000)
+      iex> EVM.Block.Header.is_gas_limit_valid?(1_000_000, 1_000_000)
       true
 
-      iex> Block.Header.is_gas_limit_valid?(1_000_000, 2_000_000)
+      iex> EVM.Block.Header.is_gas_limit_valid?(1_000_000, 2_000_000)
       false
 
-      iex> Block.Header.is_gas_limit_valid?(1_000_000, 500_000)
+      iex> EVM.Block.Header.is_gas_limit_valid?(1_000_000, 500_000)
       false
 
-      iex> Block.Header.is_gas_limit_valid?(1_000_000, 999_500)
+      iex> EVM.Block.Header.is_gas_limit_valid?(1_000_000, 999_500)
       true
 
-      iex> Block.Header.is_gas_limit_valid?(1_000_000, 999_000)
+      iex> EVM.Block.Header.is_gas_limit_valid?(1_000_000, 999_000)
       false
 
-      iex> Block.Header.is_gas_limit_valid?(1_000_000, 2_000_000, 1)
+      iex> EVM.Block.Header.is_gas_limit_valid?(1_000_000, 2_000_000, 1)
       true
 
-      iex> Block.Header.is_gas_limit_valid?(1_000, nil, 1024, 500)
+      iex> EVM.Block.Header.is_gas_limit_valid?(1_000, nil, 1024, 500)
       true
   """
   @spec is_gas_limit_valid?(EVM.Gas.t(), EVM.Gas.t() | nil) :: boolean()

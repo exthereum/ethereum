@@ -7,7 +7,7 @@ defmodule Blockchain.Contract do
   """
 
   alias Blockchain.Account
-  alias Block.Header
+  alias EVM.Block.Header
 
   @doc """
   Creates a new contract, as defined in Section 7 Eq.(81) and Eq.(87) of the Yellow Paper as Λ.
@@ -23,7 +23,7 @@ defmodule Blockchain.Contract do
       iex> db = MerklePatriciaTree.Test.random_ets_db(:contract_create_test)
       iex> {state, _gas, _sub_state} = MerklePatriciaTree.Trie.new(db)
       ...> |> Blockchain.Account.put_account(<<0x10::160>>, %Blockchain.Account{balance: 11, nonce: 5})
-      ...> |> Blockchain.Contract.create_contract(<<0x10::160>>, <<0x10::160>>, 1000, 1, 5, EVM.MachineCode.compile([:push1, 3, :push1, 5, :add, :push1, 0x00, :mstore, :push1, 32, :push1, 0, :return]), 5, %Block.Header{nonce: 1})
+      ...> |> Blockchain.Contract.create_contract(<<0x10::160>>, <<0x10::160>>, 1000, 1, 5, EVM.MachineCode.compile([:push1, 3, :push1, 5, :add, :push1, 0x00, :mstore, :push1, 32, :push1, 0, :return]), 5, %EVM.Block.Header{nonce: 1})
       {
         %MerklePatriciaTree.Trie{db: {MerklePatriciaTree.DB.ETS, :contract_create_test}, root_hash: <<9, 235, 32, 146, 153, 242, 209, 192, 224, 61, 214, 174, 48, 24, 148, 28, 51, 254, 7, 82, 58, 82, 220, 157, 29, 159, 203, 51, 52, 240, 37, 122>>},
         976,
@@ -122,7 +122,7 @@ defmodule Blockchain.Contract do
       ...> |> Blockchain.Account.put_account(<<0x10::160>>, %Blockchain.Account{balance: 10})
       ...> |> Blockchain.Account.put_account(<<0x20::160>>, %Blockchain.Account{balance: 20})
       ...> |> Blockchain.Account.put_code(<<0x20::160>>, EVM.MachineCode.compile([:push1, 3, :push1, 5, :add, :push1, 0x00, :mstore, :push1, 32, :push1, 0, :return]))
-      ...> |> Blockchain.Contract.message_call(<<0x10::160>>, <<0x10::160>>, <<0x20::160>>, <<0x20::160>>, 1000, 1, 5, 5, <<1, 2, 3>>, 5, %Block.Header{nonce: 1})
+      ...> |> Blockchain.Contract.message_call(<<0x10::160>>, <<0x10::160>>, <<0x20::160>>, <<0x20::160>>, 1000, 1, 5, 5, <<1, 2, 3>>, 5, %EVM.Block.Header{nonce: 1})
       {
         %MerklePatriciaTree.Trie{db: {MerklePatriciaTree.DB.ETS, :message_call_test}, root_hash: <<163, 151, 95, 0, 149, 63, 81, 220, 74, 101, 219, 175, 240, 97, 153, 167, 249, 229, 144, 75, 101, 233, 126, 177, 8, 188, 105, 165, 28, 248, 67, 156>>},
         976,
@@ -262,7 +262,7 @@ defmodule Blockchain.Contract do
 
       iex> db = MerklePatriciaTree.Test.random_ets_db(:create_contract_exec_env)
       iex> state = MerklePatriciaTree.Trie.new(db)
-      iex> Blockchain.Contract.create_contract_exec_env(<<0x01::160>>, <<0x02::160>>, 5, <<0x03::160>>, 6, <<1, 2, 3>>, 14, %Block.Header{nonce: 1}, state)
+      iex> Blockchain.Contract.create_contract_exec_env(<<0x01::160>>, <<0x02::160>>, 5, <<0x03::160>>, 6, <<1, 2, 3>>, 14, %EVM.Block.Header{nonce: 1}, state)
       %EVM.ExecEnv{
         address: <<0x01::160>>,
         originator: <<0x02::160>>,
@@ -272,7 +272,7 @@ defmodule Blockchain.Contract do
         value_in_wei: 6,
         machine_code: <<1, 2, 3>>,
         stack_depth: 14,
-        block_interface: %Blockchain.Interface.BlockInterface{block_header: %Block.Header{nonce: 1}, db: {MerklePatriciaTree.DB.ETS, :create_contract_exec_env}},
+        block_interface: %Blockchain.Interface.BlockInterface{block_header: %EVM.Block.Header{nonce: 1}, db: {MerklePatriciaTree.DB.ETS, :create_contract_exec_env}},
         account_interface: %Blockchain.Interface.AccountInterface{state: %MerklePatriciaTree.Trie{db: {MerklePatriciaTree.DB.ETS, :create_contract_exec_env}, root_hash: <<86, 232, 31, 23, 27, 204, 85, 166, 255, 131, 69, 230, 146, 192, 248, 110, 91, 72, 224, 27, 153, 108, 173, 192, 1, 98, 47, 181, 227, 99, 180, 33>>}}
       }
   """
@@ -322,7 +322,7 @@ defmodule Blockchain.Contract do
 
       iex> db = MerklePatriciaTree.Test.random_ets_db(:create_message_call_exec_env)
       iex> state = MerklePatriciaTree.Trie.new(db)
-      iex> Blockchain.Contract.create_message_call_exec_env(<<0x01::160>>, <<0x02::160>>, <<0x03::160>>, 4, 5, <<1, 2, 3>>, 14, <<2, 3, 4>>, %Block.Header{nonce: 1}, state)
+      iex> Blockchain.Contract.create_message_call_exec_env(<<0x01::160>>, <<0x02::160>>, <<0x03::160>>, 4, 5, <<1, 2, 3>>, 14, <<2, 3, 4>>, %EVM.Block.Header{nonce: 1}, state)
       %EVM.ExecEnv{
         address: <<0x03::160>>,
         originator: <<0x02::160>>,
@@ -332,7 +332,7 @@ defmodule Blockchain.Contract do
         value_in_wei: 5,
         machine_code: <<2, 3, 4>>,
         stack_depth: 14,
-        block_interface: %Blockchain.Interface.BlockInterface{block_header: %Block.Header{nonce: 1}, db: {MerklePatriciaTree.DB.ETS, :create_message_call_exec_env}},
+        block_interface: %Blockchain.Interface.BlockInterface{block_header: %EVM.Block.Header{nonce: 1}, db: {MerklePatriciaTree.DB.ETS, :create_message_call_exec_env}},
         account_interface: %Blockchain.Interface.AccountInterface{state: %MerklePatriciaTree.Trie{db: {MerklePatriciaTree.DB.ETS, :create_message_call_exec_env}, root_hash: <<86, 232, 31, 23, 27, 204, 85, 166, 255, 131, 69, 230, 146, 192, 248, 110, 91, 72, 224, 27, 153, 108, 173, 192, 1, 98, 47, 181, 227, 99, 180, 33>>}}
       }
   """
@@ -382,7 +382,7 @@ defmodule Blockchain.Contract do
   # TODO: Implement and examples
   """
   @spec get_contract_creation_cost(binary()) :: EVM.Wei.t()
-  def get_contract_creation_cost(output) do
+  def get_contract_creation_cost(_output) do
     0
   end
 

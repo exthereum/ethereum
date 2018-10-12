@@ -1,5 +1,6 @@
 defmodule ExRLP do
-  alias ExRLP.{Encode, Decode}
+  alias ExRLP.Encode
+  alias ExRLP.Decode
 
   @moduledoc File.read!("#{__DIR__}/../README.md")
 

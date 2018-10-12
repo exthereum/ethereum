@@ -334,7 +334,7 @@ defmodule ExWire.Adapter.TCP do
   servers will disconnect if we send a non-Hello message as our first message.
   """
   def handle_cast(
-        {:send, %{packet: {packet_mod, _packet_type, _packet_data}}} = _data,
+        _data = {:send, %{packet: {packet_mod, _packet_type, _packet_data}}},
         state = %{peer: peer, closed: true}
       ) do
     _ =

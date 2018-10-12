@@ -124,6 +124,6 @@ defmodule EVM.ExecEnv do
       exec_env.account_interface
       |> AccountInterface.transfer(exec_env.address, to, value)
 
-    exec_env = %{exec_env | account_interface: account_interface}
+    %{exec_env | account_interface: account_interface}
   end
 end

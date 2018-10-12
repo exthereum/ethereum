@@ -3,7 +3,7 @@ defmodule Blockchain.BlockTest do
   use EthCommonTest.Harness
   doctest Blockchain.Block
 
-  alias Block.Header
+  alias EVM.Block.Header
   alias Blockchain.Block
   alias Blockchain.Transaction
 

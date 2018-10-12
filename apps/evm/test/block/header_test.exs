@@ -1,7 +1,7 @@
 defmodule Block.HeaderTest do
   use ExUnit.Case, async: true
-  doctest Block.Header
-  alias Block.Header
+  doctest EVM.Block.Header
+  alias EVM.Block.Header
 
   test "serialize and deserialize" do
     header = %Header{

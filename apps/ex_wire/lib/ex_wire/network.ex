@@ -66,7 +66,7 @@ defmodule ExWire.Network do
       ...>   remote_host: nil,
       ...>   timestamp: 123,
       ...> }, nil)
-      ** (ExWire.Crypto.HashMismatch) Invalid hash
+      ** (ExWire.Crypto.HashMismatchError) Invalid hash
   """
   @spec receive(InboundMessage.t(), identifier() | nil) :: receiver_handler_action
   def receive(

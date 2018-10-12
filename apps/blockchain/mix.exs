@@ -11,6 +11,7 @@ defmodule Blockchain.Mixfile do
       lockfile: "../../mix.lock",
       elixir: "~> 1.7",
       description: "Ethereum's Blockchain Manager",
+      elixirc_options: [warnings_as_errors: true],
       package: [
         maintainers: ["Geoffrey Hayes", "Ayrat Badykov", "Mason Forest"],
         licenses: ["MIT"],

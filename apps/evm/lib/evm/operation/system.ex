@@ -15,7 +15,7 @@ defmodule EVM.Operation.System do
 
   ## Examples
 
-      iex> block_interface = EVM.Interface.Mock.MockBlockInterface.new(%Block.Header{})
+      iex> block_interface = EVM.Interface.Mock.MockBlockInterface.new(%EVM.Block.Header{})
       iex> account_map = %{<<100::160>> => %{balance: 5_000, nonce: 5}}
       iex> account_interface = EVM.Interface.Mock.MockAccountInterface.new(account_map, %{gas: 500, sub_state: nil, output: "output"})
       iex> exec_env = %EVM.ExecEnv{stack_depth: 0, address: <<100::160>>, account_interface: account_interface, block_interface: block_interface}
@@ -39,7 +39,7 @@ defmodule EVM.Operation.System do
     is_allowed =
       value <= account_balance and exec_env.stack_depth < EVM.Functions.max_stack_depth()
 
-    {updated_account_interface, n_gas, _n_sub_state} =
+    {updated_account_interface, _n_gas, _n_sub_state} =
       if is_allowed do
         available_gas = Helpers.all_but_one_64th(machine_state.gas)
 
