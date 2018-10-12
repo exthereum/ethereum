@@ -115,6 +115,7 @@ jobs:
             - _build
             - deps
             - ~/.mix
+      - run: mix dialyzer --halt-exit-status
 
 workflows:
   version: 2
