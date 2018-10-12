@@ -59,12 +59,12 @@ defmodule Blockchain.Contract do
   """
 
   @spec create_contract(
-          t,
+          t | map,
           EVM.MachineCode.t()
         ) :: {EVM.state(), EVM.Gas.t(), EVM.SubState.t()}
 
   def create_contract(
-        %__MODULE__{
+        %{
           state: state,
           sender: sender,
           originator: originator,

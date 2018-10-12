@@ -341,47 +341,27 @@ defimpl EVM.Interface.AccountInterface, for: Blockchain.Interface.AccountInterfa
 
   ## Examples
 
-      iex> {account_interface, _gas, _sub_state} = MerklePatriciaTree.Test.random_ets_db()
+      iex> state = MerklePatriciaTree.Test.random_ets_db()
+      ...> state =
+      ...> state
       ...> |> MerklePatriciaTree.Trie.new()
       ...> |> Blockchain.Account.put_account(<<0x10::160>>, %Blockchain.Account{balance: 11, nonce: 5})
-      ...> |> Blockchain.Interface.AccountInterface.new()
-      ...> |> EVM.Interface.AccountInterface.create_contract(<<0x10::160>>, <<0x10::160>>, 1000, 1, 5, EVM.MachineCode.compile([:push1, 3, :push1, 5, :add, :push1, 0x00, :mstore, :push1, 32, :push1, 0, :return]), 5, %EVM.Block.Header{nonce: 1})
+      ...> interface = Blockchain.Interface.AccountInterface.new(state)
+      ...> contract = %Blockchain.Contract{state: state, sender: <<0x10::160>>, originator: <<0x10::160>>, available_gas: 1000, gas_price: 1, stack_depth: 5, block_header: %EVM.Block.Header{nonce: 1}, value_in_wei: 5}
+      ...> {account_interface, _gas, _sub_state} = EVM.Interface.AccountInterface.create_contract(interface, contract, EVM.MachineCode.compile([:push1, 3, :push1, 5, :add, :push1, 0x00, :mstore, :push1, 32, :push1, 0, :return]))
       iex> account_interface.state.root_hash
       <<9, 235, 32, 146, 153, 242, 209, 192, 224, 61, 214, 174, 48, 24, 148, 28, 51, 254, 7, 82, 58, 82, 220, 157, 29, 159, 203, 51, 52, 240, 37, 122>>
   """
   @spec create_contract(
           EVM.Interface.AccountInterface.t(),
-          EVM.address(),
-          EVM.address(),
-          EVM.Gas.t(),
-          EVM.Gas.gas_price(),
-          EVM.Wei.t(),
-          EVM.MachineCode.t(),
-          integer(),
-          Header.t()
+          Contract.t() | map,
+          EVM.MachineCode.t()
         ) :: {EVM.Interface.AccountInterface.t(), EVM.Gas.t(), EVM.SubState.t()}
   def create_contract(
         account_interface,
-        sender,
-        originator,
-        available_gas,
-        gas_price,
-        endowment,
-        init_code,
-        stack_depth,
-        block_header
+        contract,
+        init_code
       ) do
-    contract = %Contract{
-      state: account_interface.state,
-      sender: sender,
-      originator: originator,
-      available_gas: available_gas,
-      gas_price: gas_price,
-      stack_depth: stack_depth,
-      block_header: block_header,
-      value_in_wei: endowment
-    }
-
     {state, gas, sub_state} =
       Contract.create_contract(
         contract,

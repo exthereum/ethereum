@@ -45,53 +45,6 @@ defmodule EVM.ExecEnv do
           account_interface: EVM.Interface.AccountInterface.t()
         }
 
-  @doc """
-  Returns the base execution environment for a message call.
-  This is generally defined as equations 107-114 in the Yellow Paper.
-
-  TODO: Machine code may be passed in as a hash
-  TODO: How is block header passed in?
-
-  # TODO: Examples
-  """
-  @spec exec_env_for_message_call(
-          EVM.address(),
-          EVM.address(),
-          EVM.Gas.gas_price(),
-          binary(),
-          EVM.address(),
-          EVM.Wei.t(),
-          integer(),
-          EVM.MachineCode.t(),
-          EVM.Interface.BlockInterface.t(),
-          EVM.Interface.AccountInterface.t()
-        ) :: t
-  def exec_env_for_message_call(
-        recipient,
-        originator,
-        gas_price,
-        data,
-        sender,
-        value_in_wei,
-        stack_depth,
-        machine_code,
-        block_interface,
-        account_interface
-      ) do
-    %__MODULE__{
-      address: recipient,
-      originator: originator,
-      gas_price: gas_price,
-      data: data,
-      sender: sender,
-      value_in_wei: value_in_wei,
-      stack_depth: stack_depth,
-      machine_code: machine_code,
-      block_interface: block_interface,
-      account_interface: account_interface
-    }
-  end
-
   @spec put_storage(t(), integer(), integer()) :: t()
   def put_storage(
         exec_env = %{account_interface: account_interface, address: address},

@@ -7,6 +7,7 @@ defmodule EVM.Operation.System do
   alias EVM.Address
   alias EVM.Stack
   alias EVM.Operation
+  alias Blockchain
 
   @dialyzer {:no_return, callcode: 2}
 
@@ -43,24 +44,22 @@ defmodule EVM.Operation.System do
       if is_allowed do
         available_gas = Helpers.all_but_one_64th(machine_state.gas)
 
+        contract = %{
+          state: nil,
+          sender: exec_env.address,
+          originator: exec_env.originator,
+          available_gas: available_gas,
+          gas_price: exec_env.gas_price,
+          stack_depth: exec_env.stack_depth + 1,
+          block_header: block_header,
+          value_in_wei: value
+        }
+
         AccountInterface.create_contract(
           exec_env.account_interface,
-          # sender
-          exec_env.address,
-          # originator
-          exec_env.originator,
-          # available_gas
-          available_gas,
-          # gas_price
-          exec_env.gas_price,
-          # endowment
-          value,
+          contract,
           # init_code
-          data,
-          # stack_depth
-          exec_env.stack_depth + 1,
-          # block_header
-          block_header
+          data
         )
       else
         {exec_env.account_interface, machine_state.gas, nil}
