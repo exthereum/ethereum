@@ -20,8 +20,8 @@ defmodule ExWire.Framing.Frame do
         packet_type,
         packet_data,
         frame_secrets = %Secrets{
-          egress_mac: egress_mac,
-          encoder_stream: encoder_stream,
+          egress_mac: egress_mac0,
+          encoder_stream: encoder_stream0,
           mac_encoder: mac_encoder,
           mac_secret: mac_secret
         }
@@ -59,27 +59,27 @@ defmodule ExWire.Framing.Frame do
     # header: frame-size || header-data || padding
     header = frame_size <> header_data <> header_padding
 
-    {encoder_stream, header_enc} = AES.stream_encrypt(header, encoder_stream)
+    {encoder_stream1, header_enc} = AES.stream_encrypt(header, encoder_stream0)
 
     # header-mac: right128 of egress-mac.update(aes(mac-secret,egress-mac) ^ header-ciphertext).digest
-    egress_mac = update_mac(egress_mac, mac_encoder, mac_secret, header_enc)
-    header_mac = MAC.final(egress_mac) |> Binary.take(16)
+    egress_mac1 = update_mac(egress_mac0, mac_encoder, mac_secret, header_enc)
+    header_mac = MAC.final(egress_mac1) |> Binary.take(16)
 
-    {encoder_stream, frame_unpadded_enc} = AES.stream_encrypt(frame_unpadded, encoder_stream)
+    {encoder_stream2, frame_unpadded_enc} = AES.stream_encrypt(frame_unpadded, encoder_stream1)
 
     {encoder_stream, frame_padding_enc} =
       if byte_size(frame_padding) > 0 do
-        AES.stream_encrypt(frame_padding, encoder_stream)
+        AES.stream_encrypt(frame_padding, encoder_stream2)
       else
-        {encoder_stream, <<>>}
+        {encoder_stream2, <<>>}
       end
 
     frame_enc = frame_unpadded_enc <> frame_padding_enc
 
     # frame-mac: right128 of egress-mac.update(aes(mac-secret,egress-mac) ^ right128(egress-mac.update(frame-ciphertext).digest))
     # from EncryptedConnection::update_mac(&mut self.egress_mac, &mut self.mac_encoder, &[0u8; 0]);
-    egress_mac = MAC.update(egress_mac, frame_enc)
-    egress_mac = update_mac(egress_mac, mac_encoder, mac_secret, nil)
+    egress_mac2 = MAC.update(egress_mac1, frame_enc)
+    egress_mac = update_mac(egress_mac2, mac_encoder, mac_secret, nil)
     frame_mac = MAC.final(egress_mac) |> Binary.take(16)
 
     # egress-mac: h256, continuously updated with egress-bytes*

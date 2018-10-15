@@ -26,6 +26,7 @@ defmodule Blockchain.Contract do
         }
   alias Blockchain.Account
   alias EVM.Block.Header
+  alias EVM.ExecEnv
 
   @doc """
   Creates a new contract, as defined in Section 7 Eq.(81) and Eq.(87) of the Yellow Paper as Λ.
@@ -82,16 +83,20 @@ defmodule Blockchain.Contract do
     state_with_blank_contract = create_blank_contract(state, contract_address, sender, endowment)
 
     exec_env =
-      create_contract_exec_env(
-        contract_address,
-        originator,
-        gas_price,
-        sender,
-        endowment,
-        init_code,
-        stack_depth,
-        block_header,
-        state_with_blank_contract
+      ExecEnv.create_contract_exec_env(
+        [
+          address: contract_address,
+          originator: originator,
+          gas_price: gas_price,
+          sender: sender,
+          value_in_wei: endowment,
+          machine_code: init_code,
+          stack_depth: stack_depth,
+          block_header: block_header,
+          state: state_with_blank_contract
+        ],
+        Blockchain.Interface.BlockInterface,
+        Blockchain.Interface.AccountInterface
       )
 
     {state_after_init, remaining_gas, accrued_sub_state, output} =
@@ -185,17 +190,21 @@ defmodule Blockchain.Contract do
     state_initialized_for_message_call = initialize_message_call(state, sender, recipient, value)
 
     exec_env =
-      create_message_call_exec_env(
-        sender,
-        originator,
-        recipient,
-        gas_price,
-        apparent_value,
-        data,
-        stack_depth,
-        machine_code,
-        block_header,
-        state_initialized_for_message_call
+      ExecEnv.create_message_call_exec_env(
+        [
+          sender: sender,
+          originator: originator,
+          address: recipient,
+          gas_price: gas_price,
+          value_in_wei: apparent_value,
+          data: data,
+          stack_depth: stack_depth,
+          machine_code: machine_code,
+          block_header: block_header,
+          state: state_initialized_for_message_call
+        ],
+        Blockchain.Interface.BlockInterface,
+        Blockchain.Interface.AccountInterface
       )
 
     exec_fun.(available_gas, exec_env) |> interpret_vm_result
@@ -219,6 +228,7 @@ defmodule Blockchain.Contract do
 
       iex> Blockchain.Contract.new_contract_address(<<0x02::160>>, 3)
       <<30, 208, 147, 166, 216, 88, 183, 173, 67, 180, 70, 173, 88, 244, 201, 236, 9, 101, 145, 49>>
+
   """
   @spec new_contract_address(EVM.address(), integer()) :: EVM.address()
   def new_contract_address(sender, nonce) do
@@ -245,128 +255,6 @@ defmodule Blockchain.Contract do
           EVM.state()
   def initialize_message_call(state, sender, receiver, endowment) do
     Account.transfer!(state, sender, receiver, endowment)
-  end
-
-  @doc """
-  Creates an execution environment for a create contract call.
-
-  This is defined in Eq.(88), Eq.(89), Eq.(90), Eq.(91), Eq.(92),
-  Eq.(93), Eq.(94) and Eq.(95) of the Yellow Paper.
-
-  ## Examples
-
-      iex> db = MerklePatriciaTree.Test.random_ets_db(:create_contract_exec_env)
-      iex> state = MerklePatriciaTree.Trie.new(db)
-      iex> Blockchain.Contract.create_contract_exec_env(<<0x01::160>>, <<0x02::160>>, 5, <<0x03::160>>, 6, <<1, 2, 3>>, 14, %EVM.Block.Header{nonce: 1}, state)
-      %EVM.ExecEnv{
-        address: <<0x01::160>>,
-        originator: <<0x02::160>>,
-        gas_price: 5,
-        data: <<>>,
-        sender: <<0x03::160>>,
-        value_in_wei: 6,
-        machine_code: <<1, 2, 3>>,
-        stack_depth: 14,
-        block_interface: %Blockchain.Interface.BlockInterface{block_header: %EVM.Block.Header{nonce: 1}, db: {MerklePatriciaTree.DB.ETS, :create_contract_exec_env}},
-        account_interface: %Blockchain.Interface.AccountInterface{state: %MerklePatriciaTree.Trie{db: {MerklePatriciaTree.DB.ETS, :create_contract_exec_env}, root_hash: <<86, 232, 31, 23, 27, 204, 85, 166, 255, 131, 69, 230, 146, 192, 248, 110, 91, 72, 224, 27, 153, 108, 173, 192, 1, 98, 47, 181, 227, 99, 180, 33>>}}
-      }
-  """
-  @spec create_contract_exec_env(
-          EVM.address(),
-          EVM.address(),
-          EVM.Wei.t(),
-          EVM.address(),
-          EVM.Wei.t(),
-          EVM.MachineCode.t(),
-          integer(),
-          Header.t(),
-          EVM.state()
-        ) :: EVM.ExecEnv.t()
-  def create_contract_exec_env(
-        contract_address,
-        originator,
-        gas_price,
-        sender,
-        endowment,
-        init_code,
-        stack_depth,
-        block_header,
-        state
-      ) do
-    %EVM.ExecEnv{
-      address: contract_address,
-      originator: originator,
-      gas_price: gas_price,
-      data: <<>>,
-      sender: sender,
-      value_in_wei: endowment,
-      machine_code: init_code,
-      stack_depth: stack_depth,
-      block_interface: Blockchain.Interface.BlockInterface.new(block_header, state.db),
-      account_interface: Blockchain.Interface.AccountInterface.new(state)
-    }
-  end
-
-  @doc """
-  Creates an execution environment for a message call.
-
-  This is defined in Eq.(107), Eq.(108), Eq.(109), Eq.(110),
-  Eq.(111), Eq.(112), Eq.(113) and Eq.(114) of the Yellow Paper.
-
-  ## Examples
-
-      iex> db = MerklePatriciaTree.Test.random_ets_db(:create_message_call_exec_env)
-      iex> state = MerklePatriciaTree.Trie.new(db)
-      iex> Blockchain.Contract.create_message_call_exec_env(<<0x01::160>>, <<0x02::160>>, <<0x03::160>>, 4, 5, <<1, 2, 3>>, 14, <<2, 3, 4>>, %EVM.Block.Header{nonce: 1}, state)
-      %EVM.ExecEnv{
-        address: <<0x03::160>>,
-        originator: <<0x02::160>>,
-        gas_price: 4,
-        data: <<1, 2, 3>>,
-        sender: <<0x01::160>>,
-        value_in_wei: 5,
-        machine_code: <<2, 3, 4>>,
-        stack_depth: 14,
-        block_interface: %Blockchain.Interface.BlockInterface{block_header: %EVM.Block.Header{nonce: 1}, db: {MerklePatriciaTree.DB.ETS, :create_message_call_exec_env}},
-        account_interface: %Blockchain.Interface.AccountInterface{state: %MerklePatriciaTree.Trie{db: {MerklePatriciaTree.DB.ETS, :create_message_call_exec_env}, root_hash: <<86, 232, 31, 23, 27, 204, 85, 166, 255, 131, 69, 230, 146, 192, 248, 110, 91, 72, 224, 27, 153, 108, 173, 192, 1, 98, 47, 181, 227, 99, 180, 33>>}}
-      }
-  """
-  @spec create_message_call_exec_env(
-          EVM.address(),
-          EVM.address(),
-          EVM.address(),
-          EVM.Wei.t(),
-          EVM.Wei.t(),
-          binary(),
-          integer(),
-          EVM.MachineCode.t(),
-          Header.t(),
-          EVM.state()
-        ) :: EVM.ExecEnv.t()
-  def create_message_call_exec_env(
-        sender,
-        originator,
-        recipient,
-        gas_price,
-        apparent_value,
-        data,
-        stack_depth,
-        machine_code,
-        block_header,
-        state
-      ) do
-    %EVM.ExecEnv{
-      address: recipient,
-      originator: originator,
-      gas_price: gas_price,
-      data: data,
-      sender: sender,
-      value_in_wei: apparent_value,
-      machine_code: machine_code,
-      stack_depth: stack_depth,
-      block_interface: Blockchain.Interface.BlockInterface.new(block_header, state.db),
-      account_interface: Blockchain.Interface.AccountInterface.new(state)
-    }
   end
 
   @doc """

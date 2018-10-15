@@ -100,11 +100,11 @@ defimpl EVM.Interface.AccountInterface, for: EVM.Interface.Mock.MockAccountInter
   @spec put_storage(EVM.Interface.AccountInterface.t(), EVM.address(), integer(), integer()) ::
           EVM.Interface.AccountInterface.t()
   def put_storage(mock_account_interface, address, key, value) do
-    account = get_account(mock_account_interface, address)
+    account0 = get_account(mock_account_interface, address)
 
     account =
-      if account do
-        update_storage(account, key, value)
+      if account0 do
+        update_storage(account0, key, value)
       else
         new_account(%{
           storage: %{key => value}
