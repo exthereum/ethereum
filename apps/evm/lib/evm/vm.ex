@@ -118,21 +118,21 @@ defmodule EVM.VM do
   """
   @spec cycle(MachineState.t(), SubState.t(), ExecEnv.t()) ::
           {MachineState.t(), SubState.t(), ExecEnv.t()}
-  def cycle(machine_state, sub_state, exec_env) do
-    operation = MachineCode.current_operation(machine_state, exec_env)
-    inputs = Operation.inputs(operation, machine_state)
+  def cycle(machine_state0, sub_state, exec_env) do
+    operation = MachineCode.current_operation(machine_state0, exec_env)
+    inputs = Operation.inputs(operation, machine_state0)
 
-    machine_state =
-      machine_state
+    machine_state1 =
+      machine_state0
       |> MachineState.subtract_gas(exec_env)
 
-    {machine_state, sub_state, exec_env} =
-      Operation.run_operation(operation, machine_state, sub_state, exec_env)
+    {machine_state2, sub_state, exec_env} =
+      Operation.run_operation(operation, machine_state1, sub_state, exec_env)
 
-    machine_state =
-      machine_state
+    machine_state3 =
+      machine_state2
       |> MachineState.move_program_counter(operation, inputs)
 
-    {machine_state, sub_state, exec_env}
+    {machine_state3, sub_state, exec_env}
   end
 end

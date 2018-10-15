@@ -108,6 +108,6 @@ defmodule ExWire.Struct.Neighbour do
   """
   @spec encode(t) :: ExRLP.t()
   def encode(%__MODULE__{endpoint: endpoint, node: node_id}) do
-    Endpoint.encode(endpoint) ++ [node_id]
+    Enum.concat(Endpoint.encode(endpoint), [node_id])
   end
 end

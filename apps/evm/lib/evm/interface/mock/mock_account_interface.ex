@@ -19,7 +19,7 @@ defmodule EVM.Interface.Mock.MockAccountInterface do
 end
 
 defimpl EVM.Interface.AccountInterface, for: EVM.Interface.Mock.MockAccountInterface do
-  alias EVM.Block.Header
+  alias Blockchain.Contract
 
   @spec account_exists?(EVM.Interface.AccountInterface.t(), EVM.address()) :: boolean()
   def account_exists?(mock_account_interface, address) do
@@ -100,11 +100,11 @@ defimpl EVM.Interface.AccountInterface, for: EVM.Interface.Mock.MockAccountInter
   @spec put_storage(EVM.Interface.AccountInterface.t(), EVM.address(), integer(), integer()) ::
           EVM.Interface.AccountInterface.t()
   def put_storage(mock_account_interface, address, key, value) do
-    account = get_account(mock_account_interface, address)
+    account0 = get_account(mock_account_interface, address)
 
     account =
-      if account do
-        update_storage(account, key, value)
+      if account0 do
+        update_storage(account0, key, value)
       else
         new_account(%{
           storage: %{key => value}
@@ -165,31 +165,19 @@ defimpl EVM.Interface.AccountInterface, for: EVM.Interface.Mock.MockAccountInter
 
   @spec message_call(
           EVM.Interface.AccountInterface.t(),
+          Contract.t(),
           EVM.address(),
           EVM.address(),
-          EVM.address(),
-          EVM.address(),
-          EVM.Gas.t(),
-          EVM.Gas.gas_price(),
           EVM.Wei.t(),
-          EVM.Wei.t(),
-          binary(),
-          integer(),
-          Header.t()
+          binary()
         ) :: {EVM.Interface.AccountInterface.t(), EVM.Gas.t(), EVM.SubState.t(), EVM.VM.output()}
   def message_call(
         mock_account_interface,
-        _sender,
-        _originator,
+        _contract0,
         _recipient,
         _contract,
-        _available_gas,
-        _gas_price,
-        _value,
         _apparent_value,
-        _data,
-        _stack_depth,
-        _block_header
+        _data
       ) do
     {
       mock_account_interface,
@@ -201,25 +189,13 @@ defimpl EVM.Interface.AccountInterface, for: EVM.Interface.Mock.MockAccountInter
 
   @spec create_contract(
           EVM.Interface.AccountInterface.t(),
-          EVM.address(),
-          EVM.address(),
-          EVM.Gas.t(),
-          EVM.Gas.gas_price(),
-          EVM.Wei.t(),
-          EVM.MachineCode.t(),
-          integer(),
-          Header.t()
+          Contract.t(),
+          EVM.MachineCode.t()
         ) :: {EVM.Gas.t(), EVM.Interface.AccountInterface.t(), EVM.SubState.t()}
   def create_contract(
         mock_account_interface,
-        _sender,
-        _originator,
-        _available_gas,
-        _gas_price,
-        _endowment,
-        _init_code,
-        _stack_depth,
-        _block_header
+        _contract,
+        _init_code
       ) do
     {
       mock_account_interface,

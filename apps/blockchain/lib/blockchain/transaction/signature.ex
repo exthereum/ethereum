@@ -74,15 +74,15 @@ defmodule Blockchain.Transaction.Signature do
   @spec sign_hash(BitHelper.keccak_hash(), private_key, integer() | nil) ::
           {hash_v, hash_r, hash_s}
   def sign_hash(hash, private_key, chain_id \\ nil) do
-    {:ok, <<r::size(256), s::size(256)>>, recovery_id} =
+    {:ok, <<r::size(256), s::size(256)>>, recovery_id0} =
       :libsecp256k1.ecdsa_sign_compact(hash, private_key, :default, <<>>)
 
     # Fork Ψ EIP-155
     recovery_id =
       if chain_id do
-        chain_id * 2 + @base_recovery_id_eip_155 + recovery_id
+        chain_id * 2 + @base_recovery_id_eip_155 + recovery_id0
       else
-        @base_recovery_id + recovery_id
+        @base_recovery_id + recovery_id0
       end
 
     {recovery_id, r, s}

@@ -7,6 +7,7 @@ defmodule EVM.Operation.System do
   alias EVM.Address
   alias EVM.Stack
   alias EVM.Operation
+  alias Blockchain
 
   @dialyzer {:no_return, callcode: 2}
 
@@ -28,8 +29,8 @@ defmodule EVM.Operation.System do
       %EVM.MachineState{gas: 300, stack: [0x601bcc2189b7096d8dfaa6f74efeebef20486d0d, 1], active_words: 1, memory: "________input"}
   """
   @spec create(Operation.stack_args(), Operation.vm_map()) :: Operation.op_result()
-  def create([value, in_offset, in_size], %{exec_env: exec_env, machine_state: machine_state}) do
-    {data, machine_state} = EVM.Memory.read(machine_state, in_offset, in_size)
+  def create([value, in_offset, in_size], %{exec_env: exec_env, machine_state: machine_state0}) do
+    {data, machine_state1} = EVM.Memory.read(machine_state0, in_offset, in_size)
 
     account_balance =
       AccountInterface.get_account_balance(exec_env.account_interface, exec_env.address)
@@ -41,29 +42,27 @@ defmodule EVM.Operation.System do
 
     {updated_account_interface, _n_gas, _n_sub_state} =
       if is_allowed do
-        available_gas = Helpers.all_but_one_64th(machine_state.gas)
+        available_gas = Helpers.all_but_one_64th(machine_state1.gas)
+
+        contract = %{
+          state: nil,
+          sender: exec_env.address,
+          originator: exec_env.originator,
+          available_gas: available_gas,
+          gas_price: exec_env.gas_price,
+          stack_depth: exec_env.stack_depth + 1,
+          block_header: block_header,
+          value_in_wei: value
+        }
 
         AccountInterface.create_contract(
           exec_env.account_interface,
-          # sender
-          exec_env.address,
-          # originator
-          exec_env.originator,
-          # available_gas
-          available_gas,
-          # gas_price
-          exec_env.gas_price,
-          # endowment
-          value,
+          contract,
           # init_code
-          data,
-          # stack_depth
-          exec_env.stack_depth + 1,
-          # block_header
-          block_header
+          data
         )
       else
-        {exec_env.account_interface, machine_state.gas, nil}
+        {exec_env.account_interface, machine_state1.gas, nil}
       end
 
     # Note if was exception halt or other failure on stack
@@ -78,11 +77,11 @@ defmodule EVM.Operation.System do
         0
       end
 
-    machine_state = %{machine_state | stack: Stack.push(machine_state.stack, result)}
+    machine_state2 = %{machine_state1 | stack: Stack.push(machine_state1.stack, result)}
     exec_env = %{exec_env | account_interface: updated_account_interface}
 
     %{
-      machine_state: machine_state,
+      machine_state: machine_state2,
       exec_env: exec_env
       # TODO: sub_state
     }

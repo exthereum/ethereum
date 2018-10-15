@@ -73,7 +73,7 @@ defmodule ExRLP.Decode do
   end
 
   def add_new_item(result, new_item) do
-    result ++ [new_item]
+    Enum.concat(result, [new_item])
   end
 
   @spec add_decoded_list(ExRLP.t(), binary()) :: ExRLP.t()
@@ -84,7 +84,7 @@ defmodule ExRLP.Decode do
   defp add_decoded_list(result, rlp_list_binary) do
     list_items = decode_item(rlp_list_binary, [])
 
-    result ++ [list_items]
+    Enum.concat(result, [list_items])
   end
 
   @spec decode_medium_binary(integer(), binary(), integer()) :: {binary(), binary()}

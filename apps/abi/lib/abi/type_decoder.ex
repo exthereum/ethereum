@@ -183,8 +183,8 @@ defmodule ABI.TypeDecoder do
   end
 
   defp decode_type(:string, data) do
-    {string_size_in_bytes, rest} = decode_uint(data, 256)
-    {raw_bytes, rest} = decode_bytes(rest, string_size_in_bytes, :right)
+    {string_size_in_bytes, rest0} = decode_uint(data, 256)
+    {raw_bytes, rest} = decode_bytes(rest0, string_size_in_bytes, :right)
     {nul_terminate_string(raw_bytes), rest}
   end
 
@@ -216,7 +216,7 @@ defmodule ABI.TypeDecoder do
 
   defp decode_type({:tuple, types}, starting_data) do
     # First pass, decode static types
-    {elements, rest} =
+    {elements0, rest0} =
       Enum.reduce(types, {[], starting_data}, fn type, {elements, data} ->
         if ABI.FunctionSelector.is_dynamic?(type) do
           {tail_position, rest} = decode_type({:uint, 256}, data)
@@ -231,7 +231,7 @@ defmodule ABI.TypeDecoder do
 
     # Second pass, decode dynamic types
     {elements, rest} =
-      Enum.reduce(elements |> Enum.reverse(), {[], rest}, fn el, {elements, data} ->
+      Enum.reduce(elements0 |> Enum.reverse(), {[], rest0}, fn el, {elements, data} ->
         case el do
           {:dynamic, type, _tail_position} ->
             {el, rest} = decode_type(type, data)

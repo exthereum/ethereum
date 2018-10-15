@@ -34,6 +34,8 @@ defmodule Blockchain.Interface.AccountInterface do
 end
 
 defimpl EVM.Interface.AccountInterface, for: Blockchain.Interface.AccountInterface do
+  alias Blockchain.Contract
+
   @doc """
   Given an account interface and an address, returns the balance at that address.
 
@@ -276,57 +278,59 @@ defimpl EVM.Interface.AccountInterface, for: Blockchain.Interface.AccountInterfa
   ## Examples
 
       iex> db = MerklePatriciaTree.Test.random_ets_db()
-      iex> {account_interface, _gas, _sub_state, _output} = MerklePatriciaTree.Trie.new(db)
+      iex> state = MerklePatriciaTree.Trie.new(db)
       ...> |> Blockchain.Account.put_account(<<0x10::160>>, %Blockchain.Account{balance: 10})
       ...> |> Blockchain.Account.put_account(<<0x20::160>>, %Blockchain.Account{balance: 20})
       ...> |> Blockchain.Account.put_code(<<0x20::160>>, EVM.MachineCode.compile([:push1, 3, :push1, 5, :add, :push1, 0x00, :mstore, :push1, 32, :push1, 0, :return]))
-      ...> |> Blockchain.Interface.AccountInterface.new()
-      ...> |> EVM.Interface.AccountInterface.message_call(<<0x10::160>>, <<0x10::160>>, <<0x20::160>>, <<0x20::160>>, 1000, 1, 5, 5, <<1, 2, 3>>, 5, %EVM.Block.Header{nonce: 1})
+      ...> account_interface =  Blockchain.Interface.AccountInterface.new(state)
+      ...> contract = %Blockchain.Contract{state: state, sender: <<0x10::160>>, originator: <<0x10::160>>, available_gas: 1000, gas_price: 1, stack_depth: 5, block_header: %EVM.Block.Header{nonce: 1}, value_in_wei: 5}
+      ...> {account_interface, _gas, _sub_state, _output} = EVM.Interface.AccountInterface.message_call(account_interface, contract, <<0x20::160>>, <<0x20::160>>, <<1, 2, 3>>, 5)
       iex> account_interface.state.root_hash
       <<163, 151, 95, 0, 149, 63, 81, 220, 74, 101, 219, 175, 240, 97, 153, 167, 249, 229, 144, 75, 101, 233, 126, 177, 8, 188, 105, 165, 28, 248, 67, 156>>
   """
   @spec message_call(
           EVM.Interface.AccountInterface.t(),
+          Contract.t(),
           EVM.address(),
           EVM.address(),
-          EVM.address(),
-          EVM.address(),
-          EVM.Gas.t(),
-          EVM.Gas.gas_price(),
           EVM.Wei.t(),
-          EVM.Wei.t(),
-          binary(),
-          integer(),
-          Header.t()
+          binary()
         ) :: {EVM.Interface.AccountInterface.t(), EVM.Gas.t(), EVM.SubState.t(), EVM.VM.output()}
   def message_call(
         account_interface,
-        sender,
-        originator,
+        %Contract{
+          state: _,
+          sender: sender,
+          originator: originator,
+          available_gas: available_gas,
+          gas_price: gas_price,
+          stack_depth: stack_depth,
+          block_header: block_header,
+          value_in_wei: value
+        },
         recipient,
         contract,
-        available_gas,
-        gas_price,
-        value,
         apparent_value,
-        data,
-        stack_depth,
-        block_header
+        data
       ) do
+    contract0 = %Contract{
+      state: account_interface.state,
+      sender: sender,
+      originator: originator,
+      available_gas: available_gas,
+      gas_price: gas_price,
+      stack_depth: stack_depth,
+      block_header: block_header,
+      value_in_wei: value
+    }
+
     {state, gas, sub_state, output} =
-      Blockchain.Contract.message_call(
-        account_interface.state,
-        sender,
-        originator,
+      Contract.message_call(
+        contract0,
         recipient,
         contract,
-        available_gas,
-        gas_price,
-        value,
         apparent_value,
-        data,
-        stack_depth,
-        block_header
+        data
       )
 
     {Map.put(account_interface, :state, state), gas, sub_state, output}
@@ -337,47 +341,31 @@ defimpl EVM.Interface.AccountInterface, for: Blockchain.Interface.AccountInterfa
 
   ## Examples
 
-      iex> {account_interface, _gas, _sub_state} = MerklePatriciaTree.Test.random_ets_db()
+      iex> state = MerklePatriciaTree.Test.random_ets_db()
+      ...> state =
+      ...> state
       ...> |> MerklePatriciaTree.Trie.new()
       ...> |> Blockchain.Account.put_account(<<0x10::160>>, %Blockchain.Account{balance: 11, nonce: 5})
-      ...> |> Blockchain.Interface.AccountInterface.new()
-      ...> |> EVM.Interface.AccountInterface.create_contract(<<0x10::160>>, <<0x10::160>>, 1000, 1, 5, EVM.MachineCode.compile([:push1, 3, :push1, 5, :add, :push1, 0x00, :mstore, :push1, 32, :push1, 0, :return]), 5, %EVM.Block.Header{nonce: 1})
+      ...> interface = Blockchain.Interface.AccountInterface.new(state)
+      ...> contract = %Blockchain.Contract{state: state, sender: <<0x10::160>>, originator: <<0x10::160>>, available_gas: 1000, gas_price: 1, stack_depth: 5, block_header: %EVM.Block.Header{nonce: 1}, value_in_wei: 5}
+      ...> {account_interface, _gas, _sub_state} = EVM.Interface.AccountInterface.create_contract(interface, contract, EVM.MachineCode.compile([:push1, 3, :push1, 5, :add, :push1, 0x00, :mstore, :push1, 32, :push1, 0, :return]))
       iex> account_interface.state.root_hash
       <<9, 235, 32, 146, 153, 242, 209, 192, 224, 61, 214, 174, 48, 24, 148, 28, 51, 254, 7, 82, 58, 82, 220, 157, 29, 159, 203, 51, 52, 240, 37, 122>>
   """
   @spec create_contract(
           EVM.Interface.AccountInterface.t(),
-          EVM.address(),
-          EVM.address(),
-          EVM.Gas.t(),
-          EVM.Gas.gas_price(),
-          EVM.Wei.t(),
-          EVM.MachineCode.t(),
-          integer(),
-          Header.t()
+          Contract.t() | map,
+          EVM.MachineCode.t()
         ) :: {EVM.Interface.AccountInterface.t(), EVM.Gas.t(), EVM.SubState.t()}
   def create_contract(
         account_interface,
-        sender,
-        originator,
-        available_gas,
-        gas_price,
-        endowment,
-        init_code,
-        stack_depth,
-        block_header
+        contract,
+        init_code
       ) do
     {state, gas, sub_state} =
-      Blockchain.Contract.create_contract(
-        account_interface.state,
-        sender,
-        originator,
-        available_gas,
-        gas_price,
-        endowment,
-        init_code,
-        stack_depth,
-        block_header
+      Contract.create_contract(
+        contract,
+        init_code
       )
 
     {Map.put(account_interface, :state, state), gas, sub_state}
