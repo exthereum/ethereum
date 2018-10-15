@@ -21,3 +21,6 @@ erl_crash.dump
 
 # MacOS Files
 *.DS_Store
+
+#coveralls
+apps/*/cover

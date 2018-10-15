@@ -30,7 +30,7 @@ defmodule ExWire.Mixfile do
   end
 
   def application do
-    [mod: {ExWire, []}, extra_applications: [:logger]]
+    [mod: {ExWire, []}, extra_applications: [:logger, :crypto, :inets, :xmerl, :inet_ext]]
   end
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]

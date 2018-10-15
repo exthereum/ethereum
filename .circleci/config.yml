@@ -87,6 +87,35 @@ jobs:
             - deps
             - ~/.mix
 
+  excoveralls:
+    working_directory: ~/ethereum
+    docker:
+      - image: elixir:latest
+    steps:
+      - run: apt-get update; apt-get -y install libtool autoconf libgmp3-dev
+      - checkout
+      - run: git submodule sync --recursive
+      - run: git submodule update --recursive --init
+
+      - restore_cache:
+         keys:
+           - v1-dependency-cache-{{ arch }}-{{ checksum "mix.lock" }}
+           - v1-dependency-cache-{{ arch }}
+           - v1-dependency-cache
+
+      - run: mix local.rebar --force
+      - run: mix local.hex --force
+      - run: mix deps.get
+
+      - run: mix coveralls.circle --exclude network
+
+      - save_cache:
+          key: v1-dependency-cache-{{ arch }}-{{ checksum "mix.lock" }}
+          paths:
+            - _build
+            - deps
+            - ~/.mix
+
   dialyzer:
     working_directory: ~/ethereum
     docker:
@@ -117,11 +146,42 @@ jobs:
             - ~/.mix
       - run: mix dialyzer --halt-exit-status
 
+  release:
+    working_directory: ~/ethereum
+    docker:
+      - image: elixir:latest
+    steps:
+      - run: apt-get update; apt-get -y install libtool autoconf libgmp3-dev
+      - checkout
+      - run: git submodule sync --recursive
+      - run: git submodule update --recursive --init
+
+      - restore_cache:
+         keys:
+           - v1-dependency-cache-{{ arch }}-{{ checksum "mix.lock" }}
+           - v1-dependency-cache-{{ arch }}
+           - v1-dependency-cache
+
+      - run: mix local.rebar --force
+      - run: mix local.hex --force
+      - run: mix deps.get
+
+      - run: mix release --verbose
+
+      - save_cache:
+          key: v1-dependency-cache-{{ arch }}-{{ checksum "mix.lock" }}
+          paths:
+            - _build
+            - deps
+            - ~/.mix
+
 workflows:
   version: 2
   test:
     jobs:
       - credo
       - format
+      - excoveralls
       - test
       - dialyzer
+      - release

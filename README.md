@@ -1,5 +1,8 @@
 [![CircleCI](https://circleci.com/gh/exthereum/ethereum.svg?style=svg)](https://circleci.com/gh/exthereum/ethereum)
 
+[![Coverage Status](https://coveralls.io/repos/github/exthereum/ethereum/badge.svg?branch=master)](https://coveralls.io/github/exthereum/ethereum?branch=master)
+
+
 # Exthereum
 
 Exthereum is an Elixir client for the Ethereum blockchain.
