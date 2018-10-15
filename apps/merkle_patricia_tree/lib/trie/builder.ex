@@ -145,7 +145,7 @@ defmodule MerklePatriciaTree.Trie.Builder do
 
   # Builds a branch node with starter values
   defp build_branch(branch_options, trie) do
-    base = {:branch, for(_ <- 0..15, do: @empty_branch) ++ [<<>>]}
+    base = {:branch, Enum.concat(for(_ <- 0..15, do: @empty_branch), [<<>>])}
 
     Enum.reduce(branch_options, base, fn
       {prefix, {:encoded, value}}, {:branch, branches} ->

@@ -913,7 +913,7 @@ defmodule Blockchain.Block do
   """
   @spec put_transaction(t, integer(), Transaction.t(), DB.db()) :: t
   def put_transaction(block, i, trx, db) do
-    total_transactions = block.transactions ++ [trx]
+    total_transactions = Enum.concat(block.transactions, [trx])
 
     updated_transactions_root =
       Trie.new(db, block.header.transactions_root)
