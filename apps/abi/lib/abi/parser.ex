@@ -3,13 +3,13 @@ defmodule ABI.Parser do
 
   @doc false
   def parse!(str, opts \\ []) do
-    {:ok, tokens, _} = str |> String.to_charlist() |> :ethereum_abi_lexer.string()
+    {:ok, tokens0, _} = str |> String.to_charlist() |> :ethereum_abi_lexer.string()
 
     tokens =
       case opts[:as] do
-        nil -> tokens
-        :type -> [{:"expecting type", 1} | tokens]
-        :selector -> [{:"expecting selector", 1} | tokens]
+        nil -> tokens0
+        :type -> [{:"expecting type", 1} | tokens0]
+        :selector -> [{:"expecting selector", 1} | tokens0]
       end
 
     {:ok, ast} = :ethereum_abi_parser.parse(tokens)
