@@ -2,6 +2,8 @@ defmodule EvmTest do
   alias MerklePatriciaTree.Trie
   use ExUnit.Case, async: true
 
+  alias EVM.VM
+
   @passing_tests_by_group %{
     sha3_test: :all,
     arithmetic_test: :all,
@@ -42,7 +44,7 @@ defmodule EvmTest do
     for {test_group_name, _test_group} <- @passing_tests_by_group do
       for {_test_name, test} <- passing_tests(test_group_name) do
         {gas, sub_state, exec_env, _} =
-          EVM.VM.run(hex_to_int(test["exec"]["gas"]), %EVM.ExecEnv{
+          VM.run(hex_to_int(test["exec"]["gas"]), %EVM.ExecEnv{
             account_interface: account_interface(test),
             address: hex_to_int(test["exec"]["address"]),
             block_interface: block_interface(test),

@@ -5,6 +5,7 @@ defmodule ExWire.Framing.Secrets do
   """
 
   alias ExthCrypto.AES
+  alias ExthCrypto.Math
   alias ExthCrypto.MAC
   alias ExthCrypto.Hash.Keccak
 
@@ -97,12 +98,12 @@ defmodule ExWire.Framing.Secrets do
 
     mac_1 =
       MAC.init(:kec)
-      |> MAC.update(ExthCrypto.Math.xor(mac_secret, remote_nonce))
+      |> MAC.update(Math.xor(mac_secret, remote_nonce))
       |> MAC.update(auth_data)
 
     mac_2 =
       MAC.init(:kec)
-      |> MAC.update(ExthCrypto.Math.xor(mac_secret, my_nonce))
+      |> MAC.update(Math.xor(mac_secret, my_nonce))
       |> MAC.update(ack_data)
 
     {egress_mac, ingress_mac} =

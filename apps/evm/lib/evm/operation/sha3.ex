@@ -1,7 +1,9 @@
 defmodule EVM.Operation.Sha3 do
+  alias EVM
   alias EVM.Helpers
   alias EVM.Operation
   alias EVM.Stack
+  alias EVM.Memory
 
   @doc """
   Compute Keccak-256 hash.
@@ -14,7 +16,7 @@ defmodule EVM.Operation.Sha3 do
   """
   @spec sha3(Operation.stack_args(), Operation.vm_map()) :: Operation.op_result()
   def sha3([s0, s1], %{machine_state: machine_state}) do
-    {value, machine_state} = EVM.Memory.read(machine_state, s0, s1)
+    {value, machine_state} = Memory.read(machine_state, s0, s1)
 
     hash = Helpers.encode_val(:keccakf1600.sha3_256(value))
 

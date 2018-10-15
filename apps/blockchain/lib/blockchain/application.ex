@@ -4,6 +4,7 @@ defmodule Blockchain.Application do
   @moduledoc false
 
   use Application
+  alias EVM.Debugger
   require Logger
 
   def start(_type, _args) do
@@ -12,8 +13,8 @@ defmodule Blockchain.Application do
     if breakpoint_address_hex = System.get_env("BREAKPOINT") do
       case Base.decode16(breakpoint_address_hex, case: :mixed) do
         {:ok, breakpoint_address} ->
-          EVM.Debugger.enable()
-          id = EVM.Debugger.break_on(address: breakpoint_address)
+          Debugger.enable()
+          id = Debugger.break_on(address: breakpoint_address)
 
           Logger.warn(
             "Debugger has been enabled. Set breakpoint ##{id} on contract address 0x#{

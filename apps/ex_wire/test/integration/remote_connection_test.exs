@@ -18,6 +18,7 @@ defmodule ExWire.RemoteConnectionTest do
   alias ExWire.Packet
   alias ExWire.Adapter.TCP
   alias EVM.Block.Header
+  alias ExWire.Config
   @moduletag integration: true
   @moduletag network: true
 
@@ -33,8 +34,7 @@ defmodule ExWire.RemoteConnectionTest do
     send(pid, {:incoming_packet, inbound_packet})
   end
 
-  @remote_test_peer System.get_env("REMOTE_TEST_PEER") ||
-                      ExWire.Config.chain().nodes |> List.last()
+  @remote_test_peer System.get_env("REMOTE_TEST_PEER") || Config.chain().nodes |> List.last()
 
   test "connect to remote peer for discovery" do
     %URI{
@@ -144,14 +144,14 @@ defmodule ExWire.RemoteConnectionTest do
        }} ->
         # Send a simple status message
         TCP.send_packet(client_pid, %Packet.Status{
-          protocol_version: ExWire.Config.protocol_version(),
-          network_id: ExWire.Config.network_id(),
+          protocol_version: Config.protocol_version(),
+          network_id: Config.network_id(),
           total_difficulty: total_difficulty,
           best_hash: genesis_hash,
           genesis_hash: genesis_hash
         })
 
-        ExWire.Adapter.TCP.send_packet(client_pid, %ExWire.Packet.GetBlockHeaders{
+        TCP.send_packet(client_pid, %ExWire.Packet.GetBlockHeaders{
           block_identifier: genesis_hash,
           max_headers: 1,
           skip: 0,
@@ -174,7 +174,7 @@ defmodule ExWire.RemoteConnectionTest do
   def receive_block_headers(client_pid) do
     receive do
       {:incoming_packet, _packet = %Packet.BlockHeaders{headers: [header]}} ->
-        ExWire.Adapter.TCP.send_packet(client_pid, %ExWire.Packet.GetBlockBodies{
+        TCP.send_packet(client_pid, %ExWire.Packet.GetBlockBodies{
           hashes: [header |> Header.hash()]
         })
 

@@ -170,7 +170,7 @@ defimpl EVM.Interface.AccountInterface, for: EVM.Interface.Mock.MockAccountInter
           EVM.address(),
           EVM.Wei.t(),
           binary()
-        ) :: {EVM.Interface.AccountInterface.t(), EVM.Gas.t(), EVM.SubState.t(), EVM.VM.output()}
+        ) :: {EVM.Interface.AccountInterface.t(), EVM.Gas.t(), EVM.SubState.t(), VM.output()}
   def message_call(
         mock_account_interface,
         _contract0,

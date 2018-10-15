@@ -6,12 +6,13 @@ defmodule Blockchain.BlockTest do
   alias EVM.Block.Header
   alias Blockchain.Block
   alias Blockchain.Transaction
+  alias MerklePatriciaTree.Test
 
   eth_test("GenesisTests", :basic_genesis_tests, [:test2, :test3], fn test,
                                                                       _test_subset,
                                                                       _test_name,
                                                                       _ ->
-    db = MerklePatriciaTree.Test.random_ets_db()
+    db = Test.random_ets_db()
 
     chain = %Blockchain.Chain{
       genesis: %{
@@ -110,7 +111,7 @@ defmodule Blockchain.BlockTest do
   end
 
   test "match genesis block on ropsten" do
-    db = MerklePatriciaTree.Test.random_ets_db()
+    db = Test.random_ets_db()
     chain = Blockchain.Test.ropsten_chain()
 
     block =
@@ -161,7 +162,7 @@ defmodule Blockchain.BlockTest do
   end
 
   test "assert fully valid genesis block on ropsten" do
-    db = MerklePatriciaTree.Test.random_ets_db()
+    db = Test.random_ets_db()
     chain = Blockchain.Test.ropsten_chain()
 
     Blockchain.Block.gen_genesis_block(chain, db)

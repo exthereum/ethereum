@@ -2,6 +2,7 @@ defmodule ExWireTest do
   use ExUnit.Case
   doctest ExWire
 
+  alias ExWire.Config
   alias ExWire.Protocol
   alias ExWire.Message.Ping
   alias ExWire.Message.Pong
@@ -63,12 +64,12 @@ defmodule ExWireTest do
   end
 
   def assert_receive_message(message) do
-    message = message |> Protocol.encode(ExWire.Config.private_key())
+    message = message |> Protocol.encode(Config.private_key())
     assert_receive(%{data: ^message, to: @us})
   end
 
   def fake_send(message, timestamp) do
-    encoded_message = Protocol.encode(message, ExWire.Config.private_key())
+    encoded_message = Protocol.encode(message, Config.private_key())
 
     GenServer.cast(
       :test_network_adapter,

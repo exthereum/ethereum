@@ -5,6 +5,8 @@ defmodule ABI.TypeEncoder do
   array of data and encode that array according to the specification.
   """
 
+  alias ExthCrypto.Math
+
   @doc """
   Encodes the given data based on the function selector.
 
@@ -246,8 +248,7 @@ defmodule ABI.TypeEncoder do
 
   defp pad(bin, size_in_bytes, direction) do
     # TODO: Create `left_pad` repo, err, add to `ExthCrypto.Math`
-    total_size =
-      size_in_bytes + ExthCrypto.Math.mod(32 - ExthCrypto.Math.mod(size_in_bytes, 32), 32)
+    total_size = size_in_bytes + ExthCrypto.Math.mod(32 - Math.mod(size_in_bytes, 32), 32)
 
     padding_size_bits = (total_size - byte_size(bin)) * 8
     padding = <<0::size(padding_size_bits)>>

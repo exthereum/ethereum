@@ -2,13 +2,14 @@ defmodule MerklePatriciaTree.TrieTest do
   use ExUnit.Case, async: true
   doctest MerklePatriciaTree.Trie
 
+  alias MerklePatriciaTree.Test
   alias MerklePatriciaTree.Trie
   alias MerklePatriciaTree.Trie.Verifier
 
   @max_32_bits 4_294_967_296
 
   setup do
-    db = MerklePatriciaTree.Test.random_ets_db()
+    db = Test.random_ets_db()
 
     {:ok, %{db: db}}
   end
@@ -54,7 +55,7 @@ defmodule MerklePatriciaTree.TrieTest do
   end
 
   test "create trie" do
-    trie = Trie.new(MerklePatriciaTree.Test.random_ets_db())
+    trie = Trie.new(Test.random_ets_db())
 
     assert Trie.get(trie, <<0x01, 0x02, 0x03>>) == nil
   end

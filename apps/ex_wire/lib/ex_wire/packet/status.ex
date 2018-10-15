@@ -26,6 +26,7 @@ defmodule ExWire.Packet.Status do
   """
 
   require Logger
+  alias ExWire.Config
 
   @behaviour ExWire.Packet
 
@@ -146,7 +147,7 @@ defmodule ExWire.Packet.Status do
 
     protocol_version = packet.protocol_version
 
-    case ExWire.Config.protocol_version() do
+    case Config.protocol_version() do
       ^protocol_version ->
         :ok
 
@@ -156,7 +157,7 @@ defmodule ExWire.Packet.Status do
           Logger.debug(fn ->
             "[Packet] Disconnecting to due incompatible protocol version (them #{
               packet.protocol_version
-            }, us: #{ExWire.Config.protocol_version()})"
+            }, us: #{Config.protocol_version()})"
           end)
 
         {:disconnect, :useless_peer}

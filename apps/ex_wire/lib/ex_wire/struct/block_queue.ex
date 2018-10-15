@@ -19,6 +19,8 @@ defmodule ExWire.Struct.BlockQueue do
   alias Blockchain.Blocktree
   alias Blockchain.Chain
   alias MerklePatriciaTree.Trie
+  alias MerklePatriciaTree.Test
+  alias ExWire.Config
 
   require Logger
 
@@ -324,7 +326,7 @@ defmodule ExWire.Struct.BlockQueue do
         {final_block_map, new_blocks} =
           Enum.reduce(block_map, {block_map, []}, fn {hash, block_item}, {block_map, blocks} ->
             if block_item.ready and
-                 MapSet.size(block_item.commitments) >= ExWire.Config.commitment_count() do
+                 MapSet.size(block_item.commitments) >= Config.commitment_count() do
               {Map.delete(block_map, hash), [block_item.block | blocks]}
             else
               {block_map, blocks}
@@ -375,10 +377,10 @@ defmodule ExWire.Struct.BlockQueue do
     header.transactions_root == @empty_trie and header.ommers_hash == @empty_hash
   end
 
-  @spec get_transactions_root([ExRLP.t()]) :: MerklePatriciaTree.Trie.root_hash()
+  @spec get_transactions_root([ExRLP.t()]) :: Trie.root_hash()
   defp get_transactions_root(transactions_list) do
     # this is a throw-away
-    db = MerklePatriciaTree.Test.random_ets_db()
+    db = Test.random_ets_db()
 
     trie =
       Enum.reduce(transactions_list |> Enum.with_index(), Trie.new(db), fn {trx, i}, trie ->
@@ -397,7 +399,7 @@ defmodule ExWire.Struct.BlockQueue do
           block_map,
           BlockStruct.t(),
           ExthCrypto.hash(),
-          MerklePatriciaTree.Trie.root_hash()
+          Trie.root_hash()
         ) :: block_map
   defp reduce_block_item(
          block_map,

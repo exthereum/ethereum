@@ -7,7 +7,9 @@ defmodule RopstenTest do
   """
 
   use ExUnit.Case, async: true
-
+  alias MerklePatriciaTree.Test
+  alias Blockchain.Blocktree
+  alias Blockchain.Test, as: BlockchainTest
   @n 11
 
   setup_all do
@@ -27,12 +29,12 @@ defmodule RopstenTest do
   end
 
   test "processing the first #{@n} blocks of the live ropsten block tree", %{blocks: blocks} do
-    db = MerklePatriciaTree.Test.random_ets_db()
-    tree = Blockchain.Blocktree.new_tree()
-    chain = Blockchain.Test.ropsten_chain()
+    db = Test.random_ets_db()
+    tree = Blocktree.new_tree()
+    chain = BlockchainTest.ropsten_chain()
 
     Enum.reduce(blocks, tree, fn block, tree ->
-      {:ok, new_tree} = Blockchain.Blocktree.verify_and_add_block(tree, chain, block, db)
+      {:ok, new_tree} = Blocktree.verify_and_add_block(tree, chain, block, db)
 
       new_tree
     end)

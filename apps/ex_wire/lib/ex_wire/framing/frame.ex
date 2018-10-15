@@ -11,6 +11,7 @@ defmodule ExWire.Framing.Frame do
 
   alias ExthCrypto.MAC
   alias ExthCrypto.AES
+  alias ExthCrypto.Math
   alias ExWire.Framing.Secrets
 
   @type frame :: binary()
@@ -189,7 +190,7 @@ defmodule ExWire.Framing.Frame do
 
     enc = ExthCrypto.Cipher.encrypt(final, mac_secret, mac_encoder) |> Binary.take(-16)
 
-    enc_xored = ExthCrypto.Math.xor(enc, if(seed, do: seed, else: final))
+    enc_xored = Math.xor(enc, if(seed, do: seed, else: final))
 
     MAC.update(mac, enc_xored)
   end

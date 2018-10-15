@@ -295,7 +295,7 @@ defimpl EVM.Interface.AccountInterface, for: Blockchain.Interface.AccountInterfa
           EVM.address(),
           EVM.Wei.t(),
           binary()
-        ) :: {EVM.Interface.AccountInterface.t(), EVM.Gas.t(), EVM.SubState.t(), EVM.VM.output()}
+        ) :: {EVM.Interface.AccountInterface.t(), EVM.Gas.t(), EVM.SubState.t(), VM.output()}
   def message_call(
         account_interface,
         %Contract{

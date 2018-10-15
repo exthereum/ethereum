@@ -15,6 +15,7 @@ defmodule ExWire.Adapter.TCP do
   alias ExWire.Framing.Frame
   alias ExWire.Handshake
   alias ExWire.Packet
+  alias ExWire.Config
 
   @ping_interval 2_000
 
@@ -72,8 +73,8 @@ defmodule ExWire.Adapter.TCP do
 
     {my_auth_msg, my_ephemeral_key_pair, my_nonce} =
       ExWire.Handshake.build_auth_msg(
-        ExWire.Config.public_key(),
-        ExWire.Config.private_key(),
+        Config.public_key(),
+        Config.private_key(),
         peer.remote_id
       )
 
@@ -386,21 +387,21 @@ defmodule ExWire.Adapter.TCP do
   # Client function to send HELLO message after connecting.
   defp send_hello(pid) do
     send_packet(pid, %Packet.Hello{
-      p2p_version: ExWire.Config.p2p_version(),
-      client_id: ExWire.Config.client_id(),
-      caps: ExWire.Config.caps(),
-      listen_port: ExWire.Config.listen_port(),
-      node_id: ExWire.Config.node_id()
+      p2p_version: Config.p2p_version(),
+      client_id: Config.client_id(),
+      caps: Config.caps(),
+      listen_port: Config.listen_port(),
+      node_id: Config.node_id()
     })
   end
 
   # Client function to send STATUS message.
   defp send_status(pid) do
     send_packet(pid, %Packet.Status{
-      protocol_version: ExWire.Config.protocol_version(),
-      network_id: ExWire.Config.network_id(),
-      total_difficulty: ExWire.Config.chain().genesis.difficulty,
-      best_hash: ExWire.Config.chain().genesis.parent_hash,
+      protocol_version: Config.protocol_version(),
+      network_id: Config.network_id(),
+      total_difficulty: Config.chain().genesis.difficulty,
+      best_hash: Config.chain().genesis.parent_hash,
       genesis_hash: <<>>
     })
     |> Exth.view("status")

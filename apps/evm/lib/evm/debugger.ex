@@ -9,7 +9,6 @@ defmodule EVM.Debugger do
   alias EVM.SubState
   alias EVM.ExecEnv
   alias EVM.MachineState
-
   require Logger
 
   @commands [
@@ -87,7 +86,7 @@ defmodule EVM.Debugger do
   def enable() do
     Application.put_env(__MODULE__, :enabled, true)
 
-    EVM.Debugger.Breakpoint.init()
+    Breakpoint.init()
   end
 
   @doc """

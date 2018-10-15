@@ -7,6 +7,8 @@ defmodule Blockchain.TransactionTest do
 
   alias Blockchain.Transaction
   alias EVM.Block.Header
+  alias MerklePatriciaTree.Test
+  alias MerklePatriciaTree.Trie
 
   # TODO: These eth common test cases have seemed to have moved or no longer
   #       exist. We should add them back when we discover where they moved to.
@@ -173,7 +175,7 @@ defmodule Blockchain.TransactionTest do
         }
         |> Blockchain.Transaction.Signature.sign_transaction(private_key)
 
-      trie = MerklePatriciaTree.Trie.new(MerklePatriciaTree.Test.random_ets_db())
+      trie = Trie.new(Test.random_ets_db())
 
       account =
         Blockchain.Account.put_account(trie, sender, %Blockchain.Account{

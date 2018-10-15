@@ -2,6 +2,7 @@ defmodule MerklePatriciaTreeTest do
   use ExUnit.Case
 
   alias MerklePatriciaTree.Trie
+  alias MerklePatriciaTree.Test
 
   @passing_tests %{
     anyorder: :all,
@@ -12,7 +13,7 @@ defmodule MerklePatriciaTreeTest do
     for {test_type, test_group} <- @passing_tests do
       for {test_name, test} <- read_test_file(test_type),
           test_group == :all or Enum.member?(test_group, String.to_atom(test_name)) do
-        db = MerklePatriciaTree.Test.random_ets_db()
+        db = Test.random_ets_db()
         test_in = test["in"]
 
         input =

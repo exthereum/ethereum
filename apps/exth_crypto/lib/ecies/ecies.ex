@@ -11,7 +11,7 @@ defmodule ExthCrypto.ECIES do
   alias ExthCrypto.Hash
   alias ExthCrypto.Cipher
   alias ExthCrypto.KDF.NistSp80056
-
+  alias ExthCrypto.Key
   @curve_name :secp256k1
 
   @doc """
@@ -40,11 +40,11 @@ defmodule ExthCrypto.ECIES do
       # TODO: More tests
   """
   @spec encrypt(
-          ExthCrypto.Key.public_key(),
+          Key.public_key(),
           Cipher.plaintext(),
           binary(),
           binary(),
-          {ExthCrypto.Key.public_key(), ExthCrypto.Key.private_key()} | nil,
+          {Key.public_key(), Key.private_key()} | nil,
           Cipher.init_vector() | nil
         ) :: {:ok, binary()} | {:error, String.t()}
   def encrypt(
@@ -106,7 +106,7 @@ defmodule ExthCrypto.ECIES do
         MAC.mac(init_vector <> encoded_message <> shared_info_2, key_mac_hashed, params.mac)
 
       # Remove DER encoding byte
-      my_ephemeral_public_key_raw = ExthCrypto.Key.der_to_raw(my_ephemeral_public_key)
+      my_ephemeral_public_key_raw = Key.der_to_raw(my_ephemeral_public_key)
 
       # return 0x04 || R || AsymmetricEncrypt(shared-secret, plaintext) || tag
       {:ok,
@@ -133,7 +133,7 @@ defmodule ExthCrypto.ECIES do
       iex> ExthCrypto.ECIES.decrypt(ExthCrypto.Test.private_key(:key_a), ecies_encoded_msg, "shared_info_1", "shared_info_2")
       {:ok, "hello"}
   """
-  @spec decrypt(ExthCrypto.Key.private_key(), binary(), binary(), binary()) ::
+  @spec decrypt(Key.private_key(), binary(), binary(), binary()) ::
           {:ok, Cipher.plaintext()} | {:error, String.t()}
   def decrypt(
         my_static_private_key,
@@ -220,7 +220,7 @@ defmodule ExthCrypto.ECIES do
 
     # SEC1 - §5.1.4 - Steps 4, 5
     # Generate a shared secret based on our ephemeral private key and the ephemeral public key from the message
-    her_ephemeral_public_key = ExthCrypto.Key.raw_to_der(her_ephemeral_public_key_raw)
+    her_ephemeral_public_key = Key.raw_to_der(her_ephemeral_public_key_raw)
 
     shared_secret =
       ECDH.generate_shared_secret(
