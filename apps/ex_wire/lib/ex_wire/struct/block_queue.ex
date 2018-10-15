@@ -82,25 +82,25 @@ defmodule ExWire.Struct.BlockQueue do
         chain,
         db
       ) do
-    block_map = Map.get(queue, header.number, %{})
+    block_map0 = Map.get(queue, header.number, %{})
 
     {block_map, should_request_body} =
-      case Map.get(block_map, header_hash) do
+      case Map.get(block_map0, header_hash) do
         nil ->
           # may already be ready, already.
           is_empty = is_block_empty?(header)
 
-          block_map =
-            Map.put(block_map, header_hash, %{
+          block_map1 =
+            Map.put(block_map0, header_hash, %{
               commitments: MapSet.new([remote_id]),
               block: %Block{header: header},
               ready: is_empty
             })
 
-          {block_map, not is_empty}
+          {block_map1, not is_empty}
 
         block_item ->
-          {Map.put(block_map, header_hash, %{
+          {Map.put(block_map0, header_hash, %{
              block_item
              | commitments: MapSet.put(block_item.commitments, remote_id)
            }), false}
