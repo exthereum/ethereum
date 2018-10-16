@@ -92,7 +92,7 @@ defmodule EVM.Helpers do
   def encode_signed(n) when n < 0, do: EVM.max_int() - abs(n)
   def encode_signed(n), do: n
 
-  @spec decode_signed(integer() | nil) :: EVM.val() | nil
+  @spec decode_signed(nil | <<_::8, _::_*8>> | non_neg_integer()) :: EVM.val()
   def decode_signed(n) when is_nil(n), do: 0
 
   def decode_signed(n) when is_integer(n) do
@@ -123,7 +123,7 @@ defmodule EVM.Helpers do
   Helper function to print an instruction message.
   """
   def inspect(msg, prefix) do
-    Logger.debug(inspect([prefix, ":", msg]))
+    _ = Logger.debug(inspect([prefix, ":", msg]))
 
     msg
   end

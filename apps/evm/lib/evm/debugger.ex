@@ -199,7 +199,7 @@ defmodule EVM.Debugger do
   @spec break(Breakpoint.t(), MachineState.t(), SubState.t(), ExecEnv.t(), [String.t()]) ::
           {MachineState.t(), SubState.t(), ExecEnv.t()}
   def break(breakpoint, machine_state, sub_state, exec_env, input_sequence \\ []) do
-    Breakpoint.clear_pc_if_one_time_break(breakpoint.id)
+    _ = Breakpoint.clear_pc_if_one_time_break(breakpoint.id)
 
     if breakpoint.pc == :start do
       # If we're not next, we're likely a freshly hit breakpoint and should display a helpful prompt
@@ -365,9 +365,10 @@ defmodule EVM.Debugger do
          exec_env,
          input_sequence
        ) do
-    Logger.debug(fn ->
-      "Debugger output #{inspect(machine_state)} #{inspect(sub_state)} #{inspect(exec_env)}"
-    end)
+    _ =
+      Logger.debug(fn ->
+        "Debugger output #{inspect(machine_state)} #{inspect(sub_state)} #{inspect(exec_env)}"
+      end)
 
     prompt(breakpoint, machine_state, sub_state, exec_env, input_sequence)
   end
@@ -506,7 +507,7 @@ defmodule EVM.Debugger do
          exec_env,
          _input_sequence
        ) do
-    Breakpoint.set_next(breakpoint.id)
+    _ = Breakpoint.set_next(breakpoint.id)
 
     {machine_state, sub_state, exec_env}
   end

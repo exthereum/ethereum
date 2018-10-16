@@ -46,7 +46,12 @@ defmodule Blockchain.Blocktree do
         parent_map: %{}
       }
   """
-  @spec new_tree() :: t
+  @spec new_tree() :: %Blockchain.Blocktree{
+          :block => :root,
+          :children => %{},
+          :total_difficulty => 0,
+          :parent_map => %{}
+        }
   def new_tree() do
     %__MODULE__{
       block: :root,

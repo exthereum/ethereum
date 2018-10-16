@@ -22,7 +22,7 @@ defprotocol EVM.Interface.AccountInterface do
   @spec get_account_code(t, EVM.address()) :: nil | binary()
   def get_account_code(t, address)
 
-  @spec get_account_nonce(EVM.Interface.AccountInterface.t(), EVM.address()) :: integer()
+  @spec get_account_nonce(EVM.Interface.AccountInterface.t(), EVM.address()) :: nil | integer()
   def get_account_nonce(mock_account_interface, address)
 
   @spec increment_account_nonce(t, EVM.address()) :: t

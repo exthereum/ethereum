@@ -11,7 +11,7 @@ defmodule EVM.Address do
   @doc """
   Returns the maximum allowed address size.
   """
-  @spec size() :: integer()
+  @spec size() :: 20
   def size(), do: @size
 
   @doc """
@@ -24,7 +24,7 @@ defmodule EVM.Address do
   Returns an address given an integer.
   """
 
-  @spec new(integer()) :: binary()
+  @spec new(non_neg_integer()) :: binary()
   def new(address) when is_number(address) do
     address
     |> :binary.encode_unsigned()

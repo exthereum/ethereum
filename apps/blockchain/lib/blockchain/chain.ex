@@ -182,6 +182,6 @@ defmodule Blockchain.Chain do
     res
   end
 
-  @spec load_hex(String.t()) :: integer()
+  @spec load_hex(String.t()) :: non_neg_integer()
   defp load_hex(hex_data), do: hex_data |> load_raw_hex |> :binary.decode_unsigned()
 end
