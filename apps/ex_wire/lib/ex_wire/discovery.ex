@@ -9,6 +9,8 @@ defmodule ExWire.Discovery do
   require Logger
 
   alias ExWire.Struct.Neighbour
+  alias ExWire.Config
+  alias ExthCrypto.Math
 
   @min_neighbours 50
 
@@ -26,12 +28,12 @@ defmodule ExWire.Discovery do
   def init(nodes) do
     # Configure how we describe ourselves
     local_endpoint =
-      if ExWire.Config.use_nat() do
+      if Config.use_nat() do
         # Use a NAT for inbound ports
         {:ok, context} = :nat_upnp.discover()
 
         # TODO: Should we remove existing mapping?
-        # :nat_upnp.delete_port_mapping(context, :udp, ExWire.Config.listen_port())
+        # :nat_upnp.delete_port_mapping(context, :udp, Config.listen_port())
 
         {_, _, ip_address_binary} = context
         {:ok, ip_address} = :inet.parse_address(ip_address_binary)
@@ -40,23 +42,23 @@ defmodule ExWire.Discovery do
           :nat_upnp.add_port_mapping(
             context,
             :udp,
-            ExWire.Config.listen_port(),
-            ExWire.Config.listen_port(),
+            Config.listen_port(),
+            Config.listen_port(),
             'discovery mapping',
             0
           )
 
         %ExWire.Struct.Endpoint{
           ip: ip_address,
-          udp_port: ExWire.Config.listen_port(),
-          tcp_port: ExWire.Config.listen_port()
+          udp_port: Config.listen_port(),
+          tcp_port: Config.listen_port()
         }
       else
         # Use defaults
         %ExWire.Struct.Endpoint{
-          ip: ExWire.Config.local_ip(),
-          udp_port: ExWire.Config.listen_port(),
-          tcp_port: ExWire.Config.listen_port()
+          ip: Config.local_ip(),
+          udp_port: Config.listen_port(),
+          tcp_port: Config.listen_port()
         }
       end
 
@@ -80,7 +82,7 @@ defmodule ExWire.Discovery do
 
   def handle_cast({:ping, node_id}, state) do
     Logger.debug(fn ->
-      "[Discovery] Received ping to #{node_id |> ExthCrypto.Math.bin_to_hex()}"
+      "[Discovery] Received ping to #{node_id |> Math.bin_to_hex()}"
     end)
 
     # For now, do nothing.
@@ -90,7 +92,7 @@ defmodule ExWire.Discovery do
 
   def handle_cast({:pong, node_id}, state = %{neighbours: neighbours}) do
     Logger.debug(fn ->
-      "[Discovery] Received pong from #{node_id |> ExthCrypto.Math.bin_to_hex()}"
+      "[Discovery] Received pong from #{node_id |> Math.bin_to_hex()}"
     end)
 
     # If we get a pong and we like it, we should connect via TCP.
@@ -118,8 +120,7 @@ defmodule ExWire.Discovery do
 
     new_neighbours =
       Enum.filter(add_neighbours.nodes, fn neighbour ->
-        neighbour.node != ExWire.Config.node_id() and
-          not Enum.member?(known_nodes, neighbour.node)
+        neighbour.node != Config.node_id() and not Enum.member?(known_nodes, neighbour.node)
       end)
 
     Logger.debug(fn ->
@@ -209,7 +210,7 @@ defmodule ExWire.Discovery do
     # Ask node for neighbours
     find_neighbours = %ExWire.Message.FindNeighbours{
       # random target address
-      target: ExthCrypto.Math.nonce(64),
+      target: Math.nonce(64),
       timestamp: ExWire.Util.Timestamp.soon()
     }
 

@@ -27,6 +27,7 @@ defmodule Blockchain.Contract do
   alias Blockchain.Account
   alias EVM.Block.Header
   alias EVM.ExecEnv
+  alias EVM.VM
 
   @doc """
   Creates a new contract, as defined in Section 7 Eq.(81) and Eq.(87) of the Yellow Paper as Λ.
@@ -100,7 +101,7 @@ defmodule Blockchain.Contract do
       )
 
     {state_after_init, remaining_gas, accrued_sub_state, output} =
-      EVM.VM.run(available_gas, exec_env)
+      VM.run(available_gas, exec_env)
       |> interpret_vm_result
 
     contract_creation_cost = get_contract_creation_cost(output)
@@ -165,7 +166,7 @@ defmodule Blockchain.Contract do
           EVM.address(),
           EVM.Wei.t(),
           binary()
-        ) :: {EVM.state(), EVM.Gas.t(), EVM.SubState.t(), EVM.VM.output()}
+        ) :: {EVM.state(), EVM.Gas.t(), EVM.SubState.t(), VM.output()}
   def message_call(
         %__MODULE__{
           state: state,
@@ -296,19 +297,19 @@ defmodule Blockchain.Contract do
   """
   @spec get_message_call_exec_fun(EVM.address()) ::
           (EVM.Gas.t(), EVM.ExecEnv.t() ->
-             {EVM.state(), EVM.Gas.t(), EVM.SubState.t(), EVM.VM.output()})
+             {EVM.state(), EVM.Gas.t(), EVM.SubState.t(), VM.output()})
   def get_message_call_exec_fun(recipient) do
     case :binary.decode_unsigned(recipient) do
       1 -> &EVM.Builtin.run_ecrec/2
       2 -> &EVM.Builtin.run_sha256/2
       3 -> &EVM.Builtin.run_rip160/2
       4 -> &EVM.Builtin.run_id/2
-      _ -> &EVM.VM.run/2
+      _ -> &VM.run/2
     end
   end
 
-  @spec interpret_vm_result({EVM.Gas.t(), EVM.SubState.t(), EVM.ExecEnv.t(), EVM.VM.output()}) ::
-          {EVM.state(), EVM.Gas.t(), EVM.SubState.t(), EVM.VM.output()}
+  @spec interpret_vm_result({EVM.Gas.t(), EVM.SubState.t(), EVM.ExecEnv.t(), VM.output()}) ::
+          {EVM.state(), EVM.Gas.t(), EVM.SubState.t(), VM.output()}
   defp interpret_vm_result({gas, sub_state, exec_env, output}),
     do: {exec_env.account_interface.state, gas, sub_state, output}
 

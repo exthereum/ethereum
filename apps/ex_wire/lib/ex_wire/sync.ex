@@ -14,6 +14,7 @@ defmodule ExWire.Sync do
   require Logger
 
   alias EVM.Block.Header
+  alias ExWire.Config
   alias ExWire.Struct.BlockQueue
   alias ExWire.Packet.BlockHeaders
   alias ExWire.Packet.BlockBodies
@@ -39,7 +40,7 @@ defmodule ExWire.Sync do
      %{
        block_queue: %BlockQueue{},
        block_tree: block_tree,
-       chain: ExWire.Config.chain(),
+       chain: Config.chain(),
        db: db,
        last_requested_block: request_next_block(block_tree)
      }}

@@ -7,7 +7,10 @@ defmodule Blockchain.Transaction do
 
   alias Blockchain.Account
   alias Blockchain.Contract
+  alias Blockchain.Transaction.Signature
   alias EVM.Block.Header
+  alias EVM.Gas
+  alias EVM.MachineCode
 
   defstruct nonce: 0,
 
@@ -37,10 +40,10 @@ defmodule Blockchain.Transaction do
           gas_limit: EVM.val(),
           to: EVM.address() | <<_::0>>,
           value: EVM.val(),
-          v: Blockchain.Transaction.Signature.hash_v(),
-          r: Blockchain.Transaction.Signature.hash_r(),
-          s: Blockchain.Transaction.Signature.hash_s(),
-          init: EVM.MachineCode.t(),
+          v: Signature.hash_v(),
+          r: Signature.hash_r(),
+          s: Signature.hash_s(),
+          init: MachineCode.t(),
           data: binary()
         }
 
@@ -491,13 +494,13 @@ defmodule Blockchain.Transaction do
       iex> Blockchain.Transaction.intrinsic_gas_cost(%Blockchain.Transaction{to: <<>>, init: <<1, 2, 0, 3>>, data: <<>>}, %EVM.Block.Header{number: 5_000_000})
       3 * 68 + 4 + 32000 + 21000
   """
-  @spec intrinsic_gas_cost(t, Header.t()) :: EVM.Gas.t()
+  @spec intrinsic_gas_cost(t, Header.t()) :: Gas.t()
   def intrinsic_gas_cost(trx, block_header) do
-    EVM.Gas.g_txdata(trx.init) + EVM.Gas.g_txdata(trx.data) +
+    Gas.g_txdata(trx.init) + Gas.g_txdata(trx.data) +
       if(
         trx.to == <<>> and Header.is_after_homestead?(block_header),
-        do: EVM.Gas.g_txcreate(),
+        do: Gas.g_txcreate(),
         else: 0
-      ) + EVM.Gas.g_transaction()
+      ) + Gas.g_transaction()
   end
 end

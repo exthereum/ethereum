@@ -7,6 +7,7 @@ defmodule ExWire.Network do
 
   require Logger
 
+  alias ExWire.Config
   alias ExWire.Crypto
   alias ExWire.Handler
   alias ExWire.Protocol
@@ -258,7 +259,7 @@ defmodule ExWire.Network do
           :send,
           %{
             to: to,
-            data: Protocol.encode(message, ExWire.Config.private_key())
+            data: Protocol.encode(message, Config.private_key())
           }
         }
       )

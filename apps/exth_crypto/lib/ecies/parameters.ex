@@ -20,6 +20,9 @@ defmodule ExthCrypto.ECIES.Parameters do
           key_len: integer()
         }
 
+  alias ExthCrypto.Hash.SHA
+  alias ExthCrypto.AES
+
   @doc """
   Returns curve parameters for ECIES with AES-256 symmetric
   encryption and SHA-256 hash.
@@ -28,8 +31,8 @@ defmodule ExthCrypto.ECIES.Parameters do
   def ecies_aes128_sha256 do
     %__MODULE__{
       mac: :sha256,
-      hasher: {&ExthCrypto.Hash.SHA.sha256/1, nil, 32},
-      cipher: {ExthCrypto.AES, ExthCrypto.AES.block_size(), :ctr},
+      hasher: {&SHA.sha256/1, nil, 32},
+      cipher: {AES, AES.block_size(), :ctr},
       key_len: 16
     }
   end
@@ -42,8 +45,8 @@ defmodule ExthCrypto.ECIES.Parameters do
   def ecies_aes256_sha256 do
     %__MODULE__{
       mac: :sha256,
-      hasher: {&ExthCrypto.Hash.SHA.sha256/1, nil, 32},
-      cipher: {ExthCrypto.AES, ExthCrypto.AES.block_size(), :ctr},
+      hasher: {&SHA.sha256/1, nil, 32},
+      cipher: {AES, AES.block_size(), :ctr},
       key_len: 32
     }
   end
@@ -56,8 +59,8 @@ defmodule ExthCrypto.ECIES.Parameters do
   def ecies_aes256_sha384 do
     %__MODULE__{
       mac: :sha256,
-      hasher: {&ExthCrypto.Hash.SHA.sha384/1, nil, 48},
-      cipher: {ExthCrypto.AES, ExthCrypto.AES.block_size(), :ctr},
+      hasher: {&SHA.sha384/1, nil, 48},
+      cipher: {AES, AES.block_size(), :ctr},
       key_len: 32
     }
   end
@@ -70,8 +73,8 @@ defmodule ExthCrypto.ECIES.Parameters do
   def ecies_aes256_sha512 do
     %__MODULE__{
       mac: :sha256,
-      hasher: {&ExthCrypto.Hash.SHA.sha512/1, nil, 64},
-      cipher: {ExthCrypto.AES, ExthCrypto.AES.block_size(), :ctr},
+      hasher: {&SHA.sha512/1, nil, 64},
+      cipher: {AES, AES.block_size(), :ctr},
       key_len: 32
     }
   end

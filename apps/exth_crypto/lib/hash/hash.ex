@@ -4,8 +4,9 @@ defmodule ExthCrypto.Hash do
   defined by Ethereum.
   """
 
-  # @type hash_algorithm :: :md4 | :md5 | :sha | :sha224 | :sha256 | :sha384 | :sha512 | :sha3_224 | :sha3_256 | :sha3_384 | :sha3_512
-  # @type hash_algorithms :: [:md4 | :md5 | :sha | :sha224 | :sha256 | :sha384 | :sha512 | :sha3_224 | :sha3_256 | :sha3_384 | :sha3_512]
+  alias ExthCrypto.Hash.Keccak
+  alias ExthCrypto.Hash.SHA
+
   @type hash_algorithm ::
           :md4
           | :md5
@@ -46,13 +47,13 @@ defmodule ExthCrypto.Hash do
   The SHA1 hasher.
   """
   @spec sha1() :: hash_type
-  def sha1, do: {&ExthCrypto.Hash.SHA.sha1/1, nil, 20}
+  def sha1, do: {&SHA.sha1/1, nil, 20}
 
   @doc """
   The KECCAK hasher, as defined by Ethereum.
   """
   @spec kec() :: hash_type
-  def kec, do: {&ExthCrypto.Hash.Keccak.kec/1, nil, 256}
+  def kec, do: {&Keccak.kec/1, nil, 256}
 
   @doc """
   Runs the specified hash type on the given data.

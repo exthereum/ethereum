@@ -2,9 +2,10 @@ defmodule MerklePatriciaTree.DB.LevelDBTest do
   use ExUnit.Case, async: false
   alias MerklePatriciaTree.DB
   alias MerklePatriciaTree.DB.LevelDB
+  alias MerklePatriciaTree.Test
 
   test "init creates an leveldb table" do
-    db_name = "/tmp/db#{MerklePatriciaTree.Test.random_string(20)}"
+    db_name = "/tmp/db#{Test.random_string(20)}"
 
     {_, db_ref} = LevelDB.init(db_name)
     Exleveldb.close(db_ref)
@@ -12,7 +13,7 @@ defmodule MerklePatriciaTree.DB.LevelDBTest do
   end
 
   test "get/1" do
-    {_, db_ref} = LevelDB.init("/tmp/db#{MerklePatriciaTree.Test.random_string(20)}")
+    {_, db_ref} = LevelDB.init("/tmp/db#{Test.random_string(20)}")
 
     Exleveldb.put(db_ref, "key", "value")
     assert LevelDB.get(db_ref, "key") == {:ok, "value"}
@@ -20,7 +21,7 @@ defmodule MerklePatriciaTree.DB.LevelDBTest do
   end
 
   test "get!/1" do
-    db = {_, db_ref} = LevelDB.init("/tmp/db#{MerklePatriciaTree.Test.random_string(20)}")
+    db = {_, db_ref} = LevelDB.init("/tmp/db#{Test.random_string(20)}")
 
     Exleveldb.put(db_ref, "key", "value")
     assert DB.get!(db, "key") == "value"
@@ -31,14 +32,14 @@ defmodule MerklePatriciaTree.DB.LevelDBTest do
   end
 
   test "put!/2" do
-    {_, db_ref} = LevelDB.init("/tmp/db#{MerklePatriciaTree.Test.random_string(20)}")
+    {_, db_ref} = LevelDB.init("/tmp/db#{Test.random_string(20)}")
 
     assert LevelDB.put!(db_ref, "key", "value") == :ok
     assert Exleveldb.get(db_ref, "key") == {:ok, "value"}
   end
 
   test "simple init, put, get" do
-    db = {_, db_ref} = LevelDB.init("/tmp/db#{MerklePatriciaTree.Test.random_string(20)}")
+    db = {_, db_ref} = LevelDB.init("/tmp/db#{Test.random_string(20)}")
 
     assert LevelDB.put!(db_ref, "name", "bob") == :ok
     assert DB.get!(db, "name") == "bob"

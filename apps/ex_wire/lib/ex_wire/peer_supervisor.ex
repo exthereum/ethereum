@@ -11,6 +11,8 @@ defmodule ExWire.PeerSupervisor do
   use Supervisor
 
   require Logger
+  alias ExthCrypto.Math
+  alias ExWire.Adapter.TCP
 
   @name __MODULE__
 
@@ -20,7 +22,7 @@ defmodule ExWire.PeerSupervisor do
 
   def init(_args) do
     children = [
-      worker(ExWire.Adapter.TCP, [], restart: :transient)
+      worker(TCP, [], restart: :transient)
     ]
 
     supervise(children, strategy: :simple_one_for_one)
@@ -36,7 +38,7 @@ defmodule ExWire.PeerSupervisor do
 
     for {_id, child, _type, _modules} <- Supervisor.which_children(pid) do
       # Children which are being restarted by not have a child_pid at this time.
-      if is_pid(child), do: ExWire.Adapter.TCP.send_packet(child, packet)
+      if is_pid(child), do: TCP.send_packet(child, packet)
     end
   end
 
@@ -48,7 +50,7 @@ defmodule ExWire.PeerSupervisor do
       Logger.debug(fn ->
         "[Peer Supervisor] Starting TCP connection to neighbour #{
           neighbour.endpoint.ip |> ExWire.Struct.Endpoint.ip_to_string()
-        }:#{neighbour.endpoint.tcp_port} (#{neighbour.node |> ExthCrypto.Math.bin_to_hex()})"
+        }:#{neighbour.endpoint.tcp_port} (#{neighbour.node |> Math.bin_to_hex()})"
       end)
 
     peer = ExWire.Struct.Peer.from_neighbour(neighbour)

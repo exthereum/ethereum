@@ -2,6 +2,7 @@ defmodule Blockchain.StateTest do
   alias MerklePatriciaTree.Trie
   alias Blockchain.Account
   alias EVM.Block.Header
+  alias MerklePatriciaTree.Test
   use EthCommonTest.Harness
   use ExUnit.Case, async: true
 
@@ -80,7 +81,7 @@ defmodule Blockchain.StateTest do
   end
 
   def account_interface(test) do
-    db = MerklePatriciaTree.Test.random_ets_db()
+    db = Test.random_ets_db()
     empty_root_hash = ExRLP.encode(<<>>) |> BitHelper.kec()
 
     state = %Trie{

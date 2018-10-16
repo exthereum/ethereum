@@ -17,6 +17,7 @@ defmodule ExWire.Packet.NewBlock do
 
   alias EVM.Block.Header
   alias ExWire.Struct.Block
+  alias ExthCrypto.Math
 
   @behaviour ExWire.Packet
 
@@ -115,7 +116,7 @@ defmodule ExWire.Packet.NewBlock do
     _ =
       Logger.debug(fn ->
         "[Packet] Peer sent new block with hash #{
-          packet.block_header |> Header.hash() |> ExthCrypto.Math.bin_to_hex()
+          packet.block_header |> Header.hash() |> Math.bin_to_hex()
         }"
       end)
 

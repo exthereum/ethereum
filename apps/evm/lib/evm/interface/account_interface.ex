@@ -48,7 +48,7 @@ defprotocol EVM.Interface.AccountInterface do
           EVM.address(),
           EVM.Wei.t(),
           binary()
-        ) :: {t, EVM.Gas.t(), EVM.SubState.t(), EVM.VM.output()}
+        ) :: {t, EVM.Gas.t(), EVM.SubState.t(), VM.output()}
   def message_call(
         t,
         contract0,

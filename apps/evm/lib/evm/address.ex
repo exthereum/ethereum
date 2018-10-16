@@ -2,6 +2,9 @@ defmodule EVM.Address do
   @moduledoc """
   EVM address functions and constants.
   """
+  alias EVM
+  alias EVM.Helpers
+
   @size 20
   @max round(:math.pow(2, @size * EVM.byte_size()))
 
@@ -25,7 +28,7 @@ defmodule EVM.Address do
   def new(address) when is_number(address) do
     address
     |> :binary.encode_unsigned()
-    |> EVM.Helpers.left_pad_bytes(@size)
+    |> Helpers.left_pad_bytes(@size)
   end
 
   @doc """
@@ -35,7 +38,7 @@ defmodule EVM.Address do
   def new(address, nonce) do
     ExRLP.encode([address, nonce])
     |> :keccakf1600.sha3_256()
-    |> EVM.Helpers.take_n_last_bytes(@size)
+    |> Helpers.take_n_last_bytes(@size)
     |> :binary.decode_unsigned()
   end
 end

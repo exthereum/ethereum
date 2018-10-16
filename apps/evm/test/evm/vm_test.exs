@@ -2,6 +2,8 @@ defmodule EVM.VMTest do
   use ExUnit.Case, async: true
   doctest EVM.VM
 
+  alias EVM.VM
+
   setup do
     account_interface = EVM.Interface.Mock.MockAccountInterface.new()
 
@@ -29,7 +31,7 @@ defmodule EVM.VMTest do
     ]
 
     exec_env = %EVM.ExecEnv{machine_code: EVM.MachineCode.compile(instructions)}
-    result = EVM.VM.run(24, exec_env)
+    result = VM.run(24, exec_env)
 
     assert result ==
              {0, %EVM.SubState{logs: [], refund: 0, suicide_list: []}, exec_env, <<0x08::256>>}
@@ -53,7 +55,7 @@ defmodule EVM.VMTest do
       account_interface: account_interface
     }
 
-    result = EVM.VM.run(20006, exec_env)
+    result = VM.run(20006, exec_env)
 
     expected_account_state = %{
       address => %{

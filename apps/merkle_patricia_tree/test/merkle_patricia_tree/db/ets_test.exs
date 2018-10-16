@@ -2,16 +2,17 @@ defmodule MerklePatriciaTree.DB.ETSTest do
   use ExUnit.Case, async: false
   alias MerklePatriciaTree.DB
   alias MerklePatriciaTree.DB.ETS
+  alias MerklePatriciaTree.Test
 
   test "init creates an ets table" do
-    {_, db_ref} = ETS.init(MerklePatriciaTree.Test.random_atom(20))
+    {_, db_ref} = ETS.init(Test.random_atom(20))
 
     :ets.insert(db_ref, {"key", "value"})
     assert :ets.lookup(db_ref, "key") == [{"key", "value"}]
   end
 
   test "get/1" do
-    {_, db_ref} = ETS.init(MerklePatriciaTree.Test.random_atom(20))
+    {_, db_ref} = ETS.init(Test.random_atom(20))
 
     :ets.insert(db_ref, {"key", "value"})
     assert ETS.get(db_ref, "key") == {:ok, "value"}
@@ -19,7 +20,7 @@ defmodule MerklePatriciaTree.DB.ETSTest do
   end
 
   test "get!/1" do
-    db = {_, db_ref} = ETS.init(MerklePatriciaTree.Test.random_atom(20))
+    db = {_, db_ref} = ETS.init(Test.random_atom(20))
 
     :ets.insert(db_ref, {"key", "value"})
     assert DB.get!(db, "key") == "value"
@@ -30,7 +31,7 @@ defmodule MerklePatriciaTree.DB.ETSTest do
   end
 
   test "put!/2" do
-    {_, db_ref} = ETS.init(MerklePatriciaTree.Test.random_atom(20))
+    {_, db_ref} = ETS.init(Test.random_atom(20))
 
     assert ETS.put!(db_ref, "key", "value") == :ok
     assert :ets.lookup(db_ref, "key") == [{"key", "value"}]

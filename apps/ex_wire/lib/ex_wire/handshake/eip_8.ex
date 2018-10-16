@@ -7,6 +7,7 @@ defmodule ExWire.Handshake.EIP8 do
   """
 
   require Logger
+  alias ExthCrypto.Math
 
   # Amount of bytes added when encrypting with ECIES.
   # EIP Question: This is magic, isn't it? Definitely magic.
@@ -41,7 +42,7 @@ defmodule ExWire.Handshake.EIP8 do
 
     # According to EIP-8, we add padding to prevent length detection attacks. Thus, it should be
     # acceptable to pad with zero instead of random data. We opt for padding with zeros.
-    padding = ExthCrypto.Math.pad(<<>>, 100)
+    padding = Math.pad(<<>>, 100)
 
     # rlp.list(sig, initiator-pubk, initiator-nonce, auth-vsn)
     # EIP Question: Why is random appended at the end? Is this going to make it hard to upgrade the protocol?

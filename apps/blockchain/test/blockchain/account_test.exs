@@ -2,6 +2,7 @@ defmodule Blockchain.AccountTest do
   use ExUnit.Case, async: true
   doctest Blockchain.Account
   alias Blockchain.Account
+  alias MerklePatriciaTree.Test
 
   test "serialize and deserialize" do
     acct = %Account{
@@ -20,7 +21,7 @@ defmodule Blockchain.AccountTest do
   end
 
   test "valid empty state_root" do
-    db = MerklePatriciaTree.Test.random_ets_db()
+    db = Test.random_ets_db()
     state = MerklePatriciaTree.Trie.new(db)
 
     assert state.root_hash ==
@@ -29,7 +30,7 @@ defmodule Blockchain.AccountTest do
   end
 
   test "valid state_root with one empty account" do
-    db = MerklePatriciaTree.Test.random_ets_db()
+    db = Test.random_ets_db()
     state = MerklePatriciaTree.Trie.new(db)
 
     state =
@@ -47,7 +48,7 @@ defmodule Blockchain.AccountTest do
   end
 
   test "valid state root with an updated storage value" do
-    db = MerklePatriciaTree.Test.random_ets_db()
+    db = Test.random_ets_db()
     address = <<0x01::160>>
     state = MerklePatriciaTree.Trie.new(db)
 
@@ -67,7 +68,7 @@ defmodule Blockchain.AccountTest do
   end
 
   test "valid state root for an account with code set" do
-    db = MerklePatriciaTree.Test.random_ets_db()
+    db = Test.random_ets_db()
     state = MerklePatriciaTree.Trie.new(db)
     address = <<0x01::160>>
 
@@ -87,7 +88,7 @@ defmodule Blockchain.AccountTest do
   end
 
   test "valid state root after nonce has been incremented" do
-    db = MerklePatriciaTree.Test.random_ets_db()
+    db = Test.random_ets_db()
     state = MerklePatriciaTree.Trie.new(db)
     address = <<0x01::160>>
 
@@ -107,7 +108,7 @@ defmodule Blockchain.AccountTest do
   end
 
   test "valid state root with an account balance set" do
-    db = MerklePatriciaTree.Test.random_ets_db()
+    db = Test.random_ets_db()
     state = MerklePatriciaTree.Trie.new(db)
     address = <<0x01::160>>
 

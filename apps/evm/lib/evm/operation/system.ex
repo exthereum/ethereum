@@ -1,4 +1,5 @@
 defmodule EVM.Operation.System do
+  alias EVM.VM
   alias EVM.MachineState
   alias EVM.ExecEnv
   alias EVM.Interface.AccountInterface
@@ -133,7 +134,7 @@ defmodule EVM.Operation.System do
       exec_env = ExecEnv.tranfer_wei_to(exec_env, to, value)
 
       {n_gas, _n_sub_state, n_exec_env, n_output} =
-        EVM.VM.run(
+        VM.run(
           call_gas,
           Map.merge(exec_env, %{
             # a
