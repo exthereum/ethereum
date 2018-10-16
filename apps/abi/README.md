@@ -1,4 +1,4 @@
-# ABI [![CircleCI](https://circleci.com/gh/exthereum/abi.svg?style=svg)](https://circleci.com/gh/exthereum/abi)
+# ABI
 
 The [Application Binary Interface](https://solidity.readthedocs.io/en/develop/abi-spec.html) (ABI) of Solidity describes how to transform binary data to types which the Solidity programming language understands. For instance, if we want to call a function `bark(uint32,bool)` on a Solidity-created contract `contract Dog`, what `data` parameter do we pass into our Ethereum transaction? This project allows us to encode such function calls.
 
@@ -49,6 +49,19 @@ Decode is generally the opposite of encoding, though we generally leave off the 
 ```elixir
 iex> ABI.decode("baz(uint,address)", "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000320000000000000000000000000000000000000000000000000000000000000001" |> Base.decode16!(case: :lower))
 [50, <<1::160>> |> :binary.decode_unsigned]
+```
+
+## ABI JSON
+
+You can also use the ABI JSON (produced by Solidity and other compilers) with the ABI library.
+
+```elixir
+iex> "{ \"type\": \"function\", \"name\": \"myFun\", \"inputs\": [ { \"type\": \"uint256\" } ] }"
+...> |> Poison.decode!
+...> |> ABI.Spec.load_spec()
+...> |> elem(1)
+...> |> ABI.Spec.input_function_selector()
+%ABI.FunctionSelector{function: "myFun", returns: nil, types: [uint: 256]}
 ```
 
 ## Support
