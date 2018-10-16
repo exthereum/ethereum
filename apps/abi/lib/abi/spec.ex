@@ -17,22 +17,28 @@ defmodule ABI.Spec do
   @type abi_type :: nil | :event | :function | :constructor | :fallback
 
   @type io_data_type :: %{
-    type: type,
-    name: String.t(),
-    indexed: boolean(),
-  }
+          type: type,
+          name: String.t(),
+          indexed: boolean()
+        }
 
   @type t :: %{
-    constant: boolean(),
-    inputs: list(io_data_type()),
-    name: String.t(),
-    outputs: list(io_data_type()),
-    payable: boolean(),
-    state_mutability: state_mutability(),
-    abi_type: abi_type(),
-  }
+          constant: boolean(),
+          inputs: list(io_data_type()),
+          name: String.t(),
+          outputs: list(io_data_type()),
+          payable: boolean(),
+          state_mutability: state_mutability(),
+          abi_type: abi_type()
+        }
 
-  defstruct [constant: false, inputs: [], name: "", outputs: [], payable: false, state_mutability: nil, abi_type: nil]
+  defstruct constant: false,
+            inputs: [],
+            name: "",
+            outputs: [],
+            payable: false,
+            state_mutability: nil,
+            abi_type: nil
 
   @doc """
   Parses an ABI specification and returns an ABI.Spec struct
@@ -41,8 +47,9 @@ defmodule ABI.Spec do
   @spec load_specs(abi_input()) :: {:ok, list(ABI.Spec.t())} | {:error, any()}
   def load_specs(abi_input) do
     Enum.reduce(abi_input, {:ok, []}, fn
-      _el, err={:error, _} ->
+      _el, err = {:error, _} ->
         err
+
       abi_entry, {:ok, entries} ->
         with {:ok, entry} <- load_spec(abi_entry) do
           {:ok, [entry | entries]}
@@ -59,15 +66,16 @@ defmodule ABI.Spec do
     # to create the specification to allow it, since there are plenty
     # of invalid cases that might be swallowed here.
 
-    {:ok, %ABI.Spec{
-      constant: abi_entry["constant"] == true,
-      name: abi_entry["name"],
-      inputs: (abi_entry["inputs"] || []) |> Enum.map(&parse_data_type/1),
-      outputs: (abi_entry["outputs"] || []) |> Enum.map(&parse_data_type/1),
-      payable: abi_entry["payable"] == true,
-      state_mutability: get_state_mutability(abi_entry["stateMutability"]),
-      abi_type: get_abi_type(abi_entry["type"]),
-    }}
+    {:ok,
+     %ABI.Spec{
+       constant: abi_entry["constant"] == true,
+       name: abi_entry["name"],
+       inputs: (abi_entry["inputs"] || []) |> Enum.map(&parse_data_type/1),
+       outputs: (abi_entry["outputs"] || []) |> Enum.map(&parse_data_type/1),
+       payable: abi_entry["payable"] == true,
+       state_mutability: get_state_mutability(abi_entry["stateMutability"]),
+       abi_type: get_abi_type(abi_entry["type"])
+     }}
   end
 
   @doc """
@@ -108,7 +116,7 @@ defmodule ABI.Spec do
     %{
       name: data_type["name"],
       type: data_type["type"],
-      indexed: data_type["indexed"] == true,
+      indexed: data_type["indexed"] == true
     }
   end
 
@@ -131,5 +139,4 @@ defmodule ABI.Spec do
       _ -> nil
     end
   end
-
 end

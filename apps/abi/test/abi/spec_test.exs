@@ -165,10 +165,10 @@ defmodule ABI.SpecTest do
     }
 
     assert Spec.input_function_selector(spec) == %ABI.FunctionSelector{
-      function: "getBorrowRate",
-      returns: nil,
-      types: [:address, {:uint, 256}, {:uint, 256}]
-    }
+             function: "getBorrowRate",
+             returns: nil,
+             types: [:address, {:uint, 256}, {:uint, 256}]
+           }
   end
 
   test "output_function_selector/1" do
@@ -190,8 +190,8 @@ defmodule ABI.SpecTest do
     }
 
     assert Spec.output_function_selector(spec) == %ABI.FunctionSelector{
-      returns: nil,
-      types: [{:uint, 256}, {:uint, 256}]
-    }
+             returns: nil,
+             types: [{:uint, 256}, {:uint, 256}]
+           }
   end
 end
