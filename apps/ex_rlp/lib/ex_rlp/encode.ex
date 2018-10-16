@@ -12,7 +12,7 @@ defimpl ExRLP.Encode, for: BitString do
     |> Utils.maybe_encode_hex(Keyword.get(options, :encoding, :binary))
   end
 
-  @spec encode_item(binary()) :: binary()
+  @spec encode_item(binary()) :: <<_::8, _::_*8>>
   defp encode_item(<<byte>> = item) when byte_size(item) == 1 and byte < 128 do
     item
   end
@@ -64,7 +64,7 @@ defimpl ExRLP.Encode, for: List do
     |> Utils.maybe_encode_hex(Keyword.get(options, :encoding, :binary))
   end
 
-  @spec encode_items([ExRLP.t()], binary()) :: binary()
+  @spec encode_items([ExRLP.t()], binary()) :: <<_::8, _::_*8>>
   defp encode_items([], acc) do
     acc |> prefix_list
   end
@@ -75,7 +75,7 @@ defimpl ExRLP.Encode, for: List do
     tail |> encode_items(acc <> encoded_item)
   end
 
-  @spec prefix_list(binary()) :: binary()
+  @spec prefix_list(binary()) :: <<_::8, _::_*8>>
   defp prefix_list(encoded_concat) when byte_size(encoded_concat) < 56 do
     size = encoded_concat |> byte_size
 
