@@ -28,7 +28,8 @@ defmodule Ethereum.MixProject do
         "coveralls.detail": :test,
         "coveralls.post": :test,
         "coveralls.html": :test,
-        "coveralls.circle": :test
+        "coveralls.circle": :test,
+        dialyzer: :test
       ],
       dialyzer: [
         flags: [:underspecs, :unknown, :unmatched_returns],
@@ -46,8 +47,9 @@ defmodule Ethereum.MixProject do
   defp deps do
     [
       {:credo, "~> 0.10.2", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.0.0-rc.3", only: [:dev], runtime: false},
-      {:excoveralls, "~> 0.10", only: :test},
+      {:dialyxir, "~> 1.0.0-rc.3", only: [:test, :dev], runtime: false},
+      {:excoveralls, "~> 0.10.0",
+       only: [:test], github: "KronicDeth/excoveralls", branch: "circle-workflows"},
       {:distillery, "~> 2.0"}
     ]
   end

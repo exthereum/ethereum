@@ -18,10 +18,18 @@ defmodule ExRLP.Mixfile do
         links: %{"GitHub" => "https://github.com/exthereum/ex_rlp"}
       ],
       build_embedded: Mix.env() == :prod,
-      start_permanent: Mix.env() == :prod,
       deps: deps(),
       dialyzer: [ignore_warnings: "../../.dialyzer.ignore-warnings"],
-      elixirc_paths: elixirc_paths(Mix.env())
+      elixirc_paths: elixirc_paths(Mix.env()),
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test,
+        dialyzer: :test
+      ],
+      start_permanent: Mix.env() == :prod,
+      test_coverage: [tool: ExCoveralls]
     ]
   end
 

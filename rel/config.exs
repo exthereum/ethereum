@@ -29,12 +29,14 @@ environment :dev do
   # It is recommended that you build with MIX_ENV=prod and pass
   # the --env flag to Distillery explicitly if you want to use
   # dev mode.
-  set dev_mode: true
-  set include_erts: false
+  set output_dir: "_build/"
+  set dev_mode: false
+  set include_erts: true
   set cookie: :"`ybR3Te$f;/5OwNL^B/x,47Ik)SvZa81Q[&8WukUZ~XvHT)Eg%?&w1^yY`|Er3.2"
 end
 
 environment :prod do
+  set output_dir: "_build/"
   set include_erts: true
   set include_src: false
   set cookie: :"f<,RX%KGkI@n6%=<qV!W9(hm!8!~{xBqfAzwwIs1GHX:YXE%:j<?U2>iE)6bcKh,"
@@ -46,7 +48,7 @@ end
 # will be used by default
 
 release :ethereum do
-  set version: "0.1.0"
+  set version: "#{System.get_env("RELEASE_VERSION")}"
   set applications: [
     :runtime_tools,
     abi: :permanent,

@@ -62,9 +62,10 @@ jobs:
     working_directory: ~/ethereum
     docker:
       - image: elixir:latest
+
     steps:
-      - run: apt-get update; apt-get -y install libtool autoconf libgmp3-dev
       - checkout
+      - run: apt-get update; apt-get -y install libtool autoconf libgmp3-dev
       - run: git submodule sync --recursive
       - run: git submodule update --recursive --init
 
@@ -77,37 +78,14 @@ jobs:
       - run: mix local.rebar --force
       - run: mix local.hex --force
       - run: mix deps.get
-
-      - run: mix test --exclude network
-
-      - save_cache:
-          key: v1-dependency-cache-{{ arch }}-{{ checksum "mix.lock" }}
-          paths:
-            - _build
-            - deps
-            - ~/.mix
-
-  excoveralls:
-    working_directory: ~/ethereum
-    docker:
-      - image: elixir:latest
-    steps:
-      - run: apt-get update; apt-get -y install libtool autoconf libgmp3-dev
-      - checkout
-      - run: git submodule sync --recursive
-      - run: git submodule update --recursive --init
-
-      - restore_cache:
-         keys:
-           - v1-dependency-cache-{{ arch }}-{{ checksum "mix.lock" }}
-           - v1-dependency-cache-{{ arch }}
-           - v1-dependency-cache
-
-      - run: mix local.rebar --force
-      - run: mix local.hex --force
-      - run: mix deps.get
-
-      - run: mix coveralls.circle --exclude network
+      - run:
+          name: mix coveralls.html --exclude network --parallel --umbrella
+          command: |
+            if [[ -z "$COVERALLS_REPO_TOKEN" ]]; then
+              mix coveralls.html --exclude network --parallel --umbrella
+            else
+              mix coveralls.circle --exclude network --parallel --umbrella
+            fi
 
       - save_cache:
           key: v1-dependency-cache-{{ arch }}-{{ checksum "mix.lock" }}
@@ -165,8 +143,7 @@ jobs:
       - run: mix local.rebar --force
       - run: mix local.hex --force
       - run: mix deps.get
-
-      - run: mix release --verbose
+      - run: RELEASE_VERSION="0.1.0" mix release --verbose
 
       - save_cache:
           key: v1-dependency-cache-{{ arch }}-{{ checksum "mix.lock" }}
@@ -175,13 +152,16 @@ jobs:
             - deps
             - ~/.mix
 
+      - store_artifacts:
+          path: ~/ethereum/_build/releases/0.1.0/ethereum.tar.gz
+          destination: releases
+
 workflows:
   version: 2
   test:
     jobs:
       - credo
       - format
-      - excoveralls
       - test
       - dialyzer
       - release
