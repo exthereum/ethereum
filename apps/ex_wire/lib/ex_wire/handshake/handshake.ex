@@ -27,33 +27,6 @@ defmodule ExWire.Handshake do
 
   @type token :: binary()
 
-  defmodule Handshake do
-    defstruct [
-      :initiator,
-      :remote_id,
-      # ecdhe-random
-      :remote_pub,
-      # nonce
-      :init_nonce,
-      #
-      :resp_nonce,
-      # ecdhe-random
-      :random_priv_key,
-      # ecdhe-random-pubk
-      :remote_random_pub
-    ]
-
-    @type t :: %__MODULE__{
-            initiator: boolean(),
-            remote_id: ExWire.node_id(),
-            remote_pub: Config.private_key(),
-            init_nonce: binary(),
-            resp_nonce: binary(),
-            random_priv_key: Config.private_key(),
-            remote_random_pub: Config.pubic_key()
-          }
-  end
-
   @nonce_len 32
 
   @doc """

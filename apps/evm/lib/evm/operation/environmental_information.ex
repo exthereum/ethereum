@@ -5,6 +5,9 @@ defmodule EVM.Operation.EnvironmentalInformation do
   alias EVM.Interface.AccountInterface
   alias EVM.Memory
 
+  @moduledoc """
+    Module provides EVM OPCODE implementations for accessing the currect account context.
+  """
   @doc """
   Get address of currently executing account.
 

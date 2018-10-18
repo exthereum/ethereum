@@ -1,4 +1,5 @@
 defmodule EVM.Operation.Metadata.Exchange do
+  @moduledoc false
   alias EVM.Operation.Metadata
 
   @operations for n <- 1..17,

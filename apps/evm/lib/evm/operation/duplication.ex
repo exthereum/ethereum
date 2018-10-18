@@ -1,6 +1,10 @@
 defmodule EVM.Operation.Duplication do
   alias EVM.Operation
 
+  @moduledoc """
+    Module provides EVM OPCODE implementation for duplicating items on stack.
+  """
+
   @doc """
   Duplicate stack item n-times.
 

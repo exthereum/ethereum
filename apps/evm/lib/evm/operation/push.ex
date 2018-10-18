@@ -2,6 +2,10 @@ defmodule EVM.Operation.Push do
   alias EVM.Operation
   alias EVM.Memory
 
+  @moduledoc """
+    Module provides EVM OPCODE implementation putting N-bytes up to a full word on stack.
+  """
+
   @doc """
   Place n-byte item on stack
 

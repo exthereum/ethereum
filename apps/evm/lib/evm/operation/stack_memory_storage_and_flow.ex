@@ -7,6 +7,10 @@ defmodule EVM.Operation.StackMemoryStorageAndFlow do
   alias EVM.Operation
   use Bitwise
 
+  @moduledoc """
+    Module provides EVM OPCODE basic instruction type implementations (storage, memory and flow).
+
+  """
   @doc """
   Remove item from stack.
 

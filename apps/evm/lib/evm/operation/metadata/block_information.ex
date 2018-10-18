@@ -1,4 +1,5 @@
 defmodule EVM.Operation.Metadata.BlockInformation do
+  @moduledoc false
   @operations for operation <- [
                     %{
                       id: 0x40,

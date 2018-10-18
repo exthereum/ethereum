@@ -4,6 +4,10 @@ defmodule EVM.Operation.StopAndArithmetic do
   alias MathHelper
   use Bitwise
 
+  @moduledoc """
+    Module provides  EVM OPCODE arithmetic implementations.
+  """
+
   @doc """
   Halts execution.
 

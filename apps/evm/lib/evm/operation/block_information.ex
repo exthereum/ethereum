@@ -2,6 +2,10 @@ defmodule EVM.Operation.BlockInformation do
   alias EVM.Operation
   alias EVM.Interface.BlockInterface
 
+  @moduledoc """
+  Module provides EVM OPCODE implementations for accesing block's information like timestamp, number,
+  difficulty, beneficiary address, gas and hash.
+  """
   @doc """
   Get the hash of one of the 256 most recent complete blocks.
 

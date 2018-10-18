@@ -1,4 +1,5 @@
 defmodule EVM.Operation.Metadata.EnvironmentalInformation do
+  @moduledoc false
   alias EVM.Operation.Metadata
 
   @operations for operation <- [

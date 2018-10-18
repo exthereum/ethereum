@@ -8,8 +8,11 @@ defmodule EVM.Operation do
   alias EVM.Helpers
   alias EVM.ExecEnv
   alias EVM.MachineState
+  alias EVM.MachineCode
+  alias EVM.Interface.BlockInterface
   alias EVM.Stack
   alias EVM.SubState
+  alias EVM.Operation.Metadata
   alias EVM.Operation.Metadata.StopAndArithmetic, as: StopAndArithmeticMetadata
   alias EVM.Operation.Metadata.ComparisonAndBitwiseLogic, as: ComparisonAndBitwiseLogicMetadata
   alias EVM.Operation.Metadata.SHA3, as: SHA3Metadata
@@ -35,10 +38,10 @@ defmodule EVM.Operation do
           optional(:machine_state) => MachineState.t(),
           optional(:sub_state) => SubState.t(),
           optional(:exec_env) => ExecEnv.t(),
-          optional(:block_interface) => EVM.Interface.BlockInterface.t(),
+          optional(:block_interface) => BlockInterface.t(),
           # EVM.Interface.ContractInterface.t()
           optional(:contract_interface) => any(),
-          optional(:account_interface) => EVM.Interface.AccountInterface.t()
+          optional(:account_interface) => AccountInterface.t()
         }
   @type noop :: :noop
   @type op_result :: any()
@@ -189,7 +192,7 @@ defmodule EVM.Operation do
       iex> EVM.Operation.metadata(nil)
       nil
   """
-  @spec metadata(operation | opcode) :: EVM.Operation.Metadata.t() | nil
+  @spec metadata(operation | opcode) :: Metadata.t() | nil
   def metadata(nil), do: nil
 
   def metadata(operation) when is_atom(operation) do
@@ -238,10 +241,11 @@ defmodule EVM.Operation do
 
   @spec apply_to_group_module(operation, list(EVM.val())) :: op_result()
   defp apply_to_group_module(operation, args) do
-    %EVM.Operation.Metadata{fun: fun, group: group} = metadata(operation)
+    %Metadata{fun: fun, group: group} = metadata(operation)
     method = fun || operation
+    module = group_to_module(group)
 
-    apply(group_to_module(group), method, args)
+    apply(module, method, args)
   end
 
   @spec group_to_module(atom()) :: op_result()

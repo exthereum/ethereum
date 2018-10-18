@@ -6,92 +6,22 @@ defmodule EVM.Operation.System do
   alias EVM.Memory
   alias EVM.ExecEnv
   alias EVM.Interface.AccountInterface
-  alias EVM.Interface.BlockInterface
-  alias EVM.Helpers
+  #  alias EVM.Interface.BlockInterface
+  #  alias EVM.Helpers
   alias EVM.Address
   alias EVM.Stack
   alias EVM.Operation
   alias Blockchain
 
-  @dialyzer {:no_return, callcode: 2}
-
-  @doc """
-  Create a new account with associated code.
-
-  ## Examples
-
-      iex> block_interface = EVM.Interface.Mock.MockBlockInterface.new(%EVM.Block.Header{})
-      iex> account_map = %{<<100::160>> => %{balance: 5_000, nonce: 5}}
-      iex> account_interface = EVM.Interface.Mock.MockAccountInterface.new(account_map, %{gas: 500, sub_state: nil, output: "output"})
-      iex> exec_env = %EVM.ExecEnv{stack_depth: 0, address: <<100::160>>, account_interface: account_interface, block_interface: block_interface}
-      iex> machine_state = %EVM.MachineState{gas: 300, stack: [1], memory: "________" <> "input"}
-      iex> %{machine_state: n_machine_state} =
-      ...>   EVM.Operation.System.create(
-      ...>     [1_000, 5, 5],
-      ...>     %{exec_env: exec_env, machine_state: machine_state})
-      iex> n_machine_state
-      %EVM.MachineState{gas: 300, stack: [0x601bcc2189b7096d8dfaa6f74efeebef20486d0d, 1], active_words: 1, memory: "________input"}
+  @moduledoc """
+    Module provides system EVM OPCODE implementations:
+    Return - Halt execution returning output data
+    Call - Message-call into an account
+    Suicide (SELFDESTRUCT) - Halt execution and register account for later deletion
   """
-  @spec create(Operation.stack_args(), Operation.vm_map()) :: Operation.op_result()
-  def create([value, in_offset, in_size], %{exec_env: exec_env, machine_state: machine_state0}) do
-    {data, machine_state1} = Memory.read(machine_state0, in_offset, in_size)
-
-    account_balance =
-      AccountInterface.get_account_balance(exec_env.account_interface, exec_env.address)
-
-    block_header = BlockInterface.get_block_header(exec_env.block_interface)
-
-    is_allowed = value <= account_balance and exec_env.stack_depth < Functions.max_stack_depth()
-
-    {updated_account_interface, _n_gas, _n_sub_state} =
-      if is_allowed do
-        available_gas = Helpers.all_but_one_64th(machine_state1.gas)
-
-        contract = %{
-          state: nil,
-          sender: exec_env.address,
-          originator: exec_env.originator,
-          available_gas: available_gas,
-          gas_price: exec_env.gas_price,
-          stack_depth: exec_env.stack_depth + 1,
-          block_header: block_header,
-          value_in_wei: value
-        }
-
-        AccountInterface.create_contract(
-          exec_env.account_interface,
-          contract,
-          # init_code
-          data
-        )
-      else
-        {exec_env.account_interface, machine_state1.gas, nil}
-      end
-
-    # Note if was exception halt or other failure on stack
-    result =
-      if is_allowed do
-        nonce =
-          exec_env.account_interface
-          |> AccountInterface.get_account_nonce(exec_env.address)
-
-        Address.new(exec_env.address, nonce)
-      else
-        0
-      end
-
-    machine_state2 = %{machine_state1 | stack: Stack.push(machine_state1.stack, result)}
-    exec_env = %{exec_env | account_interface: updated_account_interface}
-
-    %{
-      machine_state: machine_state2,
-      exec_env: exec_env
-      # TODO: sub_state
-    }
-  end
 
   @doc """
-    Message-call into an account. Transfer `value` wei from callers account to callees account then run the code in that account.
+     Message-call into an account. Transfer `value` wei from callers account to callees account then run the code in that account.
 
     ## Examples
 
@@ -173,35 +103,6 @@ defmodule EVM.Operation.System do
         machine_state: %{machine_state | stack: Stack.push(machine_state.stack, 0)}
       }
     end
-  end
-
-  @doc """
-    Exactly equivalent to `call` except  the recipient is in fact the same account as at present, simply that the code is overwritten.
-
-    ## Examples
-
-        iex> account_interface = EVM.Interface.Mock.MockAccountInterface.new(%{})
-        iex> exec_env = %EVM.ExecEnv{
-        ...>   account_interface: account_interface,
-        ...>   sender: <<0::160>>,
-        ...>   address: <<5::160>>
-        ...> }
-        iex> machine_state = %EVM.MachineState{gas: 1000}
-        iex> %{machine_state: machine_state, exec_env: _exec_env} =
-        ...> EVM.Operation.System.callcode([10, 1, 1, 0, 0, 0, 0],
-        ...>   %{exec_env: exec_env, machine_state: machine_state})
-        iex> EVM.Stack.peek(machine_state.stack)
-        1
-  """
-  @spec callcode(Operation.stack_args(), Operation.vm_map()) :: Operation.op_result()
-  def callcode(
-        [call_gas, _to, value, in_offset, in_size, out_offset, out_size],
-        vm_map = %{
-          exec_env: exec_env,
-          machine_state: _machine_state
-        }
-      ) do
-    call([call_gas, exec_env.address, value, in_offset, in_size, out_offset, out_size], vm_map)
   end
 
   @doc """

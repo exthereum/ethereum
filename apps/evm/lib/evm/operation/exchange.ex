@@ -1,6 +1,10 @@
 defmodule EVM.Operation.Exchange do
   alias EVM.Operation
 
+  @moduledoc """
+    Module provides EVM OPCODE implementation for swaping items on stack.
+  """
+
   @doc """
   Swaps the first and last values on the stack.
 

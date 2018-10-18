@@ -1,4 +1,5 @@
 defmodule EVM.Operation.Metadata.Duplication do
+  @moduledoc false
   @operations for n <- 1..17,
                   do: %EVM.Operation.Metadata{
                     # 0x80..0x8e

@@ -1,4 +1,5 @@
 defmodule EVM.Operation.Metadata.SHA3 do
+  @moduledoc false
   @operations [
     %EVM.Operation.Metadata{
       id: 0x20,

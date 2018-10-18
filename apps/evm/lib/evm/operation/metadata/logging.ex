@@ -1,4 +1,5 @@
 defmodule EVM.Operation.Metadata.Logging do
+  @moduledoc false
   @operations for n <- 0..4,
                   do: %EVM.Operation.Metadata{
                     # 0xa0 - 0xa3

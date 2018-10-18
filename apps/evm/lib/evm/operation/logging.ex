@@ -3,6 +3,9 @@ defmodule EVM.Operation.Logging do
   alias EVM.Memory
   alias EVM.SubState
 
+  @moduledoc """
+    Module provides EVM OPCODE log implementations (log0 to log4).
+  """
   @doc """
   Append log record with no topics.
 

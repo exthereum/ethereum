@@ -5,6 +5,9 @@ defmodule EVM.Operation.Sha3 do
   alias EVM.Stack
   alias EVM.Memory
 
+  @moduledoc """
+    Module provides EVM OPCODE implementation for Keccak-256 hash
+  """
   @doc """
   Compute Keccak-256 hash.
 

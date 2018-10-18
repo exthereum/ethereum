@@ -6,6 +6,10 @@ defmodule ExWire.Handshake.MessageHandler do
   alias ExthCrypto.ECIES
   alias ExthCrypto.Math
 
+  @moduledoc """
+    RLPx ECIES handshake protocol receives messages that need to be handled.
+    A helper module for ExWire.Handshake.
+  """
   @doc """
   Reads a given ack message, transported during the key initialization phase
   of the RLPx protocol. This will generally be handled by the dialer of the connection.
@@ -51,8 +55,6 @@ defmodule ExWire.Handshake.MessageHandler do
 
   @doc """
 
-
-  TODO move to a separate module
   Builds a response for an incoming authentication message.
 
   ## Examples

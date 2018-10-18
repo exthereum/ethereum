@@ -4,6 +4,10 @@ defmodule EVM.Operation.ComparisonAndBitwiseLogic do
   alias EVM.Operation
   use Bitwise
 
+  @moduledoc """
+  Module provides EVM OPCODE implementations for comparison and bitwise operations.
+  """
+
   @doc """
   Less-than comparision.
 

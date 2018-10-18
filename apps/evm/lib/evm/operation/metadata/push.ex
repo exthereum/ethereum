@@ -1,4 +1,5 @@
 defmodule EVM.Operation.Metadata.Push do
+  @moduledoc false
   @operations for n <- 1..32,
                   do: %EVM.Operation.Metadata{
                     # 0x60..0x7f
