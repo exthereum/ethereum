@@ -79,7 +79,7 @@ jobs:
       - run: mix local.hex --force
       - run: mix deps.get
       - run:
-          name: mix coveralls.html --exclude network --parallel --umbrella
+          name: mix test --exclude network --parallel --umbrella
           command: |
             if [[ -z "$COVERALLS_REPO_TOKEN" ]]; then
               mix coveralls.html --exclude network --parallel --umbrella
@@ -93,6 +93,9 @@ jobs:
             - _build
             - deps
             - ~/.mix
+
+      - store_artifacts:
+          path: cover/excoveralls.html
 
   dialyzer:
     working_directory: ~/ethereum

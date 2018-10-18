@@ -1,5 +1,4 @@
 defmodule EvmTest do
-  alias MerklePatriciaTree.Trie
   use ExUnit.Case, async: true
 
   alias EVM.VM
@@ -41,20 +40,41 @@ defmodule EvmTest do
   }
 
   test "Ethereum Common Tests" do
-    for {test_group_name, _test_group} <- @passing_tests_by_group do
-      for {_test_name, test} <- passing_tests(test_group_name) do
-        {gas, sub_state, exec_env, _} =
-          VM.run(hex_to_int(test["exec"]["gas"]), %EVM.ExecEnv{
-            account_interface: account_interface(test),
-            address: hex_to_int(test["exec"]["address"]),
-            block_interface: block_interface(test),
-            data: hex_to_binary(test["exec"]["data"]),
-            gas_price: hex_to_binary(test["exec"]["gasPrice"]),
-            machine_code: hex_to_binary(test["exec"]["code"]),
-            originator: hex_to_binary(test["exec"]["origin"]),
-            sender: hex_to_int(test["exec"]["caller"]),
-            value_in_wei: hex_to_binary(test["exec"]["value"])
-          })
+    tasks =
+      List.flatten(
+        for {test_group_name, _test_group} <- @passing_tests_by_group do
+          for data = {_test_name, _test} <- passing_tests(test_group_name) do
+            make_ethereum_test_task(data)
+          end
+        end
+      )
+
+    tasks_with_results = Task.yield_many(tasks, 55_000)
+
+    _ =
+      Enum.map(tasks_with_results, fn {task, res} ->
+        # Shutdown the tasks that did not reply nor exit
+        res || Task.shutdown(task, :brutal_kill)
+      end)
+  end
+
+  defp make_ethereum_test_task({test_name, test}) do
+    Task.async(fn ->
+      try do
+        exec_env0 = %EVM.ExecEnv{
+          account_interface: account_interface(test),
+          address: hex_to_int(test["exec"]["address"]),
+          block_interface: block_interface(test),
+          data: hex_to_binary(test["exec"]["data"]),
+          gas_price: hex_to_binary(test["exec"]["gasPrice"]),
+          machine_code: hex_to_binary(test["exec"]["code"]),
+          originator: hex_to_binary(test["exec"]["origin"]),
+          sender: hex_to_int(test["exec"]["caller"]),
+          value_in_wei: hex_to_binary(test["exec"]["value"])
+        }
+
+        value = VM.run(hex_to_int(test["exec"]["gas"]), exec_env0)
+        {gas, sub_state, exec_env, _} = value
 
         assert_state(test, exec_env.account_interface)
 
@@ -67,17 +87,16 @@ defmodule EvmTest do
 
           assert hex_to_binary(test["logs"]) == logs_hash
         end
-      end
-    end
-  end
 
-  def account_storage(storage, db) do
-    Enum.reduce(storage, Trie.new(db), fn {key, value}, trie ->
-      Trie.update(trie, <<hex_to_int(key)::size(256)>>, <<hex_to_int(value)::size(256)>>)
+        {:ok, test_name}
+      rescue
+        error ->
+          throw({:error, test_name, error})
+      end
     end)
   end
 
-  def account_interface(test) do
+  defp account_interface(test) do
     account_map = %{
       hex_to_int(test["exec"]["caller"]) => %{
         balance: 0,
@@ -117,7 +136,7 @@ defmodule EvmTest do
     )
   end
 
-  def block_interface(test) do
+  defp block_interface(test) do
     genisis_block_header = %EVM.Block.Header{
       number: 0,
       mix_hash: 0
@@ -162,7 +181,7 @@ defmodule EvmTest do
     )
   end
 
-  def passing_tests(test_group_name) do
+  defp passing_tests(test_group_name) do
     tests =
       if Map.get(@passing_tests_by_group, test_group_name) == :all do
         all_tests_of_type(test_group_name)
@@ -176,12 +195,12 @@ defmodule EvmTest do
     end)
   end
 
-  def read_test_file(group, name) do
+  defp read_test_file(group, name) do
     {:ok, body} = File.read(test_file_name(group, name))
     Poison.decode!(body)[name |> Atom.to_string()]
   end
 
-  def all_tests_of_type(type) do
+  defp all_tests_of_type(type) do
     {:ok, files} = File.ls(test_directory_name(type))
 
     Enum.map(files, fn file_name ->
@@ -191,35 +210,35 @@ defmodule EvmTest do
     end)
   end
 
-  def test_directory_name(type) do
+  defp test_directory_name(type) do
     "../../test/support/ethereum_common_tests/VMTests/vm#{Macro.camelize(Atom.to_string(type))}"
   end
 
-  def test_file_name(group, name) do
+  defp test_file_name(group, name) do
     "../../test/support/ethereum_common_tests/VMTests/vm#{Macro.camelize(Atom.to_string(group))}/#{
       name
     }.json"
   end
 
-  def hex_to_binary(string) do
+  defp hex_to_binary(string) do
     string
     |> String.slice(2..-1)
     |> Base.decode16!(case: :mixed)
   end
 
-  def hex_to_int(string) do
+  defp hex_to_int(string) do
     string
     |> hex_to_binary()
     |> :binary.decode_unsigned()
   end
 
-  def assert_state(test, mock_account_interface) do
+  defp assert_state(test, mock_account_interface) do
     if Map.get(test, "post") do
       assert expected_state(test) == actual_state(mock_account_interface)
     end
   end
 
-  def expected_state(test) do
+  defp expected_state(test) do
     post = Map.get(test, "post", %{})
 
     for {address, account_state} <- post, into: %{} do
@@ -236,7 +255,7 @@ defmodule EvmTest do
     |> Enum.into(%{})
   end
 
-  def actual_state(mock_account_interface) do
+  defp actual_state(mock_account_interface) do
     mock_account_interface
     |> EVM.Interface.AccountInterface.dump_storage()
     |> Enum.reject(fn {_key, value} -> value == %{} end)
@@ -250,7 +269,7 @@ defmodule EvmTest do
     end)
   end
 
-  def logs_hash(logs) do
+  defp logs_hash(logs) do
     logs
     |> ExRLP.encode()
     |> :keccakf1600.sha3_256()
