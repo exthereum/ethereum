@@ -11,6 +11,7 @@ defmodule ExWire do
   use Application
   alias ExWire.Config
   alias ExWire.Discovery
+  alias ExWire.PeerSupervisor
   alias ExWire.Sync
   alias ExWire.Network
   alias MerklePatriciaTree.Test

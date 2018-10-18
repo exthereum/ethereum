@@ -10,6 +10,7 @@ defmodule ExWire.Discovery do
 
   alias ExWire.Struct.Neighbour
   alias ExWire.Config
+  alias ExWire.PeerSupervisor
   alias ExthCrypto.Math
 
   @min_neighbours 50
@@ -103,7 +104,7 @@ defmodule ExWire.Discovery do
       neighbour ->
         Logger.debug("[Discovery] Got pong from known peer, connecting via TCP.")
         find_neighbours(neighbour)
-        ExWire.PeerSupervisor.connect(neighbour)
+        PeerSupervisor.connect(neighbour)
     end
 
     {:noreply, state}

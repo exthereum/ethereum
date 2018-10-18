@@ -22,13 +22,15 @@ defmodule Ethereum.MixProject do
       apps_path: "apps",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      # test_coverage: [tool: ExCoveralls],
-      # preferred_cli_env: [
-      #   coveralls: :test,
-      #   "coveralls.detail": :test,
-      #   "coveralls.post": :test,
-      #   "coveralls.html": :test
-      # ],
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test,
+        "coveralls.circle": :test,
+        dialyzer: :test
+      ],
       dialyzer: [
         flags: [:underspecs, :unknown, :unmatched_returns],
         plt_add_apps: [:mix, :iex, :logger],
@@ -45,8 +47,10 @@ defmodule Ethereum.MixProject do
   defp deps do
     [
       {:credo, "~> 0.10.2", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.0.0-rc.3", only: [:dev], runtime: false}
-      # {:excoveralls, "~> 0.10", only: :test}
+      {:dialyxir, "~> 1.0.0-rc.3", only: [:test, :dev], runtime: false},
+      {:excoveralls, "~> 0.10.0",
+       only: [:test], github: "KronicDeth/excoveralls", branch: "circle-workflows"},
+      {:distillery, "~> 2.0"}
     ]
   end
 end
