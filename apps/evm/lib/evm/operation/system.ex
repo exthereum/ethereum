@@ -1,6 +1,9 @@
 defmodule EVM.Operation.System do
   alias EVM.VM
+  alias EVM.Address
+  alias EVM.Functions
   alias EVM.MachineState
+  alias EVM.Memory
   alias EVM.ExecEnv
   alias EVM.Interface.AccountInterface
   alias EVM.Interface.BlockInterface
@@ -31,15 +34,14 @@ defmodule EVM.Operation.System do
   """
   @spec create(Operation.stack_args(), Operation.vm_map()) :: Operation.op_result()
   def create([value, in_offset, in_size], %{exec_env: exec_env, machine_state: machine_state0}) do
-    {data, machine_state1} = EVM.Memory.read(machine_state0, in_offset, in_size)
+    {data, machine_state1} = Memory.read(machine_state0, in_offset, in_size)
 
     account_balance =
       AccountInterface.get_account_balance(exec_env.account_interface, exec_env.address)
 
     block_header = BlockInterface.get_block_header(exec_env.block_interface)
 
-    is_allowed =
-      value <= account_balance and exec_env.stack_depth < EVM.Functions.max_stack_depth()
+    is_allowed = value <= account_balance and exec_env.stack_depth < Functions.max_stack_depth()
 
     {updated_account_interface, _n_gas, _n_sub_state} =
       if is_allowed do
@@ -73,7 +75,7 @@ defmodule EVM.Operation.System do
           exec_env.account_interface
           |> AccountInterface.get_account_nonce(exec_env.address)
 
-        EVM.Address.new(exec_env.address, nonce)
+        Address.new(exec_env.address, nonce)
       else
         0
       end
@@ -123,14 +125,14 @@ defmodule EVM.Operation.System do
         machine_state: machine_state
       }) do
     to = if is_number(to), do: Address.new(to), else: to
-    {data, machine_state} = EVM.Memory.read(machine_state, in_offset, in_size)
+    {data, machine_state} = Memory.read(machine_state, in_offset, in_size)
 
     account_balance =
       AccountInterface.get_account_balance(exec_env.account_interface, exec_env.address)
 
     machine_code = AccountInterface.get_account_code(exec_env.account_interface, to)
 
-    if call_gas <= account_balance && exec_env.stack_depth < EVM.Functions.max_stack_depth() do
+    if call_gas <= account_balance && exec_env.stack_depth < Functions.max_stack_depth() do
       exec_env = ExecEnv.tranfer_wei_to(exec_env, to, value)
 
       {n_gas, _n_sub_state, n_exec_env, n_output} =
@@ -155,7 +157,7 @@ defmodule EVM.Operation.System do
       exec_env = %{exec_env | account_interface: n_exec_env.account_interface}
       # TODO: Set n_account_interface
 
-      machine_state = EVM.Memory.write(machine_state, out_offset, n_output)
+      machine_state = Memory.write(machine_state, out_offset, n_output)
       machine_state = %{machine_state | gas: machine_state.gas + n_gas}
       # Return 1: 1 = success, 0 = failure
       # TODO Check if the call was actually successful
@@ -216,7 +218,7 @@ defmodule EVM.Operation.System do
   @spec return(Operation.stack_args(), Operation.vm_map()) :: Operation.op_result()
   def return([_mem_start, mem_end], %{machine_state: machine_state}) do
     # We may have to bump up number of active words
-    machine_state |> MachineState.maybe_set_active_words(EVM.Memory.get_active_words(mem_end))
+    machine_state |> MachineState.maybe_set_active_words(Memory.get_active_words(mem_end))
   end
 
   @doc """

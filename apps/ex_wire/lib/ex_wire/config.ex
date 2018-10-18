@@ -2,6 +2,10 @@ defmodule ExWire.Config do
   @moduledoc """
   General configuration information for ExWire.
   """
+  alias ExthCrypto.Key
+  alias Blockchain.Chain
+  alias ExthCrypto.Signature
+
   @private_key (case Application.get_env(:ex_wire, :private_key) do
                   key when is_binary(key) ->
                     key
@@ -9,10 +13,10 @@ defmodule ExWire.Config do
                   :random ->
                     ExthCrypto.ECIES.ECDH.new_ecdh_key_pair() |> Tuple.to_list() |> List.last()
                 end)
-  @public_key (case ExthCrypto.Signature.get_public_key(@private_key) do
+  @public_key (case Signature.get_public_key(@private_key) do
                  {:ok, public_key} -> public_key
                end)
-  @node_id @public_key |> ExthCrypto.Key.der_to_raw()
+  @node_id @public_key |> Key.der_to_raw()
 
   @caps Application.get_env(:ex_wire, :caps)
   @version Mix.Project.config()[:version]
@@ -22,10 +26,10 @@ defmodule ExWire.Config do
   Returns a private key that is generated when a new session is created. It is
   intended that this key is semi-persisted.
   """
-  @spec private_key() :: ExthCrypto.Key.private_key()
+  @spec private_key() :: Key.private_key()
   def private_key, do: @private_key
 
-  @spec public_key() :: ExthCrypto.Key.public_key()
+  @spec public_key() :: Key.public_key()
   def public_key, do: @public_key
 
   @spec node_id() :: ExWire.node_id()
@@ -60,8 +64,8 @@ defmodule ExWire.Config do
     end
   end
 
-  @spec chain() :: Blockchain.Chain.t()
-  def chain, do: Application.get_env(:ex_wire, :chain) |> Blockchain.Chain.load_chain()
+  @spec chain() :: Chain.t()
+  def chain, do: Application.get_env(:ex_wire, :chain) |> Chain.load_chain()
 
   @spec commitment_count() :: integer()
   def commitment_count, do: Application.get_env(:ex_wire, :commitment_count)

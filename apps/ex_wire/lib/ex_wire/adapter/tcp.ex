@@ -16,6 +16,11 @@ defmodule ExWire.Adapter.TCP do
   alias ExWire.Handshake
   alias ExWire.Packet
   alias ExWire.Config
+  alias ExWire.Handshake.Struct.AuthMsgV4
+  alias ExWire.Handshake.EIP8
+  alias ExWire.Packet.Hello
+  alias ExWire.Packet.Status
+  alias Packet.Disconnect
 
   @ping_interval 2_000
 
@@ -72,7 +77,7 @@ defmodule ExWire.Adapter.TCP do
       end)
 
     {my_auth_msg, my_ephemeral_key_pair, my_nonce} =
-      ExWire.Handshake.build_auth_msg(
+      Handshake.build_auth_msg(
         Config.public_key(),
         Config.private_key(),
         peer.remote_id
@@ -80,8 +85,8 @@ defmodule ExWire.Adapter.TCP do
 
     {:ok, encoded_auth_msg} =
       my_auth_msg
-      |> ExWire.Handshake.Struct.AuthMsgV4.serialize()
-      |> ExWire.Handshake.EIP8.wrap_eip_8(peer.remote_id, peer.host, my_ephemeral_key_pair)
+      |> AuthMsgV4.serialize()
+      |> EIP8.wrap_eip_8(peer.remote_id, peer.host, my_ephemeral_key_pair)
 
     # Send auth message
     :ok = GenServer.cast(self(), {:send, %{data: encoded_auth_msg}})
@@ -243,12 +248,12 @@ defmodule ExWire.Adapter.TCP do
             {:disconnect, reason} ->
               Logger.warn(
                 "[Network] [#{peer}] Disconnecting to peer due to: #{
-                  Packet.Disconnect.get_reason_msg(reason)
+                  Disconnect.get_reason_msg(reason)
                 }"
               )
 
               # TODO: Add a timeout and disconnect ourselves
-              _ = send_packet(self(), Packet.Disconnect.new(reason))
+              _ = send_packet(self(), Disconnect.new(reason))
 
               state
 
@@ -350,7 +355,7 @@ defmodule ExWire.Adapter.TCP do
         {:send, %{packet: {packet_mod, _packet_type, _packet_data}}} = data,
         state = %{peer: peer, active: false}
       )
-      when packet_mod != ExWire.Packet.Hello do
+      when packet_mod != Hello do
     _ =
       Logger.info(
         "[Network] [#{peer}] Queueing packet #{Atom.to_string(packet_mod)} to #{peer.host}"
@@ -386,7 +391,7 @@ defmodule ExWire.Adapter.TCP do
 
   # Client function to send HELLO message after connecting.
   defp send_hello(pid) do
-    send_packet(pid, %Packet.Hello{
+    send_packet(pid, %Hello{
       p2p_version: Config.p2p_version(),
       client_id: Config.client_id(),
       caps: Config.caps(),
@@ -397,7 +402,7 @@ defmodule ExWire.Adapter.TCP do
 
   # Client function to send STATUS message.
   defp send_status(pid) do
-    send_packet(pid, %Packet.Status{
+    send_packet(pid, %Status{
       protocol_version: Config.protocol_version(),
       network_id: Config.network_id(),
       total_difficulty: Config.chain().genesis.difficulty,

@@ -10,6 +10,8 @@ defmodule ExWire.Handler.Neighbours do
 
   alias ExWire.Handler
   alias ExWire.Message.Neighbours
+  alias Handler.Params
+  alias ExWire.Discovery
 
   @doc """
   Handler for a Neighbours message.
@@ -32,11 +34,11 @@ defmodule ExWire.Handler.Neighbours do
       ...> }, nil)
       :no_response
   """
-  @spec handle(Handler.Params.t(), identifier() | nil) :: Handler.handler_response()
+  @spec handle(Params.t(), identifier() | nil) :: Handler.handler_response()
   def handle(params, discovery) do
     neighbours = Neighbours.decode(params.data)
 
-    if discovery, do: ExWire.Discovery.add_neighbours(discovery, neighbours)
+    if discovery, do: Discovery.add_neighbours(discovery, neighbours)
 
     :no_response
   end

@@ -5,6 +5,7 @@ defmodule ExWire.Handler.Pong do
 
   alias ExWire.Handler
   alias ExWire.Message.Pong
+  alias ExWire.Discovery
 
   @doc """
   Handler for a Pong message.
@@ -25,7 +26,7 @@ defmodule ExWire.Handler.Pong do
   def handle(params, discovery) do
     _pong = Pong.decode(params.data)
 
-    if discovery, do: ExWire.Discovery.pong(discovery, params.node_id)
+    if discovery, do: Discovery.pong(discovery, params.node_id)
 
     :no_response
   end

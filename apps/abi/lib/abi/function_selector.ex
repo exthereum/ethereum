@@ -5,6 +5,7 @@ defmodule ABI.FunctionSelector do
   """
 
   require Integer
+  alias ABI.Parser
 
   @type type ::
           {:uint, integer()}
@@ -93,7 +94,7 @@ defmodule ABI.FunctionSelector do
       }
   """
   def decode(signature) do
-    ABI.Parser.parse!(signature, as: :selector)
+    Parser.parse!(signature, as: :selector)
   end
 
   @doc """
@@ -157,7 +158,7 @@ defmodule ABI.FunctionSelector do
       {:array, {:array, :address}, 3}
   """
   def decode_type(single_type) do
-    ABI.Parser.parse!(single_type, as: :type)
+    Parser.parse!(single_type, as: :type)
   end
 
   @doc """
@@ -213,7 +214,7 @@ defmodule ABI.FunctionSelector do
   defp get_type(els), do: raise("Unsupported type: #{inspect(els)}")
 
   @doc false
-  @spec is_dynamic?(ABI.FunctionSelector.type()) :: boolean
+  @spec is_dynamic?(t) :: boolean
   def is_dynamic?(:bytes), do: true
   def is_dynamic?(:string), do: true
   def is_dynamic?({:array, _type}), do: true

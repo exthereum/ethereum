@@ -4,6 +4,10 @@ defmodule ExWire.Handler.FindNeighbours do
   """
 
   alias ExWire.Handler
+  alias Handler.Params
+  alias ExWire.Discovery
+  alias ExWire.Message.Neighbours
+  alias ExWire.Message.FindNeighbours
 
   @doc """
   Handler for a FindNeighbors message.
@@ -23,19 +27,19 @@ defmodule ExWire.Handler.FindNeighbours do
         timestamp: 7,
       }}
   """
-  @spec handle(Handler.Params.t(), identifier | nil) :: Handler.handler_response()
+  @spec handle(Params.t(), identifier | nil) :: Handler.handler_response()
   def handle(params, discovery) do
-    find_neighbours = ExWire.Message.FindNeighbours.decode(params.data)
+    find_neighbours = FindNeighbours.decode(params.data)
 
     nodes =
       if discovery do
-        ExWire.Discovery.get_neighbours(discovery, find_neighbours.target)
+        Discovery.get_neighbours(discovery, find_neighbours.target)
       else
         []
       end
 
     {:respond,
-     %ExWire.Message.Neighbours{
+     %Neighbours{
        nodes: nodes,
        timestamp: params.timestamp
      }}

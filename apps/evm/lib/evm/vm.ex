@@ -11,6 +11,7 @@ defmodule EVM.VM do
   alias EVM.SubState
   alias EVM.Gas
   alias EVM.Operation
+  alias EVM.Debugger
 
   @type output :: binary()
 
@@ -38,10 +39,10 @@ defmodule EVM.VM do
       iex> EVM.VM.run(5, %EVM.ExecEnv{machine_code: EVM.MachineCode.compile([:add])})
       {5, %EVM.SubState{}, %EVM.ExecEnv{machine_code: EVM.MachineCode.compile([:add])}, ""}
   """
-  @spec run(Gas.t(), ExecEnv.t()) :: {Gas.t(), EVM.SubState.t(), ExecEnv.t(), output}
+  @spec run(Gas.t(), ExecEnv.t()) :: {Gas.t(), SubState.t(), ExecEnv.t(), output}
   def run(gas, exec_env) do
-    machine_state = %EVM.MachineState{gas: gas}
-    sub_state = %EVM.SubState{}
+    machine_state = %MachineState{gas: gas}
+    sub_state = %SubState{}
 
     {n_machine_state, n_sub_state, n_exec_env, output} = exec(machine_state, sub_state, exec_env)
 
@@ -74,13 +75,13 @@ defmodule EVM.VM do
   defp do_exec(machine_state, sub_state, exec_env, original_sub_state) do
     # Debugger generally runs here.
     {machine_state, sub_state, exec_env} =
-      if EVM.Debugger.enabled?() do
-        case EVM.Debugger.is_breakpoint?(machine_state, sub_state, exec_env) do
+      if Debugger.enabled?() do
+        case Debugger.is_breakpoint?(machine_state, sub_state, exec_env) do
           :continue ->
             {machine_state, sub_state, exec_env}
 
           breakpoint ->
-            EVM.Debugger.break(breakpoint, machine_state, sub_state, exec_env)
+            Debugger.break(breakpoint, machine_state, sub_state, exec_env)
         end
       else
         {machine_state, sub_state, exec_env}

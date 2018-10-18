@@ -9,6 +9,7 @@ defmodule Blockchain.Transaction.Signature do
 
   https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md
   """
+  alias Blockchain.Transaction
 
   @type public_key :: <<_::512>>
   @type private_key :: <<_::256>>
@@ -206,9 +207,9 @@ defmodule Blockchain.Transaction.Signature do
       iex> Blockchain.Transaction.Signature.transaction_hash(%Blockchain.Transaction{nonce: 5, gas_price: 6, gas_limit: 7, to: <<1>>, value: 5, data: <<1>>}, 1)
       <<132, 79, 28, 4, 212, 58, 235, 38, 66, 211, 167, 102, 36, 58, 229, 88, 238, 251, 153, 23, 121, 163, 212, 64, 83, 111, 200, 206, 54, 43, 112, 53>>
   """
-  @spec transaction_hash(Blockchain.Transaction.t(), integer() | nil) :: BitHelper.keccak_hash()
+  @spec transaction_hash(Transaction.t(), integer() | nil) :: BitHelper.keccak_hash()
   def transaction_hash(trx, chain_id \\ nil) do
-    Blockchain.Transaction.serialize(trx, false)
+    Transaction.serialize(trx, false)
     # See EIP-155
     |> Kernel.++(if chain_id, do: [chain_id |> :binary.encode_unsigned(), <<>>, <<>>], else: [])
     |> ExRLP.encode()
@@ -228,8 +229,7 @@ defmodule Blockchain.Transaction.Signature do
       iex> Blockchain.Transaction.Signature.sign_transaction(%Blockchain.Transaction{nonce: 5, gas_price: 6, gas_limit: 7, to: <<>>, value: 5, init: <<1>>}, <<1::256>>, 1)
       %Blockchain.Transaction{data: <<>>, gas_limit: 7, gas_price: 6, init: <<1>>, nonce: 5, r: 25739987953128435966549144317523422635562973654702886626580606913510283002553, s: 41423569377768420285000144846773344478964141018753766296386430811329935846420, to: "", v: 38, value: 5}
   """
-  @spec sign_transaction(Blockchain.Transaction.t(), private_key, integer() | nil) ::
-          Blockchain.Transaction.t()
+  @spec sign_transaction(Transaction.t(), private_key, integer() | nil) :: Transaction.t()
   def sign_transaction(trx, private_key, chain_id \\ nil) do
     {v, r, s} =
       trx
@@ -291,8 +291,7 @@ defmodule Blockchain.Transaction.Signature do
       iex> Blockchain.Transaction.Signature.sender(%Blockchain.Transaction{data: nil, gas_limit: 7, gas_price: 6, init: <<1>>, nonce: 5, r: 0, s: 0, to: "", v: 0, value: 5})
       {:error, "Recovery id invalid 0-3"}
   """
-  @spec sender(Blockchain.Transaction.t(), integer() | nil) ::
-          {:ok, EVM.address()} | {:error, String.t()}
+  @spec sender(Transaction.t(), integer() | nil) :: {:ok, EVM.address()} | {:error, String.t()}
   def sender(trx, chain_id \\ nil) do
     # Ignore chain_id if transaction has a `v` value before EIP-155 minimum
     chain_id =

@@ -190,7 +190,7 @@ defimpl EVM.Interface.AccountInterface, for: EVM.Interface.Mock.MockAccountInter
   @spec create_contract(
           EVM.Interface.AccountInterface.t(),
           Contract.t(),
-          EVM.MachineCode.t()
+          MachineCode.t()
         ) :: {EVM.Gas.t(), EVM.Interface.AccountInterface.t(), EVM.SubState.t()}
   def create_contract(
         mock_account_interface,

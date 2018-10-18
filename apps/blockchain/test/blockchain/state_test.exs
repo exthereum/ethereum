@@ -1,6 +1,7 @@
 defmodule Blockchain.StateTest do
   alias MerklePatriciaTree.Trie
   alias Blockchain.Account
+  alias Blockchain.Transaction
   alias EVM.Block.Header
   alias MerklePatriciaTree.Test
   use EthCommonTest.Harness
@@ -27,12 +28,10 @@ defmodule Blockchain.StateTest do
             to: maybe_hex(test["transaction"]["to"]),
             value: load_integer(List.first(test["transaction"]["value"]))
           }
-          |> Blockchain.Transaction.Signature.sign_transaction(
-            maybe_hex(test["transaction"]["secretKey"])
-          )
+          |> Transaction.Signature.sign_transaction(maybe_hex(test["transaction"]["secretKey"]))
 
         {state, _, _} =
-          Blockchain.Transaction.execute_transaction(state, transaction, %Header{
+          Transaction.execute_transaction(state, transaction, %Header{
             beneficiary: maybe_hex(test["env"]["currentCoinbase"])
           })
 

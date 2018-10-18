@@ -31,7 +31,7 @@ defmodule ExWire.Handler do
               node_id: nil
 
     @type t :: %__MODULE__{
-            remote_host: ExWire.Struct.Endpoint.t(),
+            remote_host: Endpoint.t(),
             signature: Crpyto.signature(),
             recovery_id: Crypto.recovery_id(),
             hash: Crypto.hash(),

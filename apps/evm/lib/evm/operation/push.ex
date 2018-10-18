@@ -1,5 +1,6 @@
 defmodule EVM.Operation.Push do
   alias EVM.Operation
+  alias EVM.Memory
 
   @doc """
   Place n-byte item on stack
@@ -29,7 +30,7 @@ defmodule EVM.Operation.Push do
   """
   @spec push_n(integer(), Operation.stack_args(), Operation.vm_map()) :: Operation.op_result()
   def push_n(n, _args, %{machine_state: machine_state, exec_env: %{machine_code: machine_code}}) do
-    EVM.Memory.read_zeroed_memory(machine_code, machine_state.program_counter + 1, n)
+    Memory.read_zeroed_memory(machine_code, machine_state.program_counter + 1, n)
     |> :binary.decode_unsigned()
   end
 end

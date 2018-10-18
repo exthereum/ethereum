@@ -2,6 +2,9 @@ defmodule ExWire.Struct.Peer do
   @moduledoc """
   Represents a Peer for an RLPx / Eth Wire connection.
   """
+  alias ExthCrypto.Key
+  alias ExWire.Struct.Endpoint
+  alias ExthCrypto.Math
 
   defstruct [
     :host,
@@ -32,7 +35,7 @@ defmodule ExWire.Struct.Peer do
   """
   @spec new(Sring.t(), integer(), String.t()) :: t
   def new(host, port, remote_id_hex) do
-    remote_id = remote_id_hex |> ExthCrypto.Math.hex_to_bin() |> ExthCrypto.Key.raw_to_der()
+    remote_id = remote_id_hex |> Math.hex_to_bin() |> Key.raw_to_der()
     ident = Binary.take(remote_id_hex, 6) <> "..." <> Binary.take(remote_id_hex, -6)
 
     %__MODULE__{
@@ -65,9 +68,9 @@ defmodule ExWire.Struct.Peer do
   """
   def from_neighbour(neighbour) do
     new(
-      neighbour.endpoint.ip |> ExWire.Struct.Endpoint.ip_to_string(),
+      neighbour.endpoint.ip |> Endpoint.ip_to_string(),
       neighbour.endpoint.tcp_port,
-      neighbour.node |> ExthCrypto.Math.bin_to_hex()
+      neighbour.node |> Math.bin_to_hex()
     )
   end
 

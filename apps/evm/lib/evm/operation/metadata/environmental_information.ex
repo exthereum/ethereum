@@ -1,4 +1,6 @@
 defmodule EVM.Operation.Metadata.EnvironmentalInformation do
+  alias EVM.Operation.Metadata
+
   @operations for operation <- [
                     %{
                       id: 0x30,
@@ -106,7 +108,7 @@ defmodule EVM.Operation.Metadata.EnvironmentalInformation do
                       group: :environmental_information
                     }
                   ],
-                  do: struct(EVM.Operation.Metadata, operation)
+                  do: struct(Metadata, operation)
 
   def operations, do: @operations
 end

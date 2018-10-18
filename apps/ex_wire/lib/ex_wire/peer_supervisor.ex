@@ -13,6 +13,9 @@ defmodule ExWire.PeerSupervisor do
   require Logger
   alias ExthCrypto.Math
   alias ExWire.Adapter.TCP
+  alias ExWire.Struct.Endpoint
+  alias ExWire.Struct.Peer
+  alias ExWire.Sync
 
   @name __MODULE__
 
@@ -49,12 +52,12 @@ defmodule ExWire.PeerSupervisor do
     _ =
       Logger.debug(fn ->
         "[Peer Supervisor] Starting TCP connection to neighbour #{
-          neighbour.endpoint.ip |> ExWire.Struct.Endpoint.ip_to_string()
+          neighbour.endpoint.ip |> Endpoint.ip_to_string()
         }:#{neighbour.endpoint.tcp_port} (#{neighbour.node |> Math.bin_to_hex()})"
       end)
 
-    peer = ExWire.Struct.Peer.from_neighbour(neighbour)
+    peer = Peer.from_neighbour(neighbour)
 
-    Supervisor.start_child(@name, [:outbound, peer, [{:server, ExWire.Sync}]])
+    Supervisor.start_child(@name, [:outbound, peer, [{:server, Sync}]])
   end
 end

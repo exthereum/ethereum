@@ -112,7 +112,7 @@ defmodule EVM.MachineCode do
   def compile(code) do
     for n <- code, into: <<>> do
       case n do
-        x when is_atom(x) -> EVM.Operation.encode(n)
+        x when is_atom(x) -> Operation.encode(n)
         x when is_integer(x) -> x
       end
       |> :binary.encode_unsigned()
@@ -150,8 +150,7 @@ defmodule EVM.MachineCode do
   defp decompile(acc, <<>>, _), do: Enum.reverse(acc)
 
   defp decompile(acc, <<opcode::8, bytecode::binary()>>, opts) do
-    {op, rest_of_bytecode} =
-      decompile_opcode(opcode, EVM.Operation.metadata(opcode), bytecode, opts)
+    {op, rest_of_bytecode} = decompile_opcode(opcode, Operation.metadata(opcode), bytecode, opts)
 
     decompile(op ++ acc, rest_of_bytecode, opts)
   end

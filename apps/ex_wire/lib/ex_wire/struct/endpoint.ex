@@ -7,6 +7,8 @@ defmodule ExWire.Struct.Endpoint do
             udp_port: nil,
             tcp_port: nil
 
+  alias ExthCrypto.Math
+
   @type ip :: :inet.ip_address()
   @type ip_port :: non_neg_integer()
 
@@ -164,7 +166,7 @@ defmodule ExWire.Struct.Endpoint do
   def encode_port(port) do
     case port do
       nil -> <<>>
-      _ -> port |> :binary.encode_unsigned() |> ExthCrypto.Math.pad(2)
+      _ -> port |> :binary.encode_unsigned() |> Math.pad(2)
     end
   end
 

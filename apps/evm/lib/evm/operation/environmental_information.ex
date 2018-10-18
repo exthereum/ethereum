@@ -3,6 +3,7 @@ defmodule EVM.Operation.EnvironmentalInformation do
   alias EVM.Stack
   alias EVM.Helpers
   alias EVM.Interface.AccountInterface
+  alias EVM.Memory
 
   @doc """
   Get address of currently executing account.
@@ -152,8 +153,8 @@ defmodule EVM.Operation.EnvironmentalInformation do
         machine_state: machine_state
       }) do
     if length > 0 do
-      data = EVM.Memory.read_zeroed_memory(exec_env.data, call_data_start, length)
-      machine_state = EVM.Memory.write(machine_state, memory_start, Helpers.right_pad_bytes(data))
+      data = Memory.read_zeroed_memory(exec_env.data, call_data_start, length)
+      machine_state = Memory.write(machine_state, memory_start, Helpers.right_pad_bytes(data))
 
       %{machine_state: machine_state}
     else
@@ -191,8 +192,8 @@ defmodule EVM.Operation.EnvironmentalInformation do
     if length === 0 do
       0
     else
-      data = EVM.Memory.read_zeroed_memory(exec_env.machine_code, code_offset, length)
-      machine_state = EVM.Memory.write(machine_state, mem_offset, Helpers.right_pad_bytes(data))
+      data = Memory.read_zeroed_memory(exec_env.machine_code, code_offset, length)
+      machine_state = Memory.write(machine_state, mem_offset, Helpers.right_pad_bytes(data))
 
       %{machine_state: machine_state}
     end
@@ -269,8 +270,8 @@ defmodule EVM.Operation.EnvironmentalInformation do
       account_code =
         AccountInterface.get_account_code(exec_env.account_interface, wrapped_address)
 
-      data = EVM.Memory.read_zeroed_memory(account_code, code_offset, length)
-      machine_state = EVM.Memory.write(machine_state, mem_offset, Helpers.right_pad_bytes(data))
+      data = Memory.read_zeroed_memory(account_code, code_offset, length)
+      machine_state = Memory.write(machine_state, mem_offset, Helpers.right_pad_bytes(data))
 
       %{machine_state: machine_state}
     end

@@ -166,9 +166,9 @@ defmodule EVM.Memory do
   """
 
   @spec active_words_after(
-          EVM.Operation.operation(),
+          Operation.operation(),
           list(EVM.val()),
-          EVM.MachineState.t(),
+          MachineState.t(),
           EVM.ExecEnv.t()
         ) :: integer()
   def active_words_after(_instruction, _state, machine_state, _exec_env),

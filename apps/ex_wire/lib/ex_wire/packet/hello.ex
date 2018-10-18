@@ -21,7 +21,7 @@ defmodule ExWire.Packet.Hello do
 
   require Logger
   alias ExWire.Config
-
+  alias ExWire.Struct.Endpoint
   @behaviour ExWire.Packet
 
   @type cap :: {String.t(), integer()}
@@ -60,7 +60,7 @@ defmodule ExWire.Packet.Hello do
       for({cap, ver} <- packet.caps, do: [cap, ver]),
       packet.listen_port,
       packet.node_id,
-      "#{Config.local_ip() |> ExWire.Struct.Endpoint.ip_to_string()}:#{Config.listen_port()}"
+      "#{Config.local_ip() |> Endpoint.ip_to_string()}:#{Config.listen_port()}"
     ]
   end
 

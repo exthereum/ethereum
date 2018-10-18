@@ -27,8 +27,7 @@ defmodule ExthCrypto.Signature do
       iex> ExthCrypto.Signature.get_public_key(<<1>>)
       {:error, "Private key size not 32 bytes"}
   """
-  @spec get_public_key(ExthCrypto.Key.private_key()) ::
-          {:ok, ExthCrypto.Key.public_key()} | {:error, String.t()}
+  @spec get_public_key(Key.private_key()) :: {:ok, Key.public_key()} | {:error, String.t()}
   def get_public_key(private_key) do
     case :libsecp256k1.ec_pubkey_create(private_key, :uncompressed) do
       {:ok, public_key} -> {:ok, public_key}
@@ -48,7 +47,7 @@ defmodule ExthCrypto.Signature do
       iex> ExthCrypto.Signature.verify("12345", signature, ExthCrypto.Test.public_key)
       true
   """
-  @spec sign_digest(binary(), ExthCrypto.Key.private_key()) :: {signature, r, s, recovery_id}
+  @spec sign_digest(binary(), Key.private_key()) :: {signature, r, s, recovery_id}
   def sign_digest(digest, private_key) do
     {:ok, <<r::size(256), s::size(256)>> = signature, recovery_id} =
       :libsecp256k1.ecdsa_sign_compact(digest, private_key, :default, <<>>)
@@ -76,7 +75,7 @@ defmodule ExthCrypto.Signature do
       iex> ExthCrypto.Signature.verify(msg |> Binary.drop(1), signature, ExthCrypto.Test.public_key(:key_a))
       false
   """
-  @spec verify(binary(), signature, ExthCrypto.Key.public_key()) :: boolean()
+  @spec verify(binary(), signature, Key.public_key()) :: boolean()
   def verify(digest, signature, public_key) do
     case :libsecp256k1.ecdsa_verify_compact(digest, signature, public_key) do
       :ok -> true
@@ -108,7 +107,7 @@ defmodule ExthCrypto.Signature do
               120, 250, 153, 134, 180, 218, 177, 186, 200, 199, 106, 97, 103, 50, 215, 114>>}
   """
   @spec recover(binary(), signature, recovery_id) ::
-          {:ok, ExthCrypto.Key.public_key()} | {:error, String.t()}
+          {:ok, Key.public_key()} | {:error, String.t()}
   def recover(digest, signature, recovery_id) do
     case :libsecp256k1.ecdsa_recover_compact(digest, signature, :uncompressed, recovery_id) do
       {:ok, public_key} -> {:ok, public_key}

@@ -19,6 +19,10 @@ defmodule ExWire.Sync do
   alias ExWire.Packet.BlockHeaders
   alias ExWire.Packet.BlockBodies
   alias ExWire.PeerSupervisor
+  alias ExWire.Packet.GetBlockBodies
+  alias ExWire.Packet.GetBlockHeaders
+  alias Blockchain.Blocktree
+  alias Blockchain.Block
 
   @doc """
   Starts a Sync process.
@@ -34,7 +38,7 @@ defmodule ExWire.Sync do
         We will need to add some "restore state" logic.
   """
   def init(db) do
-    block_tree = Blockchain.Blocktree.new_tree()
+    block_tree = Blocktree.new_tree()
 
     {:ok,
      %{
@@ -133,13 +137,13 @@ defmodule ExWire.Sync do
     {:noreply, state}
   end
 
-  @spec request_next_block(boolean(), Block.Header.t(), EVM.hash()) :: :ok
+  @spec request_next_block(boolean(), Header.t(), EVM.hash()) :: :ok
   defp request_next_block(_should_request_block = true, header, header_hash) do
     _ = Logger.debug(fn -> "[Sync] Requesting block body #{header.number}" end)
 
     # TODO: Bulk up these requests?
     _ =
-      PeerSupervisor.send_packet(PeerSupervisor, %ExWire.Packet.GetBlockBodies{
+      PeerSupervisor.send_packet(PeerSupervisor, %GetBlockBodies{
         hashes: [header_hash]
       })
 
@@ -152,15 +156,15 @@ defmodule ExWire.Sync do
 
   defp request_next_block(block_tree) do
     next_number =
-      case Blockchain.Blocktree.get_canonical_block(block_tree) do
+      case Blocktree.get_canonical_block(block_tree) do
         :root -> 0
-        %Blockchain.Block{header: %Header{number: number}} -> number + 1
+        %Block{header: %Header{number: number}} -> number + 1
       end
 
     _ = Logger.debug(fn -> "[Sync] Requesting block #{next_number}" end)
 
     _ =
-      ExWire.PeerSupervisor.send_packet(ExWire.PeerSupervisor, %ExWire.Packet.GetBlockHeaders{
+      PeerSupervisor.send_packet(PeerSupervisor, %GetBlockHeaders{
         block_identifier: next_number,
         max_headers: 1,
         skip: 0,

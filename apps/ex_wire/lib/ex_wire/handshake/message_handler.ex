@@ -13,7 +13,7 @@ defmodule ExWire.Handshake.MessageHandler do
   Note: this will handle pre- or post-EIP 8 messages. We take a different approach to other
         implementations and try EIP-8 first, and if that fails, plain.
   """
-  @spec read_ack_resp(binary(), ExthCrypto.Key.private_key(), String.t()) ::
+  @spec read_ack_resp(binary(), Key.private_key(), String.t()) ::
           {:ok, AckRespV4.t(), binary(), binary()} | {:error, String.t()}
   def read_ack_resp(encoded_ack, my_static_private_key, remote_addr) do
     case EIP8.unwrap_eip_8(encoded_ack, my_static_private_key, remote_addr) do
@@ -65,8 +65,7 @@ defmodule ExWire.Handshake.MessageHandler do
       }
   """
 
-  @spec build_ack_resp(ExthCrypto.Key.public_key(), binary() | nil, non_neg_integer()) ::
-          AckRespV4.t()
+  @spec build_ack_resp(Key.public_key(), binary() | nil, non_neg_integer()) :: AckRespV4.t()
   def build_ack_resp(remote_ephemeral_public_key, nonce \\ nil, nonce_len) do
     # Generate nonce unless given
     nonce = if nonce, do: nonce, else: Math.nonce(nonce_len)

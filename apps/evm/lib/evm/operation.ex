@@ -82,7 +82,7 @@ defmodule EVM.Operation do
       iex> EVM.Operation.get_operation_at(<<0x11, 0x01, 0x02>>, 3)
       0
   """
-  @spec get_operation_at(EVM.MachineCode.t(), MachineState.program_counter()) :: opcode
+  @spec get_operation_at(MachineCode.t(), MachineState.program_counter()) :: opcode
   def get_operation_at(machine_code, program_counter)
       when is_binary(machine_code) and is_integer(program_counter) do
     if program_counter < byte_size(machine_code) do
@@ -282,7 +282,7 @@ defmodule EVM.Operation do
       [1, 2]
 
   """
-  @spec inputs(EVM.Operation.Metadata.t(), EVM.MachineState.t()) :: list(EVM.val())
+  @spec inputs(EVM.Operation.Metadata.t(), MachineState.t()) :: list(EVM.val())
   def inputs(_stack, nil), do: []
 
   def inputs(operation, machine_state) do
@@ -290,8 +290,7 @@ defmodule EVM.Operation do
   end
 
   defp operation_args(operation, machine_state, sub_state, exec_env) do
-    {stack_args, updated_machine_state} =
-      EVM.MachineState.pop_n(machine_state, operation.input_count)
+    {stack_args, updated_machine_state} = MachineState.pop_n(machine_state, operation.input_count)
 
     vm_map = %{
       stack: updated_machine_state.stack,

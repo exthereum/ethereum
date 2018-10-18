@@ -20,7 +20,7 @@ defmodule ExthCrypto.ECIES.ECDH do
       iex> {public_key, private_key} == :crypto.generate_key(:ecdh, :secp256k1, private_key)
       true
   """
-  @spec new_ecdh_key_pair(ExthCrypto.named_curve()) :: ExthCrypto.Key.key_pair()
+  @spec new_ecdh_key_pair(ExthCrypto.named_curve()) :: Key.key_pair()
   def new_ecdh_key_pair(curve \\ @default_curve) when is_atom(curve) do
     :crypto.generate_key(:ecdh, curve)
   end
@@ -38,8 +38,8 @@ defmodule ExthCrypto.ECIES.ECDH do
       <<68, 139, 102, 172, 32, 159, 198, 236, 33, 216, 132, 22, 62, 46, 163, 215, 53, 40, 177, 14, 51, 94, 155, 151, 21, 226, 9, 254, 153, 48, 112, 226>>
   """
   @spec generate_shared_secret(
-          ExthCrypto.Key.private_key(),
-          ExthCrypto.Key.public_key(),
+          Key.private_key(),
+          Key.public_key(),
           ExthCrypto.named_curve()
         ) :: binary()
   def generate_shared_secret(local_private_key, remote_public_key, curve \\ @default_curve)

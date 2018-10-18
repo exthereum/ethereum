@@ -7,7 +7,7 @@ defmodule ExthCrypto.KDF.NistSp80056 do
   """
 
   import ExthCrypto.Math
-
+  alias ExthCrypto.Math
   @two_power_32 round(:math.pow(2, 32))
   @max_32_int @two_power_32 - 1
 
@@ -63,7 +63,7 @@ defmodule ExthCrypto.KDF.NistSp80056 do
           Enum.reduce(1..reps, <<>>, fn counter, results ->
             counter_enc =
               :binary.encode_unsigned(counter |> mod(@two_power_32), :big)
-              |> ExthCrypto.Math.pad(4)
+              |> Math.pad(4)
 
             result = hasher.(counter_enc <> shared_secret <> extra_data)
 

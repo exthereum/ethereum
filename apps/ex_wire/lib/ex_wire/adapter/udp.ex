@@ -6,6 +6,8 @@ defmodule ExWire.Adapter.UDP do
   use GenServer
   use Bitwise
 
+  alias ExWire.Util.Timestamp
+
   require Logger
 
   @doc """
@@ -49,7 +51,7 @@ defmodule ExWire.Adapter.UDP do
         ip: ip |> Tuple.to_list(),
         udp_port: port
       },
-      timestamp: ExWire.Util.Timestamp.soon()
+      timestamp: Timestamp.soon()
     }
 
     apply(network, :receive, [inbound_message | network_args])

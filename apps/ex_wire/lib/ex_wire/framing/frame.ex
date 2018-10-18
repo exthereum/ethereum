@@ -13,7 +13,8 @@ defmodule ExWire.Framing.Frame do
   alias ExthCrypto.AES
   alias ExthCrypto.Math
   alias ExWire.Framing.Secrets
-
+  alias ExthCrypto.Cipher
+  alias ExthCrypto.Key
   @type frame :: binary()
 
   @spec frame(integer(), ExRLP.t(), Secrets.t()) :: {frame, Secrets.t()}
@@ -181,14 +182,14 @@ defmodule ExWire.Framing.Frame do
   # it returns the first 16 bytes of the hash sum after seeding.
   @spec update_mac(
           MAC.mac_inst(),
-          ExthCrypto.Cipher.cipher(),
-          ExthCrypto.Key.symmetric_key(),
+          Cipher.cipher(),
+          Key.symmetric_key(),
           binary()
         ) :: MAC.mac_inst()
   defp update_mac(mac, mac_encoder, mac_secret, seed) do
     final = MAC.final(mac) |> Binary.take(16)
 
-    enc = ExthCrypto.Cipher.encrypt(final, mac_secret, mac_encoder) |> Binary.take(-16)
+    enc = Cipher.encrypt(final, mac_secret, mac_encoder) |> Binary.take(-16)
 
     enc_xored = Math.xor(enc, if(seed, do: seed, else: final))
 

@@ -61,7 +61,7 @@ defprotocol EVM.Interface.AccountInterface do
   @spec create_contract(
           t,
           Contract.t() | map(),
-          EVM.MachineCode.t()
+          MachineCode.t()
         ) :: {t, EVM.Gas.t(), EVM.SubState.t()}
   def create_contract(
         t,
