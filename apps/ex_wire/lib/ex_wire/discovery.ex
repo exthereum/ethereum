@@ -12,6 +12,13 @@ defmodule ExWire.Discovery do
   alias ExWire.Config
   alias ExWire.PeerSupervisor
   alias ExthCrypto.Math
+  alias ExWire.Util.Timestamp
+  alias ExWire.Struct.Neighbour
+  alias ExWire.Struct.Endpoint
+  alias ExWire.Network
+  alias ExWire.Adapter.UDP
+  alias ExWire.Message.FindNeighbours
+  alias ExWire.Message.Ping
 
   @min_neighbours 50
 
@@ -49,14 +56,14 @@ defmodule ExWire.Discovery do
             0
           )
 
-        %ExWire.Struct.Endpoint{
+        %Endpoint{
           ip: ip_address,
           udp_port: Config.listen_port(),
           tcp_port: Config.listen_port()
         }
       else
         # Use defaults
-        %ExWire.Struct.Endpoint{
+        %Endpoint{
           ip: Config.local_ip(),
           udp_port: Config.listen_port(),
           tcp_port: Config.listen_port()
@@ -67,7 +74,7 @@ defmodule ExWire.Discovery do
 
     neighbours =
       for node <- nodes do
-        {:ok, neighbour} = ExWire.Struct.Neighbour.from_uri(node)
+        {:ok, neighbour} = Neighbour.from_uri(node)
 
         ping_neighbour(neighbour, local_endpoint)
 
@@ -195,26 +202,26 @@ defmodule ExWire.Discovery do
     end)
 
     # Send a ping to each node
-    ping = %ExWire.Message.Ping{
+    ping = %Ping{
       version: 1,
       from: local_endpoint,
       to: neighbour.endpoint,
-      timestamp: ExWire.Util.Timestamp.soon()
+      timestamp: Timestamp.soon()
     }
 
-    ExWire.Network.send(ping, ExWire.Adapter.UDP, neighbour.endpoint)
+    Network.send(ping, UDP, neighbour.endpoint)
   end
 
   defp find_neighbours(neighbour) do
     # Logger.debug("[Discovery] Initiating find neighbours to #{inspect neighbour, limit: :infinity}")
 
     # Ask node for neighbours
-    find_neighbours = %ExWire.Message.FindNeighbours{
+    find_neighbours = %FindNeighbours{
       # random target address
       target: Math.nonce(64),
-      timestamp: ExWire.Util.Timestamp.soon()
+      timestamp: Timestamp.soon()
     }
 
-    ExWire.Network.send(find_neighbours, ExWire.Adapter.UDP, neighbour.endpoint)
+    Network.send(find_neighbours, UDP, neighbour.endpoint)
   end
 end

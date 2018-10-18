@@ -6,6 +6,7 @@ defmodule ExWire.Protocol do
 
   alias ExWire.Crypto
   alias ExWire.Message
+  alias ExthCrypto.Signature
 
   @doc """
   Encodes a given message by appending it to a hash of
@@ -76,7 +77,7 @@ defmodule ExWire.Protocol do
   defp sign_binary(value, private_key) do
     hashed_value = Crypto.hash(value)
 
-    {signature, _r, _s, recovery_id} = ExthCrypto.Signature.sign_digest(hashed_value, private_key)
+    {signature, _r, _s, recovery_id} = Signature.sign_digest(hashed_value, private_key)
 
     signature <> <<recovery_id>> <> value
   end

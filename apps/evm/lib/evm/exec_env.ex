@@ -39,7 +39,7 @@ defmodule EVM.ExecEnv do
           data: binary(),
           sender: EVM.address(),
           value_in_wei: EVM.Wei.t(),
-          machine_code: EVM.MachineCode.t(),
+          machine_code: MachineCode.t(),
           stack_depth: integer(),
           block_interface: EVM.Interface.BlockInterface.t(),
           account_interface: EVM.Interface.AccountInterface.t()

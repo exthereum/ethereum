@@ -4,12 +4,13 @@ defmodule ExWire.Struct.Neighbour do
   """
 
   alias ExWire.Struct.Endpoint
+  alias ExthCrypto.Math
 
   defstruct endpoint: nil,
             node: nil
 
   @type t :: %__MODULE__{
-          endpoint: ExWire.Struct.Endpoint.t(),
+          endpoint: Endpoint.t(),
           node: ExWire.node_id()
         }
 
@@ -52,7 +53,7 @@ defmodule ExWire.Struct.Neighbour do
              udp_port: remote_peer_port,
              tcp_port: remote_peer_port
            },
-           node: remote_id |> ExthCrypto.Math.hex_to_bin()
+           node: remote_id |> Math.hex_to_bin()
          }}
 
       %URI{scheme: nil} ->

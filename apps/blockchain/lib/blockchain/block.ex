@@ -160,7 +160,7 @@ defmodule Blockchain.Block do
   def put_block(block, db) do
     hash = block |> hash
 
-    :ok = MerklePatriciaTree.DB.put!(db, hash, block |> serialize |> ExRLP.encode())
+    :ok = DB.put!(db, hash, block |> serialize |> ExRLP.encode())
 
     {:ok, hash}
   end
@@ -191,7 +191,7 @@ defmodule Blockchain.Block do
   """
   @spec get_block(EVM.hash(), DB.db()) :: {:ok, t} | :not_found
   def get_block(block_hash, db) do
-    with {:ok, rlp} <- MerklePatriciaTree.DB.get(db, block_hash) do
+    with {:ok, rlp} <- DB.get(db, block_hash) do
       {:ok, rlp |> ExRLP.decode() |> deserialize()}
     end
   end
@@ -840,14 +840,14 @@ defmodule Blockchain.Block do
          db,
          trx_count
        ) do
-    state = MerklePatriciaTree.Trie.new(db, header.state_root)
+    state = Trie.new(db, header.state_root)
     # TODO: How do we deal with invalid transactions
-    {new_state, gas_used, logs} = Blockchain.Transaction.execute_transaction(state, trx, header)
+    {new_state, gas_used, logs} = Transaction.execute_transaction(state, trx, header)
 
     total_gas_used = block.header.gas_used + gas_used
 
     # TODO: Add bloom filter
-    receipt = %Blockchain.Transaction.Receipt{
+    receipt = %Receipt{
       state: new_state.root_hash,
       cumulative_gas: total_gas_used,
       logs: logs

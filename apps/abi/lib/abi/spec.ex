@@ -8,7 +8,7 @@ defmodule ABI.Spec do
   This library parses those specifications, which it assumes
   have already been parsed from JSON.
   """
-
+  alias ABI.FunctionSelector
   @type abi_entry :: %{}
   @type abi_input :: list(abi_entry())
 
@@ -44,7 +44,7 @@ defmodule ABI.Spec do
   Parses an ABI specification and returns an ABI.Spec struct
   that can be used with other library functions.
   """
-  @spec load_specs(abi_input()) :: {:ok, list(ABI.Spec.t())} | {:error, any()}
+  @spec load_specs(abi_input()) :: {:ok, list(t)} | {:error, any()}
   def load_specs(abi_input) do
     Enum.reduce(abi_input, {:ok, []}, fn
       _el, err = {:error, _} ->
@@ -82,12 +82,12 @@ defmodule ABI.Spec do
   Returns a function selector for the input. This can be used with
   the ABI library functions.
   """
-  @spec input_function_selector(ABI.Spec.t()) :: ABI.FunctionSelector.t()
+  @spec input_function_selector(Spec.t()) :: FunctionSelector.t()
   def input_function_selector(spec) do
     types =
       spec.inputs
       |> Enum.map(fn entry -> entry.type end)
-      |> Enum.map(&ABI.FunctionSelector.decode_type/1)
+      |> Enum.map(&FunctionSelector.decode_type/1)
 
     %ABI.FunctionSelector{
       function: spec.name,
@@ -99,14 +99,14 @@ defmodule ABI.Spec do
   Returns a function selector for the output of a function. This can be used with
   the ABI library functions.
   """
-  @spec output_function_selector(ABI.Spec.t()) :: ABI.FunctionSelector.t()
+  @spec output_function_selector(ABI.Spec.t()) :: FunctionSelector.t()
   def output_function_selector(spec) do
     types =
       spec.outputs
       |> Enum.map(fn entry -> entry.type end)
-      |> Enum.map(&ABI.FunctionSelector.decode_type/1)
+      |> Enum.map(&FunctionSelector.decode_type/1)
 
-    %ABI.FunctionSelector{
+    %FunctionSelector{
       types: types
     }
   end

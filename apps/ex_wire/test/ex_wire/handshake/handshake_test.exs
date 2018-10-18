@@ -127,7 +127,7 @@ defmodule HandshakeTest do
 
     assert auth_msg.remote_nonce ==
              "7e968bba13b6c50e2c4cd7f241cc0d64d1ac25c7f5952df231ac6a2bda8ee5d6"
-             |> ExthCrypto.Math.hex_to_bin()
+             |> Math.hex_to_bin()
 
     assert auth_msg.remote_ephemeral_public_key ==
              "654d1044b69c577a44e5f01a1209523adb4026e70c62d1c13a067acabc09d2667a49821a0ad4b634554d330a15a58fe61f8a8e0544b310c6de7b0c8da7528a8d"
@@ -158,7 +158,7 @@ defmodule HandshakeTest do
       d490
       """
       |> String.replace("\n", "")
-      |> ExthCrypto.Math.hex_to_bin()
+      |> Math.hex_to_bin()
 
     {:ok, auth_msg, <<>>} = MessageHandler.read_auth_msg(auth, secret, "1.2.3.4")
 
@@ -220,7 +220,7 @@ defmodule HandshakeTest do
 
     secret =
       "49a7b37aa6f6645917e7b807e9d1c00d4fa71f18343b0d4122a4d2df64dd6fee"
-      |> ExthCrypto.Math.hex_to_bin()
+      |> Math.hex_to_bin()
 
     ack =
       """
@@ -280,17 +280,17 @@ defmodule HandshakeTest do
       35b9593b48b9d3ca4c13d245d5f04169b0b1
       """
       |> String.replace("\n", "")
-      |> ExthCrypto.Math.hex_to_bin()
+      |> Math.hex_to_bin()
 
     {:ok, ack_resp, _ack_resp_bin, <<>>} = MessageHandler.read_ack_resp(ack, secret, "1.2.3.4")
 
     assert ack_resp.remote_nonce ==
              "559aead08264d5795d3909718cdd05abd49572e84fe55590eef31a88a08fdffd"
-             |> ExthCrypto.Math.hex_to_bin()
+             |> Math.hex_to_bin()
 
     assert ack_resp.remote_ephemeral_public_key ==
              "b6d82fa3409da933dbf9cb0140c5dde89f4e64aec88d476af648880f4a10e1e49fe35ef3e69e93dd300b4797765a747c6384a6ecf5db9c2690398607a86181e4"
-             |> ExthCrypto.Math.hex_to_bin()
+             |> Math.hex_to_bin()
 
     assert ack_resp.remote_version == 57
   end

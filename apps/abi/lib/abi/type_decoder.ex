@@ -7,6 +7,7 @@ defmodule ABI.TypeDecoder do
   """
 
   alias ExthCrypto.Math
+  alias ABI.FunctionSelector
 
   @doc """
   Decodes the given data based on the function selector.
@@ -153,7 +154,7 @@ defmodule ABI.TypeDecoder do
     do_decode(types, encoded_data, [])
   end
 
-  @spec do_decode([ABI.FunctionSelector.type()], binary(), [any()]) :: [any()]
+  @spec do_decode([FunctionSelector.type()], binary(), [any()]) :: [any()]
   defp do_decode([], bin, _) when byte_size(bin) > 0,
     do: raise("Found extra binary data: #{inspect(bin)}")
 
@@ -165,7 +166,7 @@ defmodule ABI.TypeDecoder do
     do_decode(remaining_types, remaining_data, [decoded | acc])
   end
 
-  @spec decode_type(ABI.FunctionSelector.type(), binary()) :: {any(), binary()}
+  @spec decode_type(FunctionSelector.type(), binary()) :: {any(), binary()}
   defp decode_type({:uint, size_in_bits}, data) do
     decode_uint(data, size_in_bits)
   end
@@ -220,7 +221,7 @@ defmodule ABI.TypeDecoder do
     # First pass, decode static types
     {elements0, rest0} =
       Enum.reduce(types, {[], starting_data}, fn type, {elements, data} ->
-        if ABI.FunctionSelector.is_dynamic?(type) do
+        if FunctionSelector.is_dynamic?(type) do
           {tail_position, rest} = decode_type({:uint, 256}, data)
 
           {[{:dynamic, type, tail_position} | elements], rest}

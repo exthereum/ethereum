@@ -9,6 +9,8 @@ defmodule EVM.Debugger do
   alias EVM.SubState
   alias EVM.ExecEnv
   alias EVM.MachineState
+  alias EVM.MachineCode
+
   require Logger
 
   @commands [
@@ -242,7 +244,7 @@ defmodule EVM.Debugger do
       IO.puts("??? invalid pc ???")
       IO.puts("")
     else
-      machine_code = EVM.MachineCode.decompile(exec_env.machine_code)
+      machine_code = MachineCode.decompile(exec_env.machine_code)
 
       index_width =
         if machine_code == [],

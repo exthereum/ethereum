@@ -12,7 +12,7 @@ defmodule ExWire.Handshake.Struct.AckRespV4 do
   ]
 
   @type t :: %__MODULE__{
-          remote_ephemeral_public_key: ExthCrypto.Key.public_key(),
+          remote_ephemeral_public_key: Key.public_key(),
           remote_nonce: binary(),
           remote_version: integer()
         }

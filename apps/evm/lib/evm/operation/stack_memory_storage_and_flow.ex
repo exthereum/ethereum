@@ -39,7 +39,7 @@ defmodule EVM.Operation.StackMemoryStorageAndFlow do
   """
   @spec mload(Operation.stack_args(), Operation.vm_map()) :: Operation.op_result()
   def mload([offset], %{machine_state: machine_state}) do
-    {value, machine_state} = EVM.Memory.read(machine_state, offset, 32)
+    {value, machine_state} = Memory.read(machine_state, offset, 32)
 
     %{machine_state | stack: Stack.push(machine_state.stack, :binary.decode_unsigned(value))}
   end
@@ -60,7 +60,7 @@ defmodule EVM.Operation.StackMemoryStorageAndFlow do
   """
   @spec mstore(Operation.stack_args(), Operation.vm_map()) :: Operation.op_result()
   def mstore([offset, value], %{machine_state: machine_state}) do
-    machine_state = EVM.Memory.write(machine_state, offset, Helpers.left_pad_bytes(value))
+    machine_state = Memory.write(machine_state, offset, Helpers.left_pad_bytes(value))
 
     %{machine_state: machine_state}
   end

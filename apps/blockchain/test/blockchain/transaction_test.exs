@@ -6,9 +6,13 @@ defmodule Blockchain.TransactionTest do
   require Logger
 
   alias Blockchain.Transaction
+  alias Blockchain.Contract
   alias EVM.Block.Header
   alias MerklePatriciaTree.Test
   alias MerklePatriciaTree.Trie
+  alias EVM.MachineCode
+  alias Blockchain.Transaction.Signature
+  alias Blockchain.Account
 
   # TODO: These eth common test cases have seemed to have moved or no longer
   #       exist. We should add them back when we discover where they moved to.
@@ -161,11 +165,11 @@ defmodule Blockchain.TransactionTest do
       sender =
         <<126, 95, 69, 82, 9, 26, 105, 18, 93, 93, 252, 183, 184, 194, 101, 144, 41, 57, 91, 223>>
 
-      contract_address = Blockchain.Contract.new_contract_address(sender, 6)
-      machine_code = EVM.MachineCode.compile([:stop])
+      contract_address = Contract.new_contract_address(sender, 6)
+      machine_code = MachineCode.compile([:stop])
 
       trx =
-        %Blockchain.Transaction{
+        %Transaction{
           nonce: 5,
           gas_price: 3,
           gas_limit: 100_000,
@@ -173,29 +177,29 @@ defmodule Blockchain.TransactionTest do
           value: 5,
           init: machine_code
         }
-        |> Blockchain.Transaction.Signature.sign_transaction(private_key)
+        |> Signature.sign_transaction(private_key)
 
       trie = Trie.new(Test.random_ets_db())
 
       account =
-        Blockchain.Account.put_account(trie, sender, %Blockchain.Account{
+        Account.put_account(trie, sender, %Account{
           balance: 400_000,
           nonce: 5
         })
 
       {state, gas_used, logs} =
-        Blockchain.Transaction.execute_transaction(account, trx, %Header{
+        Transaction.execute_transaction(account, trx, %Header{
           beneficiary: beneficiary
         })
 
       assert gas_used == 53004
       assert logs == []
 
-      assert Blockchain.Account.get_accounts(state, [sender, beneficiary, contract_address]) ==
+      assert Account.get_accounts(state, [sender, beneficiary, contract_address]) ==
                [
-                 %Blockchain.Account{balance: 240_983, nonce: 6},
-                 %Blockchain.Account{balance: 159_012},
-                 %Blockchain.Account{balance: 5}
+                 %Account{balance: 240_983, nonce: 6},
+                 %Account{balance: 159_012},
+                 %Account{balance: 5}
                ]
     end
   end

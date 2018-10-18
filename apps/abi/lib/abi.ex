@@ -4,6 +4,10 @@ defmodule ABI do
   Generally, the ABI describes how to take binary Ethereum and transform
   it to or from types that Solidity understands.
   """
+  alias ABI.Parser
+  alias ABI.TypeDecoder
+  alias ABI.TypeEncoder
+  alias ABI.FunctionSelector
 
   @doc """
   Encodes the given data into the function signature or tuple signature.
@@ -40,11 +44,11 @@ defmodule ABI do
       "b85d0bd200000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001"
   """
   def encode(function_signature, data) when is_binary(function_signature) do
-    encode(ABI.Parser.parse!(function_signature), data)
+    encode(Parser.parse!(function_signature), data)
   end
 
-  def encode(function_selector = %ABI.FunctionSelector{}, data) do
-    ABI.TypeEncoder.encode(data, function_selector)
+  def encode(function_selector = %FunctionSelector{}, data) do
+    TypeEncoder.encode(data, function_selector)
   end
 
   @doc """
@@ -72,11 +76,11 @@ defmodule ABI do
       [<<1::160>>, true]
   """
   def decode(function_signature, data) when is_binary(function_signature) do
-    decode(ABI.Parser.parse!(function_signature), data)
+    decode(Parser.parse!(function_signature), data)
   end
 
-  def decode(function_selector = %ABI.FunctionSelector{}, data) do
-    ABI.TypeDecoder.decode(data, function_selector)
+  def decode(function_selector = %FunctionSelector{}, data) do
+    TypeDecoder.decode(data, function_selector)
   end
 
   @doc """
@@ -133,7 +137,7 @@ defmodule ABI do
   """
   def parse_specification(doc) do
     doc
-    |> Enum.map(&ABI.FunctionSelector.parse_specification_item/1)
+    |> Enum.map(&FunctionSelector.parse_specification_item/1)
     |> Enum.filter(& &1)
   end
 end

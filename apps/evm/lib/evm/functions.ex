@@ -5,6 +5,7 @@ defmodule EVM.Functions do
   """
 
   alias EVM.ExecEnv
+  alias EVM.Memory
   alias EVM.MachineCode
   alias EVM.MachineState
   alias EVM.Operation
@@ -53,9 +54,9 @@ defmodule EVM.Functions do
   # Defined in Appendix H of the Yellow Paper
   @spec h_return(MachineState.t()) :: binary()
   defp h_return(machine_state) do
-    {[offset, length], _} = EVM.Stack.pop_n(machine_state.stack, 2)
+    {[offset, length], _} = Stack.pop_n(machine_state.stack, 2)
 
-    {result, _} = EVM.Memory.read(machine_state, offset, length)
+    {result, _} = Memory.read(machine_state, offset, length)
 
     result
   end

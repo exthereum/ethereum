@@ -5,6 +5,7 @@ defmodule Blockchain.Account do
   """
 
   alias MerklePatriciaTree.Trie
+  alias MerklePatriciaTree.DB
 
   @empty_keccak BitHelper.kec(<<>>)
   @empty_trie MerklePatriciaTree.Trie.empty_trie_root_hash()
@@ -453,11 +454,11 @@ defmodule Blockchain.Account do
       iex> MerklePatriciaTree.DB.get(state.db, BitHelper.kec(<<1, 2, 3>>))
       {:ok, <<1, 2, 3>>}
   """
-  @spec put_code(EVM.state(), EVM.address(), EVM.MachineCode.t()) :: EVM.state()
+  @spec put_code(EVM.state(), EVM.address(), MachineCode.t()) :: EVM.state()
   def put_code(state, contract_address, machine_code) do
     kec = BitHelper.kec(machine_code)
 
-    MerklePatriciaTree.DB.put!(state.db, kec, machine_code)
+    DB.put!(state.db, kec, machine_code)
 
     state
     |> update_account(contract_address, fn acct ->
@@ -501,7 +502,7 @@ defmodule Blockchain.Account do
         {:ok, <<>>}
 
       code_hash ->
-        case MerklePatriciaTree.DB.get(state.db, code_hash) do
+        case DB.get(state.db, code_hash) do
           nil -> :not_found
           {:ok, machine_code} when is_binary(machine_code) -> {:ok, machine_code}
         end

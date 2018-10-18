@@ -3,9 +3,13 @@ defmodule EVM.VMTest do
   doctest EVM.VM
 
   alias EVM.VM
+  alias EVM.MachineCode
+  alias EVM.ExecEnv
+  alias EVM.Interface.Mock.MockAccountInterface
+  alias EVM.SubState
 
   setup do
-    account_interface = EVM.Interface.Mock.MockAccountInterface.new()
+    account_interface = MockAccountInterface.new()
 
     {:ok,
      %{
@@ -30,11 +34,11 @@ defmodule EVM.VMTest do
       :return
     ]
 
-    exec_env = %EVM.ExecEnv{machine_code: EVM.MachineCode.compile(instructions)}
+    exec_env = %ExecEnv{machine_code: MachineCode.compile(instructions)}
     result = VM.run(24, exec_env)
 
     assert result ==
-             {0, %EVM.SubState{logs: [], refund: 0, suicide_list: []}, exec_env, <<0x08::256>>}
+             {0, %SubState{logs: [], refund: 0, suicide_list: []}, exec_env, <<0x08::256>>}
   end
 
   test "simple program with block storage", %{account_interface: account_interface} do
@@ -49,8 +53,8 @@ defmodule EVM.VMTest do
       :stop
     ]
 
-    exec_env = %EVM.ExecEnv{
-      machine_code: EVM.MachineCode.compile(instructions),
+    exec_env = %ExecEnv{
+      machine_code: MachineCode.compile(instructions),
       address: address,
       account_interface: account_interface
     }
@@ -65,12 +69,10 @@ defmodule EVM.VMTest do
       }
     }
 
-    expected_account_interface =
-      EVM.Interface.Mock.MockAccountInterface.new(expected_account_state)
+    expected_account_interface = MockAccountInterface.new(expected_account_state)
 
     expected_exec_env = Map.put(exec_env, :account_interface, expected_account_interface)
 
-    assert result ==
-             {0, %EVM.SubState{logs: [], refund: 0, suicide_list: []}, expected_exec_env, ""}
+    assert result == {0, %SubState{logs: [], refund: 0, suicide_list: []}, expected_exec_env, ""}
   end
 end

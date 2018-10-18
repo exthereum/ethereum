@@ -11,6 +11,7 @@ defmodule Blockchain.Transaction do
   alias EVM.Block.Header
   alias EVM.Gas
   alias EVM.MachineCode
+  alias EVM.SubState
 
   defstruct nonce: 0,
 
@@ -237,7 +238,7 @@ defmodule Blockchain.Transaction do
     g_0 = intrinsic_gas_cost(trx, block_header)
     v_0 = trx.gas_limit * trx.gas_price + trx.value
 
-    case Blockchain.Transaction.Signature.sender(trx) do
+    case Signature.sender(trx) do
       {:error, _reason} ->
         {:invalid, :invalid_sender}
 
@@ -305,11 +306,10 @@ defmodule Blockchain.Transaction do
       iex> Blockchain.Account.get_accounts(state, [sender, beneficiary, contract_address])
       [%Blockchain.Account{balance: 334655, nonce: 6}, %Blockchain.Account{balance: 65340}, %Blockchain.Account{balance: 5, code_hash: <<216, 114, 80, 103, 17, 50, 164, 75, 162, 123, 123, 99, 162, 105, 226, 15, 215, 200, 136, 216, 29, 106, 193, 119, 1, 173, 138, 37, 219, 39, 23, 231>>}]
   """
-  @spec execute_transaction(EVM.state(), t, Header.t()) ::
-          {EVM.state(), EVM.Gas.t(), EVM.SubState.logs()}
+  @spec execute_transaction(EVM.state(), t, Header.t()) :: {EVM.state(), Gas.t(), SubState.logs()}
   def execute_transaction(state, trx, block_header) do
     # TODO: Check transaction validity.
-    {:ok, sender} = Blockchain.Transaction.Signature.sender(trx)
+    {:ok, sender} = Signature.sender(trx)
 
     state_0 = begin_transaction(state, sender, trx)
 
@@ -431,7 +431,7 @@ defmodule Blockchain.Transaction do
         %Blockchain.Account{balance: 272},
       ]
   """
-  @spec finalize_transaction_gas(EVM.state(), EVM.address(), t, EVM.Gas.t(), Block.Header.t()) ::
+  @spec finalize_transaction_gas(EVM.state(), EVM.address(), t, Gas.t(), Header.t()) ::
           EVM.state()
   def finalize_transaction_gas(state, sender, trx, total_refund, block_header) do
     state
@@ -463,7 +463,7 @@ defmodule Blockchain.Transaction do
       iex> Blockchain.Transaction.calculate_total_refund(%Blockchain.Transaction{gas_limit: 100}, 11, 99)
       55
   """
-  @spec calculate_total_refund(t, EVM.Gas.t(), EVM.SubState.refund()) :: EVM.Gas.t()
+  @spec calculate_total_refund(t, Gas.t(), SubState.refund()) :: Gas.t()
   def calculate_total_refund(trx, remaining_gas, refund) do
     # TODO: Add a math helper, finally
     max_refund = round(:math.floor((trx.gas_limit - remaining_gas) / 2))

@@ -8,6 +8,7 @@ defmodule EVM.Gas do
   alias EVM.Operation
   alias EVM.Address
   alias EVM.ExecEnv
+  alias EVM.Interface.AccountInterface
 
   @type t :: EVM.val()
   @type gas_price :: EVM.Wei.t()
@@ -449,7 +450,7 @@ defmodule EVM.Gas do
 
   defp new_account_cost(exec_env, address) do
     if exec_env.account_interface
-       |> EVM.Interface.AccountInterface.account_exists?(address) do
+       |> AccountInterface.account_exists?(address) do
       0
     else
       @g_newaccount

@@ -5,6 +5,7 @@ defmodule WireToWireTest do
   """
 
   use ExUnit.Case, async: true
+  alias ExWire.Util.Timestamp
 
   @moduletag integration: true
   @localhost {127, 0, 0, 1}
@@ -35,7 +36,7 @@ defmodule WireToWireTest do
     {:ok, client_pid} =
       ExWire.Adapter.UDP.start_link({__MODULE__, [self()]}, @us_port, __MODULE__.Test)
 
-    timestamp = ExWire.Util.Timestamp.now()
+    timestamp = Timestamp.now()
 
     ping = %ExWire.Message.Ping{
       version: 1,

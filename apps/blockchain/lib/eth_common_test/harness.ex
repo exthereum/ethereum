@@ -2,6 +2,7 @@ defmodule EthCommonTest.Harness do
   @moduledoc """
   Harness for running tests off of the Ethereum Common Test suite.
   """
+  alias EthCommonTest.Helpers
 
   defmacro __using__(_opts) do
     quote do
@@ -18,7 +19,7 @@ defmodule EthCommonTest.Harness do
       end
 
     for test_subset <- test_subsets do
-      for {test_name, test} <- EthCommonTest.Helpers.read_test_file(test_set, test_subset),
+      for {test_name, test} <- Helpers.read_test_file(test_set, test_subset),
           tests == :all or Enum.member?(tests, String.to_atom(test_name)) do
         json = Poison.encode!(test)
 

@@ -61,7 +61,7 @@ defmodule ExthCrypto.AES do
   @spec encrypt(
           ExthCrypto.Cipher.plaintext(),
           ExthCrypto.Cipher.mode(),
-          ExthCrypto.Key.symmetric_key(),
+          Key.symmetric_key(),
           ExthCrypto.Cipher.init_vector()
         ) :: ExthCrypto.Cipher.ciphertext()
   def encrypt(plaintext, :cbc, symmetric_key, init_vector) do
@@ -86,7 +86,7 @@ defmodule ExthCrypto.AES do
   @spec encrypt(
           ExthCrypto.Cipher.plaintext(),
           ExthCrypto.Cipher.mode(),
-          ExthCrypto.Key.symmetric_key()
+          Key.symmetric_key()
         ) :: ExthCrypto.Cipher.ciphertext()
   def encrypt(plaintext, :ecb, symmetric_key) do
     padding_bits = (16 - rem(byte_size(plaintext), 16)) * 8
@@ -147,7 +147,7 @@ defmodule ExthCrypto.AES do
   @spec decrypt(
           ExthCrypto.Cipher.ciphertext(),
           ExthCrypto.Cipher.mode(),
-          ExthCrypto.Key.symmetric_key(),
+          Key.symmetric_key(),
           ExthCrypto.Cipher.init_vector()
         ) :: ExthCrypto.Cipher.plaintext()
   def decrypt(ciphertext, :cbc, symmetric_key, init_vector) do
@@ -165,7 +165,7 @@ defmodule ExthCrypto.AES do
   @spec decrypt(
           ExthCrypto.Cipher.ciphertext(),
           ExthCrypto.Cipher.mode(),
-          ExthCrypto.Key.symmetric_key()
+          Key.symmetric_key()
         ) :: ExthCrypto.Cipher.plaintext()
   def decrypt(ciphertext, :ecb, symmetric_key) do
     :crypto.block_decrypt(:aes_ecb, symmetric_key, ciphertext)
@@ -183,7 +183,7 @@ defmodule ExthCrypto.AES do
   """
   @spec stream_init(
           ExthCrypto.Cipher.mode(),
-          ExthCrypto.Key.symmetric_key(),
+          Key.symmetric_key(),
           ExthCrypto.Cipher.init_vector()
         ) :: ExthCrypto.Cipher.stream()
   def stream_init(:ctr, symmetric_key, init_vector) do

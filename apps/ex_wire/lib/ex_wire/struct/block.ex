@@ -2,6 +2,7 @@ defmodule ExWire.Struct.Block do
   @moduledoc """
   A struct for storing blocks as they are transported over the Eth Wire Protocol.
   """
+  alias Blockchain.Transaction
 
   defstruct [
     :transactions_list,
@@ -10,7 +11,7 @@ defmodule ExWire.Struct.Block do
   ]
 
   @type t :: %__MODULE__{
-          transactions: [Blockchain.Transaction.t()],
+          transactions: [Transaction.t()],
           ommers: [binary()]
         }
 
@@ -55,7 +56,7 @@ defmodule ExWire.Struct.Block do
       transactions:
         for(
           transaction_rlp <- transactions_list,
-          do: Blockchain.Transaction.deserialize(transaction_rlp)
+          do: Transaction.deserialize(transaction_rlp)
         ),
       ommers: ommers
     }

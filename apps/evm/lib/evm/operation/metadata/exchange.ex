@@ -1,6 +1,8 @@
 defmodule EVM.Operation.Metadata.Exchange do
+  alias EVM.Operation.Metadata
+
   @operations for n <- 1..17,
-                  do: %EVM.Operation.Metadata{
+                  do: %Metadata{
                     # 0x90..0x9e
                     id: n + 0x8F,
                     description: "Exchange #{n}st and #{n + 1}nd stack items.",

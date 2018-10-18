@@ -8,7 +8,7 @@ defmodule ExWire.Handshake.EIP8 do
 
   require Logger
   alias ExthCrypto.Math
-
+  alias ExthCrypto.ECIES
   # Amount of bytes added when encrypting with ECIES.
   # EIP Question: This is magic, isn't it? Definitely magic.
   @ecies_overhead 113
@@ -26,9 +26,9 @@ defmodule ExWire.Handshake.EIP8 do
   """
   @spec wrap_eip_8(
           ExRLP.t(),
-          ExthCrypto.Key.public_key(),
+          Key.public_key(),
           binary(),
-          {ExthCrypto.Key.public_key(), ExthCrypto.Key.private_key()} | nil,
+          {Key.public_key(), Key.private_key()} | nil,
           Cipher.init_vector() | nil
         ) :: {:ok, binary()} | {:error, String.t()}
   def wrap_eip_8(
@@ -55,7 +55,7 @@ defmodule ExWire.Handshake.EIP8 do
 
     # ecies.encrypt(recipient-pubk, auth-body, auth-size)
     with {:ok, enc_auth_body} <-
-           ExthCrypto.ECIES.encrypt(
+           ECIES.encrypt(
              her_static_public_key,
              auth_body,
              <<>>,
@@ -109,7 +109,7 @@ defmodule ExWire.Handshake.EIP8 do
           152, 53, 88, 100, 245, 144, 55, 227, 38, 231, 236, 155, 45, 148, 117, 128>>,
         ""}
   """
-  @spec unwrap_eip_8(binary(), ExthCrypto.Key.private_key(), binary()) ::
+  @spec unwrap_eip_8(binary(), Key.private_key(), binary()) ::
           {:ok, RLP.t(), binary(), binary()} | {:error, String.t()}
   def unwrap_eip_8(encoded_packet, my_static_private_key, remote_addr) do
     _ = Logger.debug(fn -> "[Network] Received EIP8 Handshake from #{remote_addr}" end)
@@ -119,7 +119,7 @@ defmodule ExWire.Handshake.EIP8 do
       <<auth_size::binary-size(2), ecies_encoded_message::binary-size(auth_size_int),
         frame_rest::binary()>> ->
         with {:ok, rlp_bin} <-
-               ExthCrypto.ECIES.decrypt(
+               ECIES.decrypt(
                  my_static_private_key,
                  ecies_encoded_message,
                  <<>>,

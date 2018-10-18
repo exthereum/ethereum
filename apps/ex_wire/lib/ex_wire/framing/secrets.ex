@@ -5,15 +5,18 @@ defmodule ExWire.Framing.Secrets do
   """
 
   alias ExthCrypto.AES
+  alias ExthCrypto.Key
+
   alias ExthCrypto.Math
   alias ExthCrypto.MAC
   alias ExthCrypto.Hash.Keccak
+  alias ExthCrypto.ECIES.ECDH
 
   @type t :: %__MODULE__{
           egress_mac: MAC.mac_inst(),
           ingress_mac: MAC.mac_inst(),
           mac_encoder: ExthCrypto.Cipher.cipher(),
-          mac_secret: ExthCrypto.Key.symmetric_key(),
+          mac_secret: Key.symmetric_key(),
           encoder_stream: ExthCrypto.Cipher.stream(),
           decoder_stream: ExthCrypto.Cipher.stream(),
           token: binary()
@@ -32,8 +35,8 @@ defmodule ExWire.Framing.Secrets do
   @spec new(
           MAC.mac_inst(),
           MAC.mac_inst(),
-          ExthCrypto.Key.symmetric_key(),
-          ExthCrypto.Key.symmetric_key(),
+          Key.symmetric_key(),
+          Key.symmetric_key(),
           binary()
         ) :: t
   def new(egress_mac, ingress_mac, mac_secret, symmetric_key, token) do
@@ -63,8 +66,8 @@ defmodule ExWire.Framing.Secrets do
   """
   @spec derive_secrets(
           boolean(),
-          ExthCrypto.Key.private_key(),
-          ExthCrypto.Key.public_key(),
+          Key.private_key(),
+          Key.public_key(),
           binary(),
           binary(),
           binary(),
@@ -79,10 +82,10 @@ defmodule ExWire.Framing.Secrets do
         auth_data,
         ack_data
       ) do
-    remote_ephemeral_public_key_raw = remote_ephemeral_public_key |> ExthCrypto.Key.raw_to_der()
+    remote_ephemeral_public_key_raw = remote_ephemeral_public_key |> Key.raw_to_der()
 
     ephemeral_shared_secret =
-      ExthCrypto.ECIES.ECDH.generate_shared_secret(
+      ECDH.generate_shared_secret(
         my_ephemeral_private_key,
         remote_ephemeral_public_key_raw
       )

@@ -168,7 +168,7 @@ defmodule ExWire.Handshake do
 
   TODO: Add examples
   """
-  @spec try_handle_auth(binary(), ExthCrypto.Key.key_pair(), binary(), binary(), String.t()) ::
+  @spec try_handle_auth(binary(), Key.key_pair(), binary(), binary(), String.t()) ::
           {:ok, binary(), Secrets.t()} | {:invalid, String.t()}
   def try_handle_auth(
         auth_data,

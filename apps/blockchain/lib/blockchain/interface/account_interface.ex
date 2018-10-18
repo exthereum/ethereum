@@ -355,7 +355,7 @@ defimpl EVM.Interface.AccountInterface, for: Blockchain.Interface.AccountInterfa
   @spec create_contract(
           EVM.Interface.AccountInterface.t(),
           Contract.t() | map,
-          EVM.MachineCode.t()
+          MachineCode.t()
         ) :: {EVM.Interface.AccountInterface.t(), EVM.Gas.t(), EVM.SubState.t()}
   def create_contract(
         account_interface,

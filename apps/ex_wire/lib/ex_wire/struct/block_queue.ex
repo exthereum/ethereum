@@ -18,22 +18,24 @@ defmodule ExWire.Struct.BlockQueue do
   alias Blockchain.Block
   alias Blockchain.Blocktree
   alias Blockchain.Chain
+  alias MerklePatriciaTree.DB
   alias MerklePatriciaTree.Trie
   alias MerklePatriciaTree.Test
   alias ExWire.Config
+  alias ExthCrypto.Hash.Keccak
 
   require Logger
 
   # These will be used to help us determine if a block is empty
-  @empty_trie MerklePatriciaTree.Trie.empty_trie_root_hash()
-  @empty_hash [] |> ExRLP.encode() |> ExthCrypto.Hash.Keccak.kec()
+  @empty_trie Trie.empty_trie_root_hash()
+  @empty_hash [] |> ExRLP.encode() |> Keccak.kec()
 
   defstruct queue: %{},
             do_validation: true
 
   @type block_item :: %{
           commitments: [binary()],
-          block: Blockchain.Block.t(),
+          block: Block.t(),
           ready: boolean()
         }
 
@@ -73,7 +75,7 @@ defmodule ExWire.Struct.BlockQueue do
           EVM.hash(),
           binary(),
           Chain.t(),
-          MerklePatriciaTree.DB.db()
+          DB.db()
         ) :: {t, Blocktree.t(), boolean()}
   def add_header_to_block_queue(
         block_queue = %__MODULE__{queue: queue},
@@ -169,7 +171,7 @@ defmodule ExWire.Struct.BlockQueue do
           Blocktree.t(),
           BlockStruct.t(),
           Chain.t(),
-          MerklePatriciaTree.DB.db()
+          DB.db()
         ) :: {t, Blocktree.t()}
   def add_block_struct_to_block_queue(
         block_queue = %__MODULE__{queue: queue},
@@ -222,8 +224,7 @@ defmodule ExWire.Struct.BlockQueue do
       iex> block_queue.queue
       %{}
   """
-  @spec process_block_queue(t, Blocktree.t(), Chain.t(), MerklePatriciaTree.DB.db()) ::
-          {t, Blocktree.t()}
+  @spec process_block_queue(t, Blocktree.t(), Chain.t(), DB.db()) :: {t, Blocktree.t()}
   def process_block_queue(
         block_queue = %__MODULE__{do_validation: do_validation},
         block_tree,
@@ -392,7 +393,7 @@ defmodule ExWire.Struct.BlockQueue do
 
   @spec get_ommers_hash([EVM.hash()]) :: ExthCrypto.hash()
   defp get_ommers_hash(ommers) do
-    ommers |> ExRLP.encode() |> ExthCrypto.Hash.Keccak.kec()
+    ommers |> ExRLP.encode() |> Keccak.kec()
   end
 
   @spec reduce_block_item(
@@ -428,7 +429,7 @@ defmodule ExWire.Struct.BlockQueue do
           Blocktree.t(),
           Chain.t(),
           Block.t(),
-          MerklePatriciaTree.DB.db(),
+          DB.db(),
           boolean()
         ) :: Blocktree.t()
   defp verify_and_add_block(block_tree, chain, block, db, do_validation) do

@@ -6,6 +6,8 @@ defmodule ABI.TypeEncoder do
   """
 
   alias ExthCrypto.Math
+  alias ExthCrypto.Hash.Keccak
+  alias ABI.FunctionSelector
 
   @doc """
   Encodes the given data based on the function selector.
@@ -119,15 +121,15 @@ defmodule ABI.TypeEncoder do
     do_encode(types, data, [])
   end
 
-  @spec encode_method_id(%ABI.FunctionSelector{}) :: binary()
-  defp encode_method_id(%ABI.FunctionSelector{function: nil}), do: ""
+  @spec encode_method_id(%FunctionSelector{}) :: binary()
+  defp encode_method_id(%FunctionSelector{function: nil}), do: ""
 
   defp encode_method_id(function_selector) do
     # Encode selector e.g. "baz(uint32,bool)" and take keccak
     kec =
       function_selector
-      |> ABI.FunctionSelector.encode()
-      |> ExthCrypto.Hash.Keccak.kec()
+      |> FunctionSelector.encode()
+      |> Keccak.kec()
 
     # Take first four bytes
     <<init::binary-size(4), _rest::binary>> = kec
@@ -136,7 +138,7 @@ defmodule ABI.TypeEncoder do
     init
   end
 
-  @spec do_encode([ABI.FunctionSelector.type()], [any()], [binary()]) :: binary()
+  @spec do_encode([FunctionSelector.type()], [any()], [binary()]) :: binary()
   defp do_encode([], _, acc), do: :erlang.iolist_to_binary(Enum.reverse(acc))
 
   defp do_encode([type | remaining_types], data, acc) do
@@ -145,7 +147,7 @@ defmodule ABI.TypeEncoder do
     do_encode(remaining_types, remaining_data, [encoded | acc])
   end
 
-  @spec encode_type(ABI.FunctionSelector.type(), [any()]) :: {binary(), [any()]}
+  @spec encode_type(FunctionSelector.type(), [any()]) :: {binary(), [any()]}
   defp encode_type({:uint, size}, [data | rest]) do
     {encode_uint(data, size), rest}
   end
@@ -195,7 +197,7 @@ defmodule ABI.TypeEncoder do
                                                                                 tail_position} ->
         {el, rest} = encode_type(type, data)
 
-        if ABI.FunctionSelector.is_dynamic?(type) do
+        if FunctionSelector.is_dynamic?(type) do
           # If we're a dynamic type, just encoded the length to head and the element to body
           {head <> encode_uint(tail_position, 256), tail <> el, rest,
            tail_position + byte_size(el)}
@@ -248,7 +250,7 @@ defmodule ABI.TypeEncoder do
 
   defp pad(bin, size_in_bytes, direction) do
     # TODO: Create `left_pad` repo, err, add to `ExthCrypto.Math`
-    total_size = size_in_bytes + ExthCrypto.Math.mod(32 - Math.mod(size_in_bytes, 32), 32)
+    total_size = size_in_bytes + Math.mod(32 - Math.mod(size_in_bytes, 32), 32)
 
     padding_size_bits = (total_size - byte_size(bin)) * 8
     padding = <<0::size(padding_size_bits)>>

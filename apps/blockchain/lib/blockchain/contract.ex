@@ -24,6 +24,8 @@ defmodule Blockchain.Contract do
           block_header: Header.t(),
           value_in_wei: EVM.Wei.t()
         }
+
+  alias EVM.Builtin
   alias Blockchain.Account
   alias EVM.Block.Header
   alias EVM.ExecEnv
@@ -62,7 +64,7 @@ defmodule Blockchain.Contract do
 
   @spec create_contract(
           t | map,
-          EVM.MachineCode.t()
+          MachineCode.t()
         ) :: {EVM.state(), EVM.Gas.t(), EVM.SubState.t()}
 
   def create_contract(
@@ -300,10 +302,10 @@ defmodule Blockchain.Contract do
              {EVM.state(), EVM.Gas.t(), EVM.SubState.t(), VM.output()})
   def get_message_call_exec_fun(recipient) do
     case :binary.decode_unsigned(recipient) do
-      1 -> &EVM.Builtin.run_ecrec/2
-      2 -> &EVM.Builtin.run_sha256/2
-      3 -> &EVM.Builtin.run_rip160/2
-      4 -> &EVM.Builtin.run_id/2
+      1 -> &Builtin.run_ecrec/2
+      2 -> &Builtin.run_sha256/2
+      3 -> &Builtin.run_rip160/2
+      4 -> &Builtin.run_id/2
       _ -> &VM.run/2
     end
   end

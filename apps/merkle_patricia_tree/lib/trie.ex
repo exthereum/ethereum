@@ -7,6 +7,7 @@ defmodule MerklePatriciaTree.Trie do
   alias MerklePatriciaTree.Trie.Node
   alias MerklePatriciaTree.DB
   alias MerklePatriciaTree.ListHelper
+  alias MerklePatriciaTree.Trie.Storage
 
   defstruct db: nil, root_hash: nil
 
@@ -163,8 +164,8 @@ defmodule MerklePatriciaTree.Trie do
         do: ExRLP.encode(trie.root_hash),
         else: trie.root_hash
 
-    if byte_size(root_hash) < MerklePatriciaTree.Trie.Storage.max_rlp_len() do
-      %{trie | root_hash: root_hash |> MerklePatriciaTree.Trie.Storage.store(trie.db)}
+    if byte_size(root_hash) < Storage.max_rlp_len() do
+      %{trie | root_hash: root_hash |> Storage.store(trie.db)}
     else
       trie
     end

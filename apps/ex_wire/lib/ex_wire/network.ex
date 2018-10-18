@@ -10,8 +10,11 @@ defmodule ExWire.Network do
   alias ExWire.Config
   alias ExWire.Crypto
   alias ExWire.Handler
+
   alias ExWire.Protocol
   alias ExWire.Struct.Endpoint
+  alias ExthCrypto.Signature
+  alias ExthCrypto.Key
 
   defmodule InboundMessage do
     @moduledoc """
@@ -26,7 +29,7 @@ defmodule ExWire.Network do
     @type t :: %__MODULE__{
             data: binary(),
             server_pid: pid(),
-            remote_host: ExWire.Struct.Endpoint.t(),
+            remote_host: Endpoint.t(),
             timestamp: integer()
           }
   end
@@ -152,8 +155,7 @@ defmodule ExWire.Network do
          timestamp: timestamp
        }) do
     # Recover public key
-    {:ok, node_id} =
-      ExthCrypto.Signature.recover(Crypto.hash(type <> data), signature, recovery_id)
+    {:ok, node_id} = Signature.recover(Crypto.hash(type <> data), signature, recovery_id)
 
     %Handler.Params{
       remote_host: remote_host,
@@ -163,7 +165,7 @@ defmodule ExWire.Network do
       type: type |> :binary.decode_unsigned(),
       data: data,
       timestamp: timestamp,
-      node_id: node_id |> ExthCrypto.Key.der_to_raw()
+      node_id: node_id |> Key.der_to_raw()
     }
   end
 
@@ -242,8 +244,7 @@ defmodule ExWire.Network do
         }
       }
   """
-  @spec send(ExWire.Message.t(), identifier(), ExWire.Struct.Endpoint.t()) ::
-          sender_handler_action
+  @spec send(ExWire.Message.t(), identifier(), Endpoint.t()) :: sender_handler_action
   def send(message, server_pid, to) do
     _ =
       Logger.debug(fn ->

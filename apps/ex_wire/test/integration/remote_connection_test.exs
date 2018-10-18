@@ -19,6 +19,8 @@ defmodule ExWire.RemoteConnectionTest do
   alias ExWire.Adapter.TCP
   alias EVM.Block.Header
   alias ExWire.Config
+  alias ExWire.Util.Timestamp
+
   @moduletag integration: true
   @moduletag network: true
 
@@ -56,7 +58,7 @@ defmodule ExWire.RemoteConnectionTest do
       ExWire.Adapter.UDP.start_link({__MODULE__, [self()]}, @local_peer_port, __MODULE__.Test)
 
     # Now, we'll send a ping / pong to verify connectivity
-    timestamp = ExWire.Util.Timestamp.soon()
+    timestamp = Timestamp.soon()
 
     ping = %ExWire.Message.Ping{
       version: 1,
@@ -86,8 +88,8 @@ defmodule ExWire.RemoteConnectionTest do
 
         # If so, we're going to continue on to "find neighbours."
         find_neighbours = %ExWire.Message.FindNeighbours{
-          target: remote_id |> ExthCrypto.Math.hex_to_bin(),
-          timestamp: ExWire.Util.Timestamp.soon()
+          target: remote_id |> Math.hex_to_bin(),
+          timestamp: Timestamp.soon()
         }
 
         ExWire.Network.send(find_neighbours, client_pid, remote_peer)

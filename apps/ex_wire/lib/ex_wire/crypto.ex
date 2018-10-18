@@ -3,6 +3,9 @@ defmodule ExWire.Crypto do
   Helper functions for cryptographic functions of RLPx.
   """
 
+  alias ExthCrypto.Key
+  alias ExthCrypto.Signature
+  alias ExthCrypto.Hash.Keccak
   @type hash :: binary()
   @type signature :: binary()
   @type recovery_id :: integer()
@@ -26,10 +29,10 @@ defmodule ExWire.Crypto do
       iex> ExWire.Crypto.node_id(<<1>>)
       {:error, "Private key size not 32 bytes"}
   """
-  @spec node_id(ExthCrypto.Key.private_key()) :: {:ok, ExWire.node_id()} | {:error, String.t()}
+  @spec node_id(Key.private_key()) :: {:ok, ExWire.node_id()} | {:error, String.t()}
   def node_id(private_key) do
-    case ExthCrypto.Signature.get_public_key(private_key) do
-      {:ok, <<public_key::binary()>>} -> {:ok, public_key |> ExthCrypto.Key.der_to_raw()}
+    case Signature.get_public_key(private_key) do
+      {:ok, <<public_key::binary()>>} -> {:ok, public_key |> Key.der_to_raw()}
       {:error, reason} -> {:error, to_string(reason)}
     end
   end
@@ -97,6 +100,6 @@ defmodule ExWire.Crypto do
   """
   @spec hash(binary()) :: hash
   def hash(data) do
-    ExthCrypto.Hash.Keccak.kec(data)
+    Keccak.kec(data)
   end
 end
