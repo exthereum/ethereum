@@ -79,7 +79,7 @@ defmodule HexPrefix do
     iex> HexPrefix.decode(<<0x3f, 0x1c, 0xb8>>)
     {[ 15, 1, 12, 11, 8 ], true}
   """
-  @spec decode(binary()) :: {[integer()], boolean()}
+  @spec decode(<<_::8, _::_*8>>) :: {[non_neg_integer()], boolean()}
   def decode(hp) do
     # First two bits are unused, then encode terminator, then parity, then maybe first nibble, then rest
     # We just pattern match for each

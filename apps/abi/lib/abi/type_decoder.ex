@@ -263,7 +263,7 @@ defmodule ABI.TypeDecoder do
     {value, rest}
   end
 
-  @spec decode_bytes(binary(), integer(), atom()) :: {binary(), binary()}
+  @spec decode_bytes(binary(), non_neg_integer(), :left | :right) :: {binary(), binary()}
   def decode_bytes(data, size_in_bytes, padding_direction) do
     # TODO: Create `unright_pad` repo, err, add to `ExthCrypto.Math`
     total_size_in_bytes = size_in_bytes + Math.mod(32 - Math.mod(size_in_bytes, 32), 32)

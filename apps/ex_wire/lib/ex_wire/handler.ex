@@ -79,7 +79,7 @@ defmodule ExWire.Handler do
   def dispatch(type, params, discovery) do
     case @handlers[type] do
       nil ->
-        Logger.warn("Message code `#{inspect(type, base: :hex)}` not implemented")
+        _ = Logger.warn("Message code `#{inspect(type, base: :hex)}` not implemented")
         :not_implemented
 
       mod when is_atom(mod) ->

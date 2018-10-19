@@ -28,7 +28,7 @@ defmodule ExWire.Adapter.UDP do
       :gen_udp.open(port, [{:ip, {0, 0, 0, 0}}, {:active, true}, {:reuseaddr, true}, :binary])
 
     {:ok, port_num} = :inet.port(socket)
-    Logger.debug(fn -> "[UDP] Listening on port #{port_num}" end)
+    _ = Logger.debug(fn -> "[UDP] Listening on port #{port_num}" end)
 
     {:ok, Map.put(state, :socket, socket)}
   end
@@ -69,7 +69,7 @@ defmodule ExWire.Adapter.UDP do
       )
       when not is_nil(udp_port) do
     # TODO: How should we handle invalid ping or message requests?
-    :gen_udp.send(socket, ip, udp_port, data)
+    _ = :gen_udp.send(socket, ip, udp_port, data)
 
     {:noreply, state}
   end
