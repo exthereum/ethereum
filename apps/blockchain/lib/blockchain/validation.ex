@@ -3,6 +3,7 @@ defmodule Blockchain.Block.Validation do
   This module provides functions to validate a block.
   """
   alias Blockchain.Block
+  alias Blockchain.Block.ValidationCheck
 
   @doc """
   Determines whether or not a block is valid. This is
@@ -49,22 +50,41 @@ defmodule Blockchain.Block.Validation do
       {:invalid, [:state_root_mismatch, :ommers_hash_mismatch, :transactions_root_mismatch, :receipts_root_mismatch]}
   """
   @spec is_holistic_valid?(Block.t(), Chain.t(), Block.t() | nil, DB.db()) ::
-          :valid | {:invalid, [atom()]}
+          :valid | {:invalid, ValidationCheck.errors()}
+  def is_holistic_valid?(block, chain, _parent_block = nil, db) do
+    base_block = Block.gen_genesis_block(chain, db)
+    errors = validate(block, chain, db, base_block)
+
+    case errors do
+      [] -> :valid
+      error when is_atom(error) -> {:invalid, [error]}
+      _ -> {:invalid, errors}
+    end
+  end
+
   def is_holistic_valid?(block, chain, parent_block, db) do
     base_block =
-      if parent_block |> is_nil do
-        Block.gen_genesis_block(chain, db)
-      else
-        Block.gen_child_block(
-          parent_block,
-          chain,
-          beneficiary: block.header.beneficiary,
-          timestamp: block.header.timestamp,
-          gas_limit: block.header.gas_limit,
-          extra_data: block.header.extra_data
-        )
-      end
+      Block.gen_child_block(
+        parent_block,
+        chain,
+        beneficiary: block.header.beneficiary,
+        timestamp: block.header.timestamp,
+        gas_limit: block.header.gas_limit,
+        extra_data: block.header.extra_data
+      )
 
+    errors = validate(block, chain, db, base_block)
+
+    case errors do
+      [] -> :valid
+      error when is_atom(error) -> {:invalid, [error]}
+      _ -> {:invalid, errors}
+    end
+  end
+
+  @spec validate(Block.t(), Chain.t(), DB.db(), Block.t()) ::
+          :valid | {:invalid, ValidationCheck.errors()}
+  defp validate(block, chain, db, base_block) do
     child_block =
       base_block
       |> Block.add_transactions_to_block(block.transactions, db)
@@ -72,30 +92,16 @@ defmodule Blockchain.Block.Validation do
       |> Block.add_rewards_to_block(db, chain.params[:block_reward])
 
     # The following checks Holistic Validity, as defined in Eq.(29)
-    errors =
-      [] ++
-        if child_block.header.state_root == block.header.state_root,
-          do: [],
-          else:
-            [:state_root_mismatch] ++
-              if(
-                child_block.header.ommers_hash == block.header.ommers_hash,
-                do: [],
-                else:
-                  [:ommers_hash_mismatch] ++
-                    if(
-                      child_block.header.transactions_root == block.header.transactions_root,
-                      do: [],
-                      else:
-                        [:transactions_root_mismatch] ++
-                          if(
-                            child_block.header.receipts_root == block.header.receipts_root,
-                            do: [],
-                            else: [:receipts_root_mismatch]
-                          )
-                    )
-              )
+    checks = [
+      &ValidationCheck.state_root_match/2,
+      &ValidationCheck.ommers_hash_match/2,
+      &ValidationCheck.transactions_root_match/2,
+      &ValidationCheck.receipts_root_match/2
+    ]
 
-    if errors == [], do: :valid, else: {:invalid, errors}
+    Enum.flat_map(checks, fn function ->
+      apply(function, [child_block, block])
+      # apply(ValidationCheck, function, [child_block, block])
+    end)
   end
 end
