@@ -1,6 +1,9 @@
 [![CircleCI](https://circleci.com/gh/exthereum/ethereum.svg?style=svg)](https://circleci.com/gh/exthereum/ethereum)
 
 [![Coverage Status](https://coveralls.io/repos/github/exthereum/ethereum/badge.svg)](https://coveralls.io/github/exthereum/ethereum)
+# DEPRECATED
+
+This repository will not be maintained in favour of [Mana](https://github.com/mana-ethereum/mana).
 
 # Exthereum
 
